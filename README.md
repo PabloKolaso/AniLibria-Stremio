@@ -17,32 +17,14 @@ Stremio requests streams for an IMDB ID (e.g. tt0388629)
     → HLS stream URLs are returned (480p / 720p / 1080p)
 ```
 
-## Requirements
-
-- [Node.js 18+](https://nodejs.org/)
-- Internet access (AniLibria, AniList, and Fribb APIs)
-
-## Setup
-
-```bash
-# Install dependencies
-npm install
-
-# Start the server
-npm start
-```
-
-The addon prints:
-```
-Addon running at: http://localhost:7000/manifest.json
-```
-
 ## Install in Stremio
+
+The addon is hosted on Render — no setup needed.
 
 1. Open **Stremio**
 2. Go to **Addons** → paste into the search bar:
    ```
-   http://localhost:7000/manifest.json
+   https://stremio-anilibria-addon.onrender.com/manifest.json
    ```
 3. Click **Install**
 
@@ -59,6 +41,22 @@ Addon running at: http://localhost:7000/manifest.json
 - First request for a new anime may take a few seconds (title matching)
 - Subsequent requests for the same anime are instant (result is cached)
 - A full title index is pre-loaded in the background on startup (~2–3 min)
+- Hosted on the **free tier** of Render — the server may spin down after inactivity; first request could be slow
+
+## Self-Hosting / Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start the server
+npm start
+```
+
+The addon will be available at:
+```
+http://localhost:7000/manifest.json
+```
 
 ## Project Structure
 
@@ -107,32 +105,14 @@ Stremio запрашивает стримы по IMDB ID (например tt038
     → Возвращаются HLS-ссылки на стримы (480p / 720p / 1080p)
 ```
 
-## Требования
-
-- [Node.js 18+](https://nodejs.org/)
-- Доступ в интернет (AniLibria, AniList, Fribb)
-
-## Установка
-
-```bash
-# Установить зависимости
-npm install
-
-# Запустить сервер
-npm start
-```
-
-После запуска в консоли появится:
-```
-Addon running at: http://localhost:7000/manifest.json
-```
-
 ## Подключить в Stremio
+
+Аддон размещён на Render — ничего устанавливать не нужно.
 
 1. Открыть **Stremio**
 2. Перейти в **Addons** → вставить в строку поиска:
    ```
-   http://localhost:7000/manifest.json
+   https://stremio-anilibria-addon.onrender.com/manifest.json
    ```
 3. Нажать **Install**
 
@@ -149,6 +129,22 @@ Addon running at: http://localhost:7000/manifest.json
 - Первый запрос к новому тайтлу может занять несколько секунд (поиск по названию)
 - Повторные запросы к тому же тайтлу мгновенны (кэш)
 - При запуске сервера в фоне загружается полный индекс тайтлов (~2–3 мин)
+- Сервер размещён на **бесплатном тарифе** Render — после простоя он может уснуть; первый запрос может быть медленным
+
+## Самостоятельный запуск / Локальная разработка
+
+```bash
+# Установить зависимости
+npm install
+
+# Запустить сервер
+npm start
+```
+
+Аддон будет доступен по адресу:
+```
+http://localhost:7000/manifest.json
+```
 
 ## Структура проекта
 

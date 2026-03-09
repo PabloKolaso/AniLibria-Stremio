@@ -67,7 +67,7 @@ async function getTitleIndex() {
         { name: 'alt',   weight: 1 },
         { name: 'ru',    weight: 0.5 },
       ],
-      threshold: 0.35,
+      threshold: 0.25,
       includeScore: true,
     });
   })();
@@ -123,6 +123,51 @@ async function tryAliasList(titles) {
 }
 
 /**
+ * Try to find an Anilibria release using Anilibria's own search API.
+ * Called after alias lookup fails but before the full Fuse.js index scan.
+ *
+ * Validates the top result by requiring its first significant word to match
+ * the query's first significant word (prevents false positives).
+ *
+ * @param {string[]} titles
+ * @returns {number|null}
+ */
+async function tryAnilibriaSearch(titles) {
+  const STOP = new Set(['the', 'a', 'an', 'of', 'in', 'on', 'and', 'or', 'no', 'wo', 'ga', 'wa']);
+
+  for (const title of titles) {
+    if (!title || title.length < 3) continue;
+    // Skip purely non-Latin titles (Japanese native, etc.) — Anilibria search works best with Latin
+    if (!/[a-zA-Z]/.test(title)) continue;
+
+    let results;
+    try {
+      results = await anilibria.searchReleases(title);
+    } catch {
+      continue;
+    }
+
+    if (!results || results.length === 0) continue;
+
+    const top = results[0];
+    const candidateName = (top.name?.english || top.name?.main || '').toLowerCase();
+    const candidateFirstWord = candidateName.split(/\s+/).filter(w => w.length > 1)[0] || '';
+
+    const queryFirstWord = title.toLowerCase().split(/\s+/)
+      .filter(w => w.length > 3 && !STOP.has(w))[0];
+
+    if (!queryFirstWord) continue;
+
+    if (candidateFirstWord.startsWith(queryFirstWord.slice(0, 5))) {
+      console.log(`[resolver] API search "${title}" → release ${top.id} (${top.name?.english || top.name?.main})`);
+      return top.id;
+    }
+    console.log(`[resolver] API search "${title}" discarded: "${candidateName}" (query first: "${queryFirstWord}")`);
+  }
+  return null;
+}
+
+/**
  * Search Anilibria title index for the best matching release ID.
  * Tries multiple title variants; also validates the result by checking
  * that the matched title is a genuine substring match (not just fuzzy noise).
@@ -131,8 +176,6 @@ async function tryAliasList(titles) {
  * @returns {number|null}
  */
 async function findInIndex(titleVariants) {
-  if (indexSize === 0) return null; // index not ready
-
   const index = await getTitleIndex();
   if (!index) return null;
 
@@ -219,6 +262,11 @@ async function resolveImdbToAnilibria(imdbId) {
       // Step 3: try alias-based direct lookup (most accurate)
       anilibriaId = await tryAliasList(titleVariants);
 
+      // Step 3.5: try Anilibria's own search API (catches alias mismatches)
+      if (!anilibriaId) {
+        anilibriaId = await tryAnilibriaSearch(titleVariants);
+      }
+
       // Step 4: fall back to fuzzy index search
       if (!anilibriaId) {
         anilibriaId = await findInIndex(titleVariants);
@@ -232,7 +280,11 @@ async function resolveImdbToAnilibria(imdbId) {
     console.error(`[resolver] Error resolving ${imdbId}:`, err.message);
   }
 
-  resolvedMap.set(imdbId, anilibriaId);
+  if (anilibriaId) {
+    resolvedMap.set(imdbId, anilibriaId);        // permanent for this session
+  } else {
+    resolvedMap.set(imdbId, null, 300);          // retry after 5 minutes
+  }
   return anilibriaId;
 }
 

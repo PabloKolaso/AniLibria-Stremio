@@ -93,4 +93,11 @@ async function* allReleases(pageSize = 50) {
   }
 }
 
-module.exports = { searchReleases, getRelease, allReleases, GeoBlockedError };
+/**
+ * Store a release object in the cache (avoids re-fetching after alias lookup).
+ */
+function cacheRelease(id, data) {
+  releaseCache.set(id, data);
+}
+
+module.exports = { searchReleases, getRelease, allReleases, cacheRelease, GeoBlockedError };

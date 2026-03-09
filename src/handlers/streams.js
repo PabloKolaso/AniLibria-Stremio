@@ -86,6 +86,10 @@ function buildStreams(release, episode, imdbId) {
     });
   }
 
+  if (streams.length === 0) {
+    console.warn(`[streams] Episode ${episode.ordinal} of "${releaseName}" exists but has no HLS URLs`);
+  }
+
   return streams;
 }
 

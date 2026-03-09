@@ -13,6 +13,7 @@
 
 const Fuse = require('fuse.js');
 const NodeCache = require('node-cache');
+const axios = require('axios');
 
 // ─── Title normalization helpers ─────────────────────────────────────────────
 
@@ -39,6 +40,8 @@ const resolvedMap = new NodeCache({ stdTTL: 86400, checkperiod: 600 });
 let titleIndex = null;
 let indexBuilding = null;
 let indexSize = 0;
+let indexBuiltAt = 0;
+const INDEX_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
 
 /**
  * Build (or return cached) Fuse.js search index over Anilibria catalog.
@@ -46,8 +49,8 @@ let indexSize = 0;
  * be rebuilt on the next call.
  */
 async function getTitleIndex() {
-  // Treat an empty index as not-yet-built so we retry
-  if (titleIndex && indexSize > 0) return titleIndex;
+  // Return cached index if still fresh; treat empty as not-yet-built
+  if (titleIndex && indexSize > 0 && (Date.now() - indexBuiltAt < INDEX_TTL_MS)) return titleIndex;
   if (indexBuilding) return indexBuilding;
 
   indexBuilding = (async () => {
@@ -91,6 +94,7 @@ async function getTitleIndex() {
 
   try {
     titleIndex = await indexBuilding;
+    indexBuiltAt = Date.now();
   } finally {
     indexBuilding = null;
   }
@@ -116,8 +120,6 @@ function toAlias(title) {
  * Returns the release object or null.
  */
 async function tryAliasList(titles) {
-  const axios = require('axios');
-
   // Build unique aliases, preserving title order (romaji first)
   const aliases = [];
   const seen = new Set();
@@ -130,25 +132,21 @@ async function tryAliasList(titles) {
 
   if (aliases.length === 0) return null;
 
-  // Fire all alias lookups in parallel
-  const results = await Promise.allSettled(
-    aliases.map(alias =>
-      axios.get(`https://anilibria.top/api/v1/anime/releases/${alias}`, {
+  // Try aliases sequentially, stop on first hit (avoids firing many parallel 404s)
+  for (const alias of aliases) {
+    try {
+      const { data } = await axios.get(`https://anilibria.top/api/v1/anime/releases/${alias}`, {
         timeout: 8_000,
         headers: { 'User-Agent': 'stremio-anilibria-addon/1.0' },
-      }).then(({ data }) => {
-        if (data?.id) {
-          console.log(`[resolver] Alias lookup "${alias}" → release ${data.id} (${data.name?.english || data.name?.main})`);
-          return data.id;
-        }
-        return null;
-      }).catch(() => null)
-    )
-  );
-
-  // Return the first successful match (preserves title priority order)
-  for (const r of results) {
-    if (r.status === 'fulfilled' && r.value) return r.value;
+      });
+      if (data?.id) {
+        console.log(`[resolver] Alias lookup "${alias}" → release ${data.id} (${data.name?.english || data.name?.main})`);
+        anilibria.cacheRelease(data.id, data);
+        return data.id;
+      }
+    } catch {
+      // 404 or timeout — try next alias
+    }
   }
   return null;
 }
@@ -313,7 +311,7 @@ async function resolveImdbToAnilibria(imdbId) {
   if (anilibriaId) {
     resolvedMap.set(imdbId, anilibriaId);        // permanent for this session
   } else {
-    resolvedMap.set(imdbId, null, 300);          // retry after 5 minutes
+    resolvedMap.set(imdbId, null, 7200);         // retry after 2 hours
   }
   return anilibriaId;
 }

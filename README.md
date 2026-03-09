@@ -35,7 +35,7 @@ Watch Russian-dubbed anime in Stremio without leaving the app or managing a sepa
 | Binge-watch support | Auto-plays next episode via `bingeGroup` |
 | Geo-block detection | Shows a readable message instead of a dead spinner |
 | Fast cold starts | Full AniLibria index pre-warmed on server boot |
-| Session caching | Each title resolved once; failed lookups retry after 5 min |
+| Session caching | Each title resolved once; failed lookups retry after 2 hours |
 
 ---
 
@@ -213,7 +213,7 @@ This project is licensed under the [MIT License](LICENSE). You are free to use, 
 | Авто-следующая серия | Поддержка `bingeGroup` для автоматического перехода |
 | Определение геоблока | Понятное сообщение вместо зависшей загрузки |
 | Быстрый холодный старт | Полный индекс AniLibria загружается в фоне при запуске |
-| Кэш сессии | Каждый тайтл определяется один раз; повтор через 5 мин при ошибке |
+| Кэш сессии | Каждый тайтл определяется один раз; повтор через 2 часа при ошибке |
 
 ---
 

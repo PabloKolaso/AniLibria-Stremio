@@ -101,6 +101,11 @@ router.get('/debug', (req, res) => {
  */
 router.get('/debug/resolve/:imdbId', async (req, res) => {
   const { imdbId } = req.params;
+
+  if (!/^tt\d{7,10}$/.test(imdbId)) {
+    return res.json({ imdbId, anilibriaId: null, error: 'Invalid IMDB ID format', logs: [] });
+  }
+
   const logsBefore = logBuffer.length;
 
   let anilibriaId = null;

@@ -11,6 +11,8 @@ const resolver  = require('../bridge/resolver');
 const anilibria = require('../api/anilibria');
 const { GeoBlockedError } = require('../api/anilibria');
 
+const IMDB_RE = /^tt\d{7,10}$/;
+
 /**
  * Parse a Stremio series ID into its components.
  * "tt0388629:1:5" → { imdbId: "tt0388629", season: 1, episode: 5 }
@@ -94,6 +96,8 @@ function buildStreams(release, episode, imdbId) {
  */
 async function streamHandler({ type, id }) {
   const { imdbId, season, episode } = parseId(id);
+
+  if (!IMDB_RE.test(imdbId)) return { streams: [] };
 
   console.log(`[streams] Request: type=${type} imdb=${imdbId} s=${season} e=${episode}`);
 

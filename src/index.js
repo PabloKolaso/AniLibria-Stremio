@@ -48,8 +48,20 @@ async function start() {
   const addonInterface = builder.getInterface();
   const app = express();
   app.use(cors());
+
+  // Security headers
+  app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    next();
+  });
+
   app.use('/', getRouter(addonInterface));
-  app.use('/', debugRouter);
+
+  // Only expose debug routes in development
+  if (process.env.NODE_ENV !== 'production') {
+    app.use('/', debugRouter);
+  }
   app.listen(PORT);
 
   const host = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;

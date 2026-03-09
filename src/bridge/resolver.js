@@ -33,7 +33,7 @@ const anilibria    = require('../api/anilibria');
 const anilist      = require('../api/anilist');
 
 // Cache: imdbId -> anilibria release id  (permanent for this session)
-const resolvedMap = new NodeCache({ stdTTL: 0, checkperiod: 0 });
+const resolvedMap = new NodeCache({ stdTTL: 86400, checkperiod: 600 });
 
 // Anilibria full title index, built lazily on first use
 let titleIndex = null;

@@ -1,172 +1,340 @@
-# Stremio AniLibria Addon
+<div align="center">
 
-> **EN** | [**RU**](#stremio-anilibria-addon-ru)
+<img src="https://anilibria.top/assets/img/logo.png" alt="AniLibria" width="96" />
 
-A Stremio addon that injects Russian anime dub streams from [AniLibria](https://anilibria.top) directly into Stremio's player.
+# AniLibria for Stremio
+
+*Russian anime dubs, directly inside Stremio.*
+
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Stremio Addon](https://img.shields.io/badge/stremio-addon-7B5EA7)](https://stremio.com)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Deploy: Render](https://img.shields.io/badge/deploy-Render-46E3B7?logo=render&logoColor=white)](https://render.com)
+
+**[English](#english) · [Русский](#русский)**
+
+</div>
+
+---
+
+<a name="english"></a>
+
+## What It Does
+
+Watch Russian-dubbed anime in Stremio without leaving the app or managing a separate catalog. The addon bridges Stremio's IMDB-based library to AniLibria's HLS CDN, injecting **480p / 720p / 1080p** stream options for any title available in AniLibria's library.
+
+---
+
+## Features
+
+| Feature | Detail |
+|---|---|
+| Multi-quality HLS | 480p · 720p · 1080p per episode |
+| Zero catalog noise | Stream-only addon — no duplicate browse sections |
+| 4-step ID resolution | Alias → API search → Fuse.js fuzzy → session-cached |
+| Binge-watch support | Auto-plays next episode via `bingeGroup` |
+| Geo-block detection | Shows a readable message instead of a dead spinner |
+| Fast cold starts | Full AniLibria index pre-warmed on server boot |
+| Session caching | Each title resolved once; failed lookups retry after 5 min |
 
 ---
 
 ## How It Works
 
+Every stream request follows this resolution pipeline:
+
 ```
-Stremio requests streams for an IMDB ID (e.g. tt0388629)
-    → IMDB ID is mapped to AniList ID via Fribb anime-lists
-    → English / Romaji titles are fetched from AniList API
-    → Titles are matched against the full AniLibria catalog
-    → Episode list is fetched from AniLibria API
-    → HLS stream URLs are returned (480p / 720p / 1080p)
+Stremio  ──▶  IMDB ID  (e.g. tt0388629)
+                │
+                ▼
+         Fribb anime-list          IMDB → AniList / MAL / AniDB ID
+                │
+                ▼
+         AniList GraphQL API       AniList ID → English + Rōmaji titles
+                │
+         ┌──────┴────────────────────────────────────┐
+         ▼                                           ▼  fallback chain
+  Anilibria alias lookup  →  Anilibria search API  →  Fuse.js index
+  /api/v1/releases/{slug}     (word-prefix guard)      (full catalog,
+                                                         threshold 0.25)
+                │
+                ▼
+         Episode HLS URLs   (480p / 720p / 1080p)
+                │
+                ▼
+            Stremio Player
 ```
 
-## Install in Stremio
+The alias lookup is instant and exact. The search API and fuzzy index serve as progressively broader fallbacks, each with false-positive guards to prevent wrong matches.
 
-The addon is hosted on Render — no setup needed.
+---
 
-1. Open **Stremio**
-2. Go to **Addons** → paste into the search bar:
-   ```
-   https://stremio-anilibria-addon.onrender.com/manifest.json
-   ```
-3. Click **Install**
+## Install
+
+**Hosted on Render** — no setup needed. Open the manifest URL in any browser and Stremio will prompt you to install:
+
+```
+https://stremio-anilibria-addon.onrender.com/manifest.json
+```
+
+Or paste it directly into **Stremio → Addons → search bar**.
+
+---
 
 ## Usage
 
-- Browse any anime in Stremio (via Cinemeta or any other catalog addon)
-- Open any episode
-- In the stream selector, choose **AniLibria 1080p / 720p / 480p**
-- Enjoy the Russian dub
+1. Browse any anime in Stremio (via Cinemeta or any catalog addon)
+2. Open any episode
+3. In the stream picker, select **AniLibria 1080p / 720p / 480p**
+4. Enjoy the Russian dub
 
-## Notes
+---
 
-- Streams are **Russian dub only** — that's what AniLibria provides
-- First request for a new anime may take a few seconds (title matching)
-- Subsequent requests for the same anime are instant (result is cached)
-- A full title index is pre-loaded in the background on startup (~2–3 min)
-- Hosted on the **free tier** of Render — the server may spin down after inactivity; first request could be slow
+## Self-Hosting
 
-## Self-Hosting / Local Development
+**Requirements:** Node.js ≥ 18
 
 ```bash
-# Install dependencies
+git clone https://github.com/<user>/stremio-anilibria-addon.git
+cd stremio-anilibria-addon
 npm install
-
-# Start the server
 npm start
+# Addon available at http://localhost:7000/manifest.json
 ```
 
-The addon will be available at:
-```
-http://localhost:7000/manifest.json
-```
+### Environment Variables
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `PORT` | `7000` | HTTP listen port |
+| `RENDER_EXTERNAL_URL` | — | Public base URL (auto-set on Render) |
+
+### One-Click Deploy to Render
+
+1. Fork this repository
+2. Create a new **Web Service** on [render.com](https://render.com) pointing to your fork
+3. Set start command: `node src/index.js`
+4. Render sets `RENDER_EXTERNAL_URL` automatically — no extra config needed
+
+---
+
+## Debug Panel
+
+A live diagnostics page is available at `/debug`:
+
+- Force-resolve any IMDB ID and trace the full lookup path step by step
+- View recent stream requests and their resolution outcomes
+- Useful for reporting missing anime or incorrect title matches
+
+---
 
 ## Project Structure
 
 ```
 src/
-  index.js              — Server entry point
-  manifest.js           — Addon manifest
+  index.js          — Server entry point
+  manifest.js       — Addon manifest
   mapping/
-    cache.js            — Fribb IMDB ↔ AniList mapping cache
+    cache.js        — Fribb IMDB ↔ AniList mapping cache
   api/
-    anilibria.js        — AniLibria API v1 client
-    anilist.js          — AniList GraphQL client
+    anilibria.js    — AniLibria REST API v1 client
+    anilist.js      — AniList GraphQL client
   bridge/
-    resolver.js         — Title matching & ID bridge
+    resolver.js     — 4-step title matching & ID bridge
   handlers/
-    streams.js          — Stream handler
+    streams.js      — Stream handler
+  debug.js          — Live diagnostics router
 ```
 
-## APIs Used
+---
 
-| API | Purpose |
-|-----|---------|
-| `anilibria.top/api/v1/` | Anime search + HLS stream URLs |
-| Fribb `anime-list-mini.json` | IMDB ↔ MAL / AniList / AniDB ID mapping |
-| `graphql.anilist.co` | Canonical anime titles by AniList ID |
+## Stack
+
+| Library | Role |
+|---|---|
+| [`stremio-addon-sdk`](https://github.com/Stremio/stremio-addon-sdk) | Stremio addon protocol |
+| `express` + `cors` | HTTP server |
+| `axios` | HTTP client |
+| [`fuse.js`](https://fusejs.io) | Fuzzy title matching |
+| `node-cache` | In-process session cache |
+| [Fribb `anime-list-mini.json`](https://github.com/Fribb/anime-lists) | IMDB → AniList/MAL/AniDB mapping |
+| [AniList GraphQL](https://anilist.gitbook.io/anilist-apiv2-docs) | Canonical anime title lookup |
+| [AniLibria REST API v1](https://anilibria.top) | HLS stream source |
+
+---
+
+## Limitations
+
+- **Russian dub only** — AniLibria does not offer original audio or subtitles
+- Anime not present in AniLibria's library return 0 streams (expected behavior)
+- Some titles may be geo-restricted by AniLibria independent of this addon
+- Hosted on the **free tier** of Render — the server may spin down after inactivity; the first request after a cold start may be slow
+
+---
+
+## License
+
+[MIT](LICENSE)
 
 ---
 ---
 
-# Stremio AniLibria Addon <sup>RU</sup>
+<a name="русский"></a>
 
-> [**EN**](#stremio-anilibria-addon) | **RU**
+<div align="center">
 
-Аддон для Stremio, который добавляет русскоязычные озвучки аниме от [AniLibria](https://anilibria.top) прямо в плеер.
+# AniLibria для Stremio
+
+*Русская озвучка аниме прямо в Stremio.*
+
+**[English](#english) · [Русский](#русский)**
+
+</div>
+
+---
+
+## Что это
+
+Аддон добавляет русскоязычные озвучки аниме от [AniLibria](https://anilibria.top) прямо в Stremio — без отдельного каталога и лишних приложений. Для любого тайтла из библиотеки AniLibria в плеере появятся варианты качества **480p / 720p / 1080p**.
+
+---
+
+## Возможности
+
+| Функция | Описание |
+|---|---|
+| Несколько качеств HLS | 480p · 720p · 1080p для каждой серии |
+| Без лишних каталогов | Только стримы — никаких дублирующих разделов просмотра |
+| 4-шаговое сопоставление ID | Алиас → поиск по API → нечёткий поиск Fuse.js → кэш |
+| Авто-следующая серия | Поддержка `bingeGroup` для автоматического перехода |
+| Определение геоблока | Понятное сообщение вместо зависшей загрузки |
+| Быстрый холодный старт | Полный индекс AniLibria загружается в фоне при запуске |
+| Кэш сессии | Каждый тайтл определяется один раз; повтор через 5 мин при ошибке |
 
 ---
 
 ## Как это работает
 
 ```
-Stremio запрашивает стримы по IMDB ID (например tt0388629)
-    → IMDB ID сопоставляется с AniList ID через Fribb anime-lists
-    → Английское / ромадзи название тайтла запрашивается из AniList API
-    → Название сравнивается с каталогом AniLibria
-    → Список серий загружается через AniLibria API
-    → Возвращаются HLS-ссылки на стримы (480p / 720p / 1080p)
+Stremio  ──▶  IMDB ID  (напр. tt0388629)
+                │
+                ▼
+         Fribb anime-list          IMDB → AniList / MAL / AniDB ID
+                │
+                ▼
+         AniList GraphQL API       AniList ID → английское + ромадзи название
+                │
+         ┌──────┴────────────────────────────────────┐
+         ▼                                           ▼  цепочка запасных вариантов
+  Поиск по алиасу AniLibria  →  Поиск API AniLibria  →  Индекс Fuse.js
+  /api/v1/releases/{slug}        (проверка первого слова)  (весь каталог,
+                                                            порог 0.25)
+                │
+                ▼
+         HLS-ссылки на серии   (480p / 720p / 1080p)
+                │
+                ▼
+            Плеер Stremio
 ```
+
+---
 
 ## Подключить в Stremio
 
-Аддон размещён на Render — ничего устанавливать не нужно.
+Аддон размещён на Render — ничего устанавливать не нужно. Откройте ссылку на манифест в браузере или вставьте её в **Stremio → Addons → строка поиска**:
 
-1. Открыть **Stremio**
-2. Перейти в **Addons** → вставить в строку поиска:
-   ```
-   https://stremio-anilibria-addon.onrender.com/manifest.json
-   ```
-3. Нажать **Install**
+```
+https://stremio-anilibria-addon.onrender.com/manifest.json
+```
+
+---
 
 ## Использование
 
-- Откройте любое аниме в Stremio (через Cinemeta или другой каталог-аддон)
-- Выберите любую серию
-- В списке источников появятся варианты **AniLibria 1080p / 720p / 480p**
-- Выберите нужное качество и наслаждайтесь русской озвучкой
+1. Откройте любое аниме в Stremio (через Cinemeta или другой каталог-аддон)
+2. Выберите любую серию
+3. В списке источников выберите **AniLibria 1080p / 720p / 480p**
+4. Смотрите с русской озвучкой
 
-## Примечания
+---
 
-- Стримы только на **русском** — это то, что предоставляет AniLibria
-- Первый запрос к новому тайтлу может занять несколько секунд (поиск по названию)
-- Повторные запросы к тому же тайтлу мгновенны (кэш)
-- При запуске сервера в фоне загружается полный индекс тайтлов (~2–3 мин)
-- Сервер размещён на **бесплатном тарифе** Render — после простоя он может уснуть; первый запрос может быть медленным
+## Самостоятельный запуск
 
-## Самостоятельный запуск / Локальная разработка
+**Требования:** Node.js ≥ 18
 
 ```bash
-# Установить зависимости
+git clone https://github.com/<user>/stremio-anilibria-addon.git
+cd stremio-anilibria-addon
 npm install
-
-# Запустить сервер
 npm start
+# Аддон доступен по адресу http://localhost:7000/manifest.json
 ```
 
-Аддон будет доступен по адресу:
-```
-http://localhost:7000/manifest.json
-```
+### Переменные окружения
+
+| Переменная | По умолчанию | Назначение |
+|---|---|---|
+| `PORT` | `7000` | Порт HTTP-сервера |
+| `RENDER_EXTERNAL_URL` | — | Публичный URL (задаётся автоматически на Render) |
+
+### Деплой на Render (бесплатный тариф)
+
+1. Форкнуть репозиторий
+2. Создать новый **Web Service** на [render.com](https://render.com), указав форк
+3. Команда запуска: `node src/index.js`
+4. `RENDER_EXTERNAL_URL` задаётся Render автоматически
+
+---
+
+## Диагностика
+
+Страница `/debug` предоставляет:
+
+- Принудительное определение любого IMDB ID с трассировкой всех шагов
+- Список последних запросов стримов и их результатов
+- Помогает выявить проблемы с отсутствующими тайтлами или неверными совпадениями
+
+---
 
 ## Структура проекта
 
 ```
 src/
-  index.js              — Точка входа сервера
-  manifest.js           — Манифест аддона
+  index.js          — Точка входа сервера
+  manifest.js       — Манифест аддона
   mapping/
-    cache.js            — Кэш маппинга Fribb IMDB ↔ AniList
+    cache.js        — Кэш маппинга Fribb IMDB ↔ AniList
   api/
-    anilibria.js        — Клиент AniLibria API v1
-    anilist.js          — Клиент AniList GraphQL
+    anilibria.js    — Клиент AniLibria REST API v1
+    anilist.js      — Клиент AniList GraphQL
   bridge/
-    resolver.js         — Сопоставление названий и ID
+    resolver.js     — 4-шаговое сопоставление названий и ID
   handlers/
-    streams.js          — Обработчик стримов
+    streams.js      — Обработчик стримов
+  debug.js          — Роутер диагностики
 ```
+
+---
 
 ## Используемые API
 
 | API | Назначение |
-|-----|-----------|
+|---|---|
 | `anilibria.top/api/v1/` | Поиск аниме + HLS-ссылки |
 | Fribb `anime-list-mini.json` | Маппинг IMDB ↔ MAL / AniList / AniDB |
 | `graphql.anilist.co` | Канонические названия тайтлов по AniList ID |
+
+---
+
+## Ограничения
+
+- **Только русская озвучка** — AniLibria не предоставляет оригинальный звук или субтитры
+- Аниме, не вышедшее на AniLibria, возвращает 0 стримов (ожидаемое поведение)
+- Некоторые тайтлы могут быть геоблокированы на стороне AniLibria
+- Сервер на **бесплатном тарифе** Render засыпает при простое; первый запрос после паузы может быть медленным
+
+---
+
+## Лицензия
+
+[MIT](LICENSE)

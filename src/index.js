@@ -2,7 +2,12 @@
  * Stremio AniLibria Addon — Entry Point
  */
 
-const { addonBuilder, serveHTTP } = require('stremio-addon-sdk');
+// Must be first — patches console before any other module logs
+const { router: debugRouter } = require('./debug');
+
+const { addonBuilder, getRouter } = require('stremio-addon-sdk');
+const express = require('express');
+const cors    = require('cors');
 
 const manifest          = require('./manifest');
 const mappingCache      = require('./mapping/cache');
@@ -41,11 +46,16 @@ async function start() {
 
   // Start the HTTP server
   const addonInterface = builder.getInterface();
-  serveHTTP(addonInterface, { port: PORT });
+  const app = express();
+  app.use(cors());
+  app.use('/', getRouter(addonInterface));
+  app.use('/', debugRouter);
+  app.listen(PORT);
 
   const host = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
   console.log(`\nAddon running at: ${host}/manifest.json`);
-  console.log('Install in Stremio by opening the URL above.\n');
+  console.log(`Debug page:       ${host}/debug`);
+  console.log('Install in Stremio by opening the manifest URL above.\n');
 
   // Pre-warm the Anilibria title index in the background
   warmup();

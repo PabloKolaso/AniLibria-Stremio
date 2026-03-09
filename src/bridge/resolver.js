@@ -297,4 +297,12 @@ function warmup() {
   );
 }
 
-module.exports = { resolveImdbToAnilibria, warmup };
+/**
+ * Remove a cached resolution result so the next call re-resolves from scratch.
+ * Used by the debug endpoint to force a fresh lookup.
+ */
+function clearCache(imdbId) {
+  resolvedMap.del(imdbId);
+}
+
+module.exports = { resolveImdbToAnilibria, clearCache, warmup };

@@ -1,8 +1,9 @@
 /**
  * Bulk Anime Checker
  *
- * Fetches the top 500 most popular anime from AniList, maps them to IMDB IDs
- * via the Fribb mapping, then runs each through the full Anilibria resolver.
+ * Fetches the top 500 most popular anime from AniList, then resolves each
+ * directly by title through the Anilibria pipeline (alias → search → Fuse).
+ * Also reports whether an IMDB mapping exists (needed for the live addon).
  *
  * Usage:
  *   node scripts/check-anime.js
@@ -22,7 +23,7 @@ const resolver     = require('../src/bridge/resolver');
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const TOTAL_ANIME    = 500;
+const TOTAL_ANIME    = 1500;
 const PAGE_SIZE      = 50;
 const CONCURRENCY    = 5;    // parallel resolver calls
 const PAGE_DELAY_MS  = 400;  // between AniList page fetches
@@ -96,7 +97,7 @@ function pad(str, len) {
 async function main() {
   console.log('=== Stremio AniLibria — Bulk Anime Checker ===\n');
 
-  // Step 1: Load Fribb IMDB mapping
+  // Step 1: Load Fribb IMDB mapping (needed for imdbId reporting)
   console.log('Loading Fribb IMDB mapping...');
   await mappingCache.load();
 
@@ -108,59 +109,51 @@ async function main() {
   console.log(`\nFetching top ${TOTAL_ANIME} anime from AniList by popularity...`);
   const animeList = await fetchPopularAnime(TOTAL_ANIME);
 
-  // Step 4: Resolve each anime
+  // Step 4: Resolve each anime by title (no IMDB roundtrip)
   console.log(`\nResolving ${animeList.length} anime (concurrency=${CONCURRENCY})...\n`);
 
   const lines = [];
-  let found = 0, missing = 0, noImdb = 0;
+  let found = 0, missing = 0;
   let checked = 0;
 
   const tasks = animeList.map((anime, idx) => async () => {
-    const title = anime.title?.english || anime.title?.romaji || `AniList#${anime.id}`;
+    const english = anime.title?.english || '';
+    const romaji  = anime.title?.romaji  || '';
+    const display = english || romaji || `AniList#${anime.id}`;
 
-    // Look up IMDB ID via Fribb mapping (keyed by AniList ID)
-    // The mapping cache uses getByImdb(), so we need to find the IMDB ID for this AniList ID.
-    // We'll use the internal byAnilist map indirectly: try getImdbByAnilist if exported,
-    // otherwise check the mapping by brute approach using existing API.
+    // Titles ordered romaji-first (Anilibria catalogs by Japanese romanized names)
+    const titles = [romaji, english].filter(Boolean);
+
+    // IMDB ID is informational only — shows addon compatibility
     let imdbId = null;
     try {
-      // mappingCache doesn't export getImdbByAnilist by name in all versions;
-      // we use the exported function if available
-      if (typeof mappingCache.getImdbByAnilist === 'function') {
-        imdbId = await mappingCache.getImdbByAnilist(anime.id);
-      }
+      imdbId = await mappingCache.getImdbByAnilist(anime.id);
     } catch { /* skip */ }
 
     checked++;
-    process.stdout.write(`  [${checked}/${animeList.length}] ${pad(title, 40)}\r`);
+    process.stdout.write(`  [${checked}/${animeList.length}] ${pad(display, 40)}\r`);
 
-    let status, anilibriaId, note;
+    let anilibriaId = null;
+    let note;
 
-    if (!imdbId) {
-      status = '?';
-      note   = 'no IMDB in Fribb mapping';
-      noImdb++;
-    } else {
-      try {
-        anilibriaId = await resolver.resolveImdbToAnilibria(imdbId);
-      } catch (err) {
-        note = `resolver error: ${err.message}`;
-      }
-
-      if (anilibriaId) {
-        status = '✓';
-        note   = `anilibria#${anilibriaId}`;
-        found++;
-      } else {
-        status = '✗';
-        note   = note || 'not found in Anilibria';
-        missing++;
-      }
+    try {
+      anilibriaId = await resolver.resolveByTitles(titles);
+    } catch (err) {
+      note = `resolver error: ${err.message}`;
     }
 
-    const symbol = status === '✓' ? 'FOUND  ' : status === '✗' ? 'MISSING' : 'NO_IMDB';
-    const line = `${status} ${symbol}  ${pad(imdbId || '-', 12)}  ${pad(title, 42)}  → ${note}`;
-    lines[idx] = line;
+    if (anilibriaId) {
+      note = `anilibria#${anilibriaId}`;
+      found++;
+    } else {
+      note = note || 'not found in Anilibria';
+      missing++;
+    }
+
+    const symbol = anilibriaId ? 'FOUND  ' : 'MISSING';
+    const check  = anilibriaId ? '✓' : '✗';
+    const imdb   = imdbId ? pad(imdbId, 12) : pad('-', 12);
+    lines[idx] = `${check} ${symbol}  ${imdb}  ${pad(display, 42)}  → ${note}`;
   });
 
   await pLimit(tasks, CONCURRENCY);
@@ -176,7 +169,7 @@ async function main() {
   const summary = [
     '',
     '─'.repeat(100),
-    `SUMMARY: ${animeList.length} checked  |  ✓ ${found} found  |  ✗ ${missing} missing  |  ? ${noImdb} no IMDB mapping`,
+    `SUMMARY: ${animeList.length} checked  |  ✓ ${found} found  |  ✗ ${missing} missing`,
     '─'.repeat(100),
   ].join('\n');
 

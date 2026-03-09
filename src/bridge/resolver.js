@@ -321,4 +321,20 @@ function clearCache(imdbId) {
   resolvedMap.del(imdbId);
 }
 
-module.exports = { resolveImdbToAnilibria, clearCache, warmup };
+/**
+ * Resolve an Anilibria release ID directly from a list of title strings,
+ * bypassing the IMDB→Fribb→AniList lookup chain.
+ * Useful for scripts that already hold canonical titles.
+ *
+ * @param {string[]} titles - ordered list of title variants to try
+ * @returns {number|null}
+ */
+async function resolveByTitles(titles) {
+  if (!titles || titles.length === 0) return null;
+  let id = await tryAliasList(titles);
+  if (!id) id = await tryAnilibriaSearch(titles);
+  if (!id) id = await findInIndex(titles);
+  return id || null;
+}
+
+module.exports = { resolveImdbToAnilibria, resolveByTitles, clearCache, warmup };

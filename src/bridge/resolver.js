@@ -24,9 +24,9 @@ function normalizeWords(str) {
   return str.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
 }
 
-/** Return first word that is ≥3 chars and not a stop word */
-function firstSignificantWord(str) {
-  return normalizeWords(str).find(w => w.length >= 3 && !STOP_WORDS.has(w)) || null;
+/** Return first N words that are ≥3 chars and not stop words */
+function significantWords(str, n = 2) {
+  return normalizeWords(str).filter(w => w.length >= 3 && !STOP_WORDS.has(w)).slice(0, n);
 }
 
 const mappingCache = require('../mapping/cache');
@@ -176,18 +176,30 @@ async function tryAnilibriaSearch(titles) {
 
     if (!results || results.length === 0) continue;
 
-    const top = results[0];
-    const candidateName = (top.name?.english || top.name?.main || '').toLowerCase();
-    const candidateFirstWord = normalizeWords(candidateName).filter(w => w.length >= 2)[0] || '';
+    const queryWords = significantWords(title, 2);
+    if (queryWords.length === 0) continue;
 
-    const queryFirstWord = firstSignificantWord(title);
-    if (!queryFirstWord) continue;
+    for (const candidate of results.slice(0, 3)) {
+      const candidateName = (candidate.name?.english || candidate.name?.main || '').toLowerCase();
+      const candidateWords = significantWords(candidateName, 2);
 
-    if (candidateFirstWord.startsWith(queryFirstWord.slice(0, 4))) {
-      console.log(`[resolver] API search "${title}" → release ${top.id} (${top.name?.english || top.name?.main})`);
-      return top.id;
+      if (candidateWords.length === 0) continue;
+      if (candidateWords[0] !== queryWords[0]) {
+        console.log(`[resolver] API search "${title}" discarded: "${candidateName}" (first: "${queryWords[0]}" ≠ "${candidateWords[0]}")`);
+        continue;
+      }
+
+      if (candidateWords.length >= 2 && queryWords.length >= 2) {
+        const w1 = candidateWords[1], w2 = queryWords[1];
+        if (!w1.startsWith(w2.slice(0, 4)) && !w2.startsWith(w1.slice(0, 4))) {
+          console.log(`[resolver] API search "${title}" discarded: "${candidateName}" (second: "${w2}" ≠ "${w1}")`);
+          continue;
+        }
+      }
+
+      console.log(`[resolver] API search "${title}" → release ${candidate.id} (${candidate.name?.english || candidate.name?.main})`);
+      return candidate.id;
     }
-    console.log(`[resolver] API search "${title}" discarded: "${candidateName}" (query first: "${queryFirstWord}")`);
   }
   return null;
 }
@@ -219,22 +231,26 @@ async function findInIndex(titleVariants) {
   }
 
   if (best && bestScore < 0.25) {
-    // Sanity check: the FIRST significant word of the query must be the FIRST word
-    // of the matched title. This prevents "Attack on Titan" from matching something
-    // like "Nagatoro 2nd Attack" just because both contain the word "attack".
-    const matchedFirstWord = normalizeWords(best.en || best.aliasWords || best.alias || '')[0] || '';
+    // Sanity check: require matching on the first two significant words.
+    // This prevents false positives like "Mushoku Tensei" → "Mushoku no Eiyuu"
+    // or "Shingeki no Kyojin" → "Shingeki no Bahamut".
+    const matchedWords = significantWords(best.en || best.aliasWords || best.alias || '', 2);
+    const queryWordSets = titleVariants.map(t => significantWords(t, 2)).filter(w => w.length > 0);
 
-    // Collect the FIRST meaningful word from EACH title variant.
-    // Any one of them matching the result's first word is enough.
-    const queryFirstWords = titleVariants.map(firstSignificantWord).filter(Boolean);
+    const wordMatch = queryWordSets.some(qw => {
+      if (qw[0] !== matchedWords[0]) return false;
+      if (qw.length >= 2 && matchedWords.length >= 2) {
+        const w1 = qw[1], w2 = matchedWords[1];
+        return w1.startsWith(w2.slice(0, 4)) || w2.startsWith(w1.slice(0, 4));
+      }
+      return true;
+    });
 
-    const firstWordMatch = queryFirstWords.some(w => matchedFirstWord.startsWith(w.slice(0, 4)));
-
-    if (firstWordMatch) {
+    if (wordMatch) {
       console.log(`[resolver] Fuse match "${best.en || best.ru}" (score ${bestScore.toFixed(3)})`);
       return best.id;
     }
-    console.log(`[resolver] Fuse match discarded: ${JSON.stringify(queryFirstWords)} ≠ "${matchedFirstWord}" (title: "${best.en}")`);
+    console.log(`[resolver] Fuse match discarded: ${JSON.stringify(queryWordSets)} ≠ ${JSON.stringify(matchedWords)} (title: "${best.en}")`);
   }
 
   return null;

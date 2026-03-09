@@ -9,6 +9,7 @@
 
 const resolver  = require('../bridge/resolver');
 const anilibria = require('../api/anilibria');
+const { GeoBlockedError } = require('../api/anilibria');
 
 /**
  * Parse a Stremio series ID into its components.
@@ -108,6 +109,16 @@ async function streamHandler({ type, id }) {
   try {
     release = await anilibria.getRelease(anilibriaId);
   } catch (err) {
+    if (err instanceof GeoBlockedError) {
+      console.warn(`[streams] Release ${anilibriaId} is geo-blocked for ${imdbId}`);
+      return {
+        streams: [{
+          name: 'AniLibria\nBlocked',
+          description: 'This content is restricted or geo-blocked on AniLibria in your region.',
+          externalUrl: 'https://anilibria.top',
+        }],
+      };
+    }
     console.error(`[streams] Failed to fetch release ${anilibriaId}:`, err.message);
     return { streams: [] };
   }

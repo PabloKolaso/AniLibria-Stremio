@@ -8,6 +8,18 @@
 const axios = require('axios');
 const NodeCache = require('node-cache');
 
+/**
+ * Thrown when Anilibria returns HTTP 403 or 451, indicating the content
+ * is geo-blocked or legally restricted in the user's region.
+ */
+class GeoBlockedError extends Error {
+  constructor(releaseId) {
+    super(`Anilibria release ${releaseId} is geo-blocked or restricted`);
+    this.name = 'GeoBlockedError';
+    this.releaseId = releaseId;
+  }
+}
+
 const BASE = 'https://anilibria.top/api/v1';
 
 // Cache release details for 10 minutes to avoid hammering the API
@@ -49,9 +61,17 @@ async function searchReleases(query) {
 async function getRelease(id) {
   if (releaseCache.has(id)) return releaseCache.get(id);
 
-  const { data } = await client.get(`/anime/releases/${id}`);
-  releaseCache.set(id, data);
-  return data;
+  try {
+    const { data } = await client.get(`/anime/releases/${id}`);
+    releaseCache.set(id, data);
+    return data;
+  } catch (err) {
+    const status = err.response?.status;
+    if (status === 403 || status === 451) {
+      throw new GeoBlockedError(id);
+    }
+    throw err;
+  }
 }
 
 /**
@@ -73,4 +93,4 @@ async function* allReleases(pageSize = 50) {
   }
 }
 
-module.exports = { searchReleases, getRelease, allReleases };
+module.exports = { searchReleases, getRelease, allReleases, GeoBlockedError };

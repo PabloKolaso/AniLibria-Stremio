@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://anilibria.top/assets/img/logo.png" alt="AniLibria" width="96" />
+<img src="assets/logo.jpg" alt="AniLibria" width="120" />
 
 # AniLibria for Stremio
 

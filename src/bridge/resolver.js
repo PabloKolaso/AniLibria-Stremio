@@ -116,26 +116,39 @@ function toAlias(title) {
  * Returns the release object or null.
  */
 async function tryAliasList(titles) {
-  const { getRelease } = anilibria;
-  // Only try the GET /releases/{id} endpoint with alias strings
-  // It returns 404 for unknown aliases
   const axios = require('axios');
 
+  // Build unique aliases, preserving title order (romaji first)
+  const aliases = [];
+  const seen = new Set();
   for (const title of titles) {
     const alias = toAlias(title);
-    if (!alias || alias.length < 2) continue;
-    try {
-      const { data } = await axios.get(
-        `https://anilibria.top/api/v1/anime/releases/${alias}`,
-        { timeout: 8_000, headers: { 'User-Agent': 'stremio-anilibria-addon/1.0' } }
-      );
-      if (data?.id) {
-        console.log(`[resolver] Alias lookup "${alias}" → release ${data.id} (${data.name?.english || data.name?.main})`);
-        return data.id;
-      }
-    } catch {
-      // 404 or other – try the next title
-    }
+    if (!alias || alias.length < 2 || seen.has(alias)) continue;
+    seen.add(alias);
+    aliases.push(alias);
+  }
+
+  if (aliases.length === 0) return null;
+
+  // Fire all alias lookups in parallel
+  const results = await Promise.allSettled(
+    aliases.map(alias =>
+      axios.get(`https://anilibria.top/api/v1/anime/releases/${alias}`, {
+        timeout: 8_000,
+        headers: { 'User-Agent': 'stremio-anilibria-addon/1.0' },
+      }).then(({ data }) => {
+        if (data?.id) {
+          console.log(`[resolver] Alias lookup "${alias}" → release ${data.id} (${data.name?.english || data.name?.main})`);
+          return data.id;
+        }
+        return null;
+      }).catch(() => null)
+    )
+  );
+
+  // Return the first successful match (preserves title priority order)
+  for (const r of results) {
+    if (r.status === 'fulfilled' && r.value) return r.value;
   }
   return null;
 }
@@ -294,6 +307,7 @@ async function resolveImdbToAnilibria(imdbId) {
     }
   } catch (err) {
     console.error(`[resolver] Error resolving ${imdbId}:`, err.message);
+    throw err;  // let the stream handler show an error to the user
   }
 
   if (anilibriaId) {
@@ -337,4 +351,9 @@ async function resolveByTitles(titles) {
   return id || null;
 }
 
-module.exports = { resolveImdbToAnilibria, resolveByTitles, clearCache, warmup };
+/** Whether the Fuse.js title index has been built with entries. */
+function isIndexReady() {
+  return indexSize > 0;
+}
+
+module.exports = { resolveImdbToAnilibria, resolveByTitles, clearCache, warmup, isIndexReady };

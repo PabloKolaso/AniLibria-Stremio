@@ -102,7 +102,20 @@ async function streamHandler({ type, id }) {
   console.log(`[streams] Request: type=${type} imdb=${imdbId} s=${season} e=${episode}`);
 
   // Step 1: resolve IMDB ID to Anilibria release ID
-  const anilibriaId = await resolver.resolveImdbToAnilibria(imdbId);
+  let anilibriaId;
+  try {
+    anilibriaId = await resolver.resolveImdbToAnilibria(imdbId);
+  } catch (err) {
+    console.error(`[streams] Resolution error for ${imdbId}:`, err.message);
+    return {
+      streams: [{
+        name: 'AniLibria\n\u26A0 Error',
+        description: `Temporary error looking up this anime.\n${err.message}\nTry again in a moment.`,
+        externalUrl: 'https://anilibria.top',
+      }],
+    };
+  }
+
   if (!anilibriaId) {
     console.log(`[streams] No Anilibria match for ${imdbId}`);
     return { streams: [] };
@@ -124,7 +137,13 @@ async function streamHandler({ type, id }) {
       };
     }
     console.error(`[streams] Failed to fetch release ${anilibriaId}:`, err.message);
-    return { streams: [] };
+    return {
+      streams: [{
+        name: 'AniLibria\n\u26A0 Error',
+        description: `Could not load episode data.\n${err.message}\nTry again in a moment.`,
+        externalUrl: 'https://anilibria.top',
+      }],
+    };
   }
 
   const episodes = release?.episodes;

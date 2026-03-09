@@ -98,4 +98,9 @@ async function getImdbByAnilist(anilistId) {
   return byAnilist.get(anilistId) || null;
 }
 
-module.exports = { load, getByImdb, getImdbByMal, getImdbByAnilist };
+/** Number of IMDB entries currently loaded. */
+function getMappingSize() {
+  return byImdb.size;
+}
+
+module.exports = { load, getByImdb, getImdbByMal, getImdbByAnilist, getMappingSize };

@@ -9,10 +9,12 @@ const { addonBuilder, getRouter } = require('stremio-addon-sdk');
 const express = require('express');
 const cors    = require('cors');
 
+const axios = require('axios');
+
 const manifest          = require('./manifest');
 const mappingCache      = require('./mapping/cache');
 const { streamHandler } = require('./handlers/streams');
-const { warmup }        = require('./bridge/resolver');
+const { warmup, isIndexReady } = require('./bridge/resolver');
 
 const PORT = process.env.PORT || 7000;
 
@@ -56,18 +58,49 @@ async function start() {
     next();
   });
 
-  app.use('/', getRouter(addonInterface));
+  // Health endpoint (before SDK router so it doesn't intercept)
+  app.get('/health', (req, res) => {
+    res.json({
+      status: 'ok',
+      uptime: Math.round(process.uptime()),
+      mappingLoaded: mappingCache.getMappingSize() > 0,
+      indexReady: isIndexReady(),
+    });
+  });
 
-  // Only expose debug routes in development
-  if (process.env.NODE_ENV !== 'production') {
-    app.use('/', debugRouter);
-  }
-  app.listen(PORT);
+  app.use('/', getRouter(addonInterface));
+  app.use('/', debugRouter);
+
+  const server = app.listen(PORT);
 
   const host = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
   console.log(`\nAddon running at: ${host}/manifest.json`);
   console.log(`Debug page:       ${host}/debug`);
+  console.log(`Health check:     ${host}/health`);
   console.log('Install in Stremio by opening the manifest URL above.\n');
+
+  // Self-ping keep-alive to prevent Render free tier spin-down (15 min idle)
+  let pingTimer = null;
+  if (process.env.RENDER_EXTERNAL_URL) {
+    const PING_INTERVAL = 12 * 60 * 1000; // 12 minutes
+    pingTimer = setInterval(() => {
+      axios.get(`${process.env.RENDER_EXTERNAL_URL}/health`)
+        .then(() => console.log('[keepalive] Ping OK'))
+        .catch(err => console.warn('[keepalive] Ping failed:', err.message));
+    }, PING_INTERVAL);
+    console.log('[keepalive] Self-ping enabled (every 12 min)');
+  }
+
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('[shutdown] SIGTERM received, closing server...');
+    if (pingTimer) clearInterval(pingTimer);
+    server.close(() => {
+      console.log('[shutdown] Server closed.');
+      process.exit(0);
+    });
+    setTimeout(() => process.exit(0), 5000);
+  });
 
   // Pre-warm the Anilibria title index in the background
   warmup();

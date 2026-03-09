@@ -178,7 +178,7 @@ Copyright (c) 2025-2026 **Matvei Stupachenko**
 
 This project is licensed under the [MIT License](LICENSE). You are free to use, modify, and distribute this software, provided the original copyright notice is retained in all copies.
 
-**Third-Party API Notice:** This addon uses the [AniLibria](https://anilibria.top) public REST API to retrieve anime stream data. It is an independent, unofficial project and is not affiliated with, endorsed by, or sponsored by AniLibria. All content accessed through the API remains the property of its respective copyright holders.
+**Third-Party API Notice:** This addon uses the [AniLibria](https://anilibria.top) public REST API, the [AniList](https://anilist.co) GraphQL API, and the [Fribb anime-lists](https://github.com/Fribb/anime-lists) mapping dataset. It is an independent, unofficial project and is not affiliated with, endorsed by, or sponsored by AniLibria, AniList, or Fribb. All content accessed through these APIs remains the property of its respective copyright holders.
 
 ---
 ---
@@ -345,4 +345,4 @@ Copyright (c) 2025-2026 **Matvei Stupachenko**
 
 Проект распространяется по лицензии [MIT](LICENSE). Разрешается свободное использование, изменение и распространение программного обеспечения при условии сохранения оригинального уведомления об авторских правах.
 
-**Уведомление о сторонних API:** Этот аддон использует публичный REST API [AniLibria](https://anilibria.top) для получения ссылок на стримы. Проект является независимым и не связан с AniLibria, не одобрен и не спонсируется ею. Все материалы, доступные через API, остаются собственностью их правообладателей.
+**Уведомление о сторонних API:** Этот аддон использует публичный REST API [AniLibria](https://anilibria.top), GraphQL API [AniList](https://anilist.co) и набор данных [Fribb anime-lists](https://github.com/Fribb/anime-lists). Проект является независимым и не связан с AniLibria, AniList или Fribb, не одобрен и не спонсируется ими. Все материалы, доступные через эти API, остаются собственностью их правообладателей.

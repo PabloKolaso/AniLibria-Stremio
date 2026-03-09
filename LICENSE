@@ -24,12 +24,22 @@ SOFTWARE.
 
 THIRD-PARTY API NOTICE
 
-This software uses the AniLibria public REST API (https://anilibria.top/api/v1/)
-to retrieve anime stream URLs. This project is an independent, unofficial addon
-and is not affiliated with, endorsed by, or sponsored by AniLibria or any of
-its operators. All anime content, stream data, and related media accessed
-through the AniLibria API remain the property of their respective copyright
-holders. The author of this software makes no claim of ownership over any
-third-party content delivered via the API.
+This software uses the following third-party APIs and data sources:
 
-Use of the AniLibria API is subject to AniLibria's own terms of service.
+1. AniLibria public REST API (https://anilibria.top/api/v1/)
+   Used to retrieve anime stream URLs.
+
+2. AniList GraphQL API (https://graphql.anilist.co)
+   Used to retrieve canonical anime titles by AniList ID.
+
+3. Fribb anime-lists (https://github.com/Fribb/anime-lists)
+   Used to map IMDB IDs to AniList, MAL, and AniDB IDs.
+
+This project is an independent, unofficial addon and is not affiliated with,
+endorsed by, or sponsored by AniLibria, AniList, Fribb, or any of their
+operators. All anime content, stream data, and related media accessed through
+these APIs remain the property of their respective copyright holders. The
+author of this software makes no claim of ownership over any third-party
+content or data delivered via these APIs.
+
+Use of each API is subject to its respective terms of service.

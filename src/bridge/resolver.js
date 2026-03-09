@@ -14,6 +14,20 @@
 const Fuse = require('fuse.js');
 const NodeCache = require('node-cache');
 
+// ─── Title normalization helpers ─────────────────────────────────────────────
+
+const STOP_WORDS = new Set(['the', 'a', 'an', 'of', 'in', 'on', 'and', 'or', 'no', 'wo', 'ga', 'wa']);
+
+/** Strip special chars, lowercase, split into words */
+function normalizeWords(str) {
+  return str.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+}
+
+/** Return first word that is ≥3 chars and not a stop word */
+function firstSignificantWord(str) {
+  return normalizeWords(str).find(w => w.length >= 3 && !STOP_WORDS.has(w)) || null;
+}
+
 const mappingCache = require('../mapping/cache');
 const anilibria    = require('../api/anilibria');
 const anilist      = require('../api/anilist');
@@ -43,12 +57,14 @@ async function getTitleIndex() {
     try {
       for await (const page of anilibria.allReleases(50)) {
         for (const release of page) {
+          const alias = release.alias || '';
           docs.push({
-            id:     release.id,
-            alias:  release.alias || '',
-            en:     release.name?.english    || '',
-            ru:     release.name?.main       || '',
-            alt:    release.name?.alternative || '',
+            id:         release.id,
+            alias,
+            aliasWords: alias.replace(/-/g, ' '),   // "one-piece" → "one piece" for Fuse
+            en:         release.name?.english    || '',
+            ru:         release.name?.main       || '',
+            alt:        release.name?.alternative || '',
           });
         }
       }
@@ -62,10 +78,11 @@ async function getTitleIndex() {
 
     return new Fuse(docs, {
       keys: [
-        { name: 'en',    weight: 2 },
-        { name: 'alias', weight: 1.5 },
-        { name: 'alt',   weight: 1 },
-        { name: 'ru',    weight: 0.5 },
+        { name: 'en',         weight: 2   },
+        { name: 'aliasWords', weight: 1.5 },  // spaced version: "one piece" matches "One Piece"
+        { name: 'alias',      weight: 1   },
+        { name: 'alt',        weight: 1   },
+        { name: 'ru',         weight: 0.5 },
       ],
       threshold: 0.25,
       includeScore: true,
@@ -83,11 +100,12 @@ async function getTitleIndex() {
 
 /**
  * Convert a title string to a URL-friendly alias (slug).
- * e.g. "ONE PIECE" → "one-piece", "Hunter x Hunter" → "hunter-x-hunter"
+ * e.g. "ONE PIECE" → "one-piece", "JoJo's" → "jojos-..."
  */
 function toAlias(title) {
   return title
     .toLowerCase()
+    .replace(/[''`]/g, '')           // strip apostrophes: "jojo's" → "jojos"
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 }
@@ -133,8 +151,6 @@ async function tryAliasList(titles) {
  * @returns {number|null}
  */
 async function tryAnilibriaSearch(titles) {
-  const STOP = new Set(['the', 'a', 'an', 'of', 'in', 'on', 'and', 'or', 'no', 'wo', 'ga', 'wa']);
-
   for (const title of titles) {
     if (!title || title.length < 3) continue;
     // Skip purely non-Latin titles (Japanese native, etc.) — Anilibria search works best with Latin
@@ -151,14 +167,12 @@ async function tryAnilibriaSearch(titles) {
 
     const top = results[0];
     const candidateName = (top.name?.english || top.name?.main || '').toLowerCase();
-    const candidateFirstWord = candidateName.split(/\s+/).filter(w => w.length > 1)[0] || '';
+    const candidateFirstWord = normalizeWords(candidateName).filter(w => w.length >= 2)[0] || '';
 
-    const queryFirstWord = title.toLowerCase().split(/\s+/)
-      .filter(w => w.length > 3 && !STOP.has(w))[0];
-
+    const queryFirstWord = firstSignificantWord(title);
     if (!queryFirstWord) continue;
 
-    if (candidateFirstWord.startsWith(queryFirstWord.slice(0, 5))) {
+    if (candidateFirstWord.startsWith(queryFirstWord.slice(0, 4))) {
       console.log(`[resolver] API search "${title}" → release ${top.id} (${top.name?.english || top.name?.main})`);
       return top.id;
     }
@@ -197,17 +211,13 @@ async function findInIndex(titleVariants) {
     // Sanity check: the FIRST significant word of the query must be the FIRST word
     // of the matched title. This prevents "Attack on Titan" from matching something
     // like "Nagatoro 2nd Attack" just because both contain the word "attack".
-    const matchedFirstWord = (best.en || best.alias || '').toLowerCase().split(/\s+/)[0] || '';
-
-    const STOP = new Set(['the', 'a', 'an', 'of', 'in', 'on', 'and', 'or', 'no', 'wo', 'ga', 'wa']);
+    const matchedFirstWord = normalizeWords(best.en || best.aliasWords || best.alias || '')[0] || '';
 
     // Collect the FIRST meaningful word from EACH title variant.
     // Any one of them matching the result's first word is enough.
-    const queryFirstWords = titleVariants
-      .map(t => t.toLowerCase().split(/\s+/).filter(w => w.length > 3 && !STOP.has(w))[0])
-      .filter(Boolean);
+    const queryFirstWords = titleVariants.map(firstSignificantWord).filter(Boolean);
 
-    const firstWordMatch = queryFirstWords.some(w => matchedFirstWord.startsWith(w.slice(0, 5)));
+    const firstWordMatch = queryFirstWords.some(w => matchedFirstWord.startsWith(w.slice(0, 4)));
 
     if (firstWordMatch) {
       console.log(`[resolver] Fuse match "${best.en || best.ru}" (score ${bestScore.toFixed(3)})`);
@@ -253,6 +263,12 @@ async function resolveImdbToAnilibria(imdbId) {
         const results = await anilist.searchAnime(`mal:${ids.mal_id}`).catch(() => []);
         const match = results.find(r => r.idMal === ids.mal_id);
         if (match) titleVariants = anilist.collectTitles(match);
+      }
+
+      // Reorder: put rōmaji first — Anilibria catalogs by Japanese romanized names.
+      // collectTitles returns [english, romaji, native, ...synonyms]; swap 0 and 1.
+      if (titleVariants.length >= 2 && titleVariants[1]) {
+        titleVariants = [titleVariants[1], titleVariants[0], ...titleVariants.slice(2)];
       }
     }
 

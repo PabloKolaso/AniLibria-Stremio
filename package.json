@@ -2,6 +2,8 @@
   "name": "stremio-anilibria-addon",
   "version": "1.0.0",
   "description": "Stremio addon for AniLibria - Russian anime dub streams",
+  "author": "Matvei Stupachenko",
+  "license": "MIT",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

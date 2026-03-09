@@ -23,23 +23,51 @@ const resolver     = require('../src/bridge/resolver');
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const TOTAL_ANIME    = 1500;
+const TOTAL_ANIME    = 2000;
 const PAGE_SIZE      = 50;
 const CONCURRENCY    = 5;    // parallel resolver calls
-const PAGE_DELAY_MS  = 400;  // between AniList page fetches
-const RESULTS_FILE   = path.join(__dirname, 'results.txt');
+const PAGE_DELAY_MS  = 700;  // between AniList page fetches (stay under 90 req/min limit)
+const RESULTS_DIR    = __dirname;
 
 // ─── AniList query ───────────────────────────────────────────────────────────
 
 const POPULARITY_QUERY = `
 query ($page: Int, $perPage: Int) {
   Page(page: $page, perPage: $perPage) {
+    pageInfo { hasNextPage }
     media(type: ANIME, sort: POPULARITY_DESC) {
       id
       title { english romaji }
+      synonyms
     }
   }
 }`;
+
+async function fetchAniListPage(page, perPage) {
+  const MAX_RETRIES = 3;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const { data } = await axios.post(
+        'https://graphql.anilist.co',
+        { query: POPULARITY_QUERY, variables: { page, perPage } },
+        { headers: { 'Content-Type': 'application/json' }, timeout: 15_000 }
+      );
+      return data?.data?.Page || null;
+    } catch (err) {
+      const status = err.response?.status;
+      if (status === 429 && attempt < MAX_RETRIES) {
+        const retryAfter = parseInt(err.response?.headers?.['retry-after'] || '60', 10);
+        const waitMs = (retryAfter + 2) * 1000;
+        console.warn(`\n  [429] Rate-limited on page ${page}. Waiting ${retryAfter + 2}s...`);
+        await sleep(waitMs);
+        continue;
+      }
+      console.warn(`\n  [warn] AniList page ${page} failed (attempt ${attempt}): ${err.message}`);
+      return null;
+    }
+  }
+  return null;
+}
 
 async function fetchPopularAnime(totalCount) {
   const anime = [];
@@ -47,18 +75,11 @@ async function fetchPopularAnime(totalCount) {
 
   for (let page = 1; page <= pages; page++) {
     process.stdout.write(`  Fetching AniList page ${page}/${pages}...\r`);
-    try {
-      const { data } = await axios.post(
-        'https://graphql.anilist.co',
-        { query: POPULARITY_QUERY, variables: { page, perPage: PAGE_SIZE } },
-        { headers: { 'Content-Type': 'application/json' }, timeout: 15_000 }
-      );
-      const items = data?.data?.Page?.media || [];
-      anime.push(...items);
-      if (items.length < PAGE_SIZE) break;
-    } catch (err) {
-      console.warn(`\n  [warn] AniList page ${page} failed: ${err.message}`);
-    }
+    const pageResult = await fetchAniListPage(page, PAGE_SIZE);
+    if (!pageResult) continue;
+    const items = pageResult.media || [];
+    anime.push(...items);
+    if (!pageResult.pageInfo?.hasNextPage) break;
     if (page < pages) await sleep(PAGE_DELAY_MS);
   }
 
@@ -100,6 +121,7 @@ async function main() {
   // Step 1: Load Fribb IMDB mapping (needed for imdbId reporting)
   console.log('Loading Fribb IMDB mapping...');
   await mappingCache.load();
+  console.log(`  Loaded ${mappingCache.getMappingSize()} IMDB mappings.`);
 
   // Step 2: Warm up Anilibria title index in background (helps Fuse.js step)
   console.log('Starting Anilibria index warmup (background)...');
@@ -117,12 +139,13 @@ async function main() {
   let checked = 0;
 
   const tasks = animeList.map((anime, idx) => async () => {
-    const english = anime.title?.english || '';
-    const romaji  = anime.title?.romaji  || '';
-    const display = english || romaji || `AniList#${anime.id}`;
+    const english  = anime.title?.english || '';
+    const romaji   = anime.title?.romaji  || '';
+    const synonyms = anime.synonyms || [];
+    const display  = english || romaji || `AniList#${anime.id}`;
 
-    // Titles ordered romaji-first (Anilibria catalogs by Japanese romanized names)
-    const titles = [romaji, english].filter(Boolean);
+    // Titles ordered romaji-first, with synonyms appended — mirrors collectTitles() in the real addon
+    const titles = [romaji, english, ...synonyms].filter(Boolean);
 
     // IMDB ID is informational only — shows addon compatibility
     let imdbId = null;
@@ -166,26 +189,37 @@ async function main() {
   const output = lines.join('\n');
   console.log(output);
 
+  const now = new Date();
+  const dateStr = now.toLocaleString('en-GB', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false, timeZoneName: 'short',
+  });
+
   const summary = [
     '',
     '─'.repeat(100),
     `SUMMARY: ${animeList.length} checked  |  ✓ ${found} found  |  ✗ ${missing} missing`,
+    `Generated: ${dateStr}`,
     '─'.repeat(100),
   ].join('\n');
 
   console.log(summary);
 
   // Step 6: Save to file
+  const ts = now.toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, 19);
+  const resultsFile = path.join(RESULTS_DIR, `results_${ts}.txt`);
+
   const fileContent = [
     `Stremio AniLibria — Bulk Check Results`,
-    `Generated: ${new Date().toISOString()}`,
+    `Generated: ${now.toISOString()}`,
     '─'.repeat(100),
     output,
     summary,
   ].join('\n');
 
-  fs.writeFileSync(RESULTS_FILE, fileContent, 'utf8');
-  console.log(`\nResults saved to: ${RESULTS_FILE}`);
+  fs.writeFileSync(resultsFile, fileContent, 'utf8');
+  console.log(`\nResults saved to: ${resultsFile}`);
 
   process.exit(0);
 }

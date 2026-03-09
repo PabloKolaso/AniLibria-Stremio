@@ -1,0 +1,2008 @@
+Stremio AniLibria — Bulk Check Results
+Generated: 2026-03-09T20:46:52.599Z
+────────────────────────────────────────────────────────────────────────────────────────────────────
+✓ FOUND    tt2560140     Attack on Titan                             → anilibria#1410
+✓ FOUND    tt9335498     Demon Slayer: Kimetsu no Yaiba              → anilibria#8325
+✓ FOUND    tt0877057     Death Note                                  → anilibria#5158
+✓ FOUND    tt12343534    JUJUTSU KAISEN                              → anilibria#8789
+✓ FOUND    tt5626028     My Hero Academia                            → anilibria#2114
+✗ MISSING  tt2098220     Hunter x Hunter (2011)                      → not found in Anilibria
+✓ FOUND    tt4508902     One-Punch Man                               → anilibria#1210
+✓ FOUND    tt3741634     Tokyo Ghoul                                 → anilibria#432
+✗ MISSING  tt2560140     Attack on Titan Season 2                    → not found in Anilibria
+✗ MISSING  tt0388629     ONE PIECE                                   → not found in Anilibria
+✓ FOUND    tt1355642     Fullmetal Alchemist: Brotherhood            → anilibria#9528
+✓ FOUND    tt0409591     Naruto                                      → anilibria#413
+✓ FOUND    tt2250192     Sword Art Online                            → anilibria#4857
+✓ FOUND    tt5311514     Your Name.                                  → anilibria#6826
+✗ MISSING  tt5323662     A Silent Voice                              → not found in Anilibria
+✗ MISSING  tt2560140     Attack on Titan Season 3                    → not found in Anilibria
+✓ FOUND    tt5626028     My Hero Academia Season 2                   → anilibria#3950
+✓ FOUND    tt8788458     The Promised Neverland                      → anilibria#8040
+✓ FOUND    tt2560140     Attack on Titan Final Season                → anilibria#1410
+✗ MISSING  tt3837246     Assassination Classroom                     → not found in Anilibria
+✓ FOUND    tt5897304     Mob Psycho 100                              → anilibria#2622
+✗ MISSING  tt2560140     Attack on Titan Season 3 Part 2             → not found in Anilibria
+✗ MISSING  tt3895150     Your lie in April                           → not found in Anilibria
+✓ FOUND    tt5249462     ERASED                                      → anilibria#1749
+✓ FOUND    tt0988824     Naruto: Shippuden                           → anilibria#413
+✓ FOUND    tt5626028     My Hero Academia Season 3                   → anilibria#6191
+✓ FOUND    tt5607616     Re:ZERO -Starting Life in Another World-    → anilibria#9783
+✗ MISSING  tt13616990    Chainsaw Man                                → not found in Anilibria
+✓ FOUND    tt1910272     Steins;Gate                                 → anilibria#8674
+✓ FOUND    tt3398540     HAIKYU!!                                    → anilibria#1337
+✓ FOUND    tt8993398     Rascal Does Not Dream of Bunny Girl Senpai  → anilibria#7462
+✓ FOUND    tt7441658     Black Clover                                → anilibria#5255
+✓ FOUND    tt13706018    SPY x FAMILY                                → anilibria#9161
+✓ FOUND    tt9522300     Kaguya-sama: Love is War                    → anilibria#8041
+✓ FOUND    tt9679542     Dr. STONE                                   → anilibria#8398
+✓ FOUND    tt3225270     Noragami                                    → anilibria#485
+✓ FOUND    tt3431758     No Game, No Life                            → anilibria#6163
+✓ FOUND    tt7078180     Violet Evergarden                           → anilibria#5620
+✗ MISSING  tt1279024     Toradora!                                   → not found in Anilibria
+✗ MISSING  tt3742982     Akame ga Kill!                              → not found in Anilibria
+✓ FOUND    tt5626028     My Hero Academia Season 4                   → anilibria#8480
+✓ FOUND    tt3909224     The Seven Deadly Sins                       → anilibria#1908
+✓ FOUND    tt10233448    Vinland Saga                                → anilibria#8424
+✓ FOUND    tt13103134    Horimiya                                    → anilibria#8862
+✓ FOUND    tt5370118     KONOSUBA -God's blessing on this wonderful  → anilibria#10024
+✓ FOUND    tt11032374    Demon Slayer -Kimetsu no Yaiba- The Movie:  → anilibria#9103
+✗ MISSING  tt3358020     Parasyte -the maxim-                        → not found in Anilibria
+✓ FOUND    tt7865090     DARLING in the FRANXX                       → anilibria#5692
+✓ FOUND    tt0434665     Bleach                                      → anilibria#8452
+✓ FOUND    tt0994314     Code Geass: Lelouch of the Rebellion        → anilibria#10151
+✗ MISSING  tt0112159     Neon Genesis Evangelion                     → not found in Anilibria
+✗ MISSING  tt0245429     Spirited Away                               → not found in Anilibria
+✗ MISSING  tt9307686     Fire Force                                  → not found in Anilibria
+✗ MISSING  tt4279012     Death Parade                                → not found in Anilibria
+✓ FOUND    tt2359704     JoJo's Bizarre Adventure (TV)               → anilibria#8586
+✓ FOUND    tt9335498     Demon Slayer: Kimetsu no Yaiba Entertainme  → anilibria#9093
+✓ FOUND    tt4508902     One-Punch Man Season 2                      → anilibria#8335
+✓ FOUND    tt1799631     Blue Exorcist                               → anilibria#3464
+✓ FOUND    tt0213338     Cowboy Bebop                                → anilibria#8443
+✓ FOUND    tt7131720     Kakegurui                                   → anilibria#4575
+✓ FOUND    tt12343534    JUJUTSU KAISEN Season 2                     → anilibria#9470
+✓ FOUND    tt2250192     Sword Art Online II                         → anilibria#8644
+✓ FOUND    tt9529546     The Rising of the Shield Hero               → anilibria#8030
+✓ FOUND    tt5897304     Mob Psycho 100 II                           → anilibria#2622
+✓ FOUND    tt1639109     Angel Beats!                                → anilibria#495
+✓ FOUND    tt13196080    Tokyo Revengers                             → anilibria#8965
+✓ FOUND    tt9054364     That Time I Got Reincarnated as a Slime     → anilibria#10154
+✓ FOUND    tt9522300     Kaguya-sama: Love is War?                   → anilibria#8041
+✓ FOUND    tt2069441     The Future Diary                            → anilibria#8431
+✗ MISSING  tt13293588    Mushoku Tensei: Jobless Reincarnation       → not found in Anilibria
+✗ MISSING  tt4574736     Charlotte                                   → not found in Anilibria
+✓ FOUND    tt7263328     Classroom of the Elite                      → anilibria#4578
+✗ MISSING  tt2560140     Attack on Titan Final Season Part 2         → not found in Anilibria
+✓ FOUND    tt22248376    Frieren: Beyond Journey’s End               → anilibria#9542
+✓ FOUND    tt5679720     Bungo Stray Dogs                            → anilibria#2122
+✓ FOUND    tt3114390     Kill la Kill                                → anilibria#823
+✓ FOUND    tt14331144    JUJUTSU KAISEN 0                            → anilibria#9313
+✓ FOUND    tt5626028     My Hero Academia Season 5                   → anilibria#8948
+✓ FOUND    tt3741634     Tokyo Ghoul √A                              → anilibria#433
+✓ FOUND    tt4731072     Food Wars!                                  → anilibria#421
+✓ FOUND    tt21209876    Solo Leveling                               → anilibria#9600
+✓ FOUND    tt3398540     HAIKYU!! 2nd Season                         → anilibria#1337
+✓ FOUND    tt7222086     Made in Abyss                               → anilibria#4644
+✗ MISSING  tt1913273     Anohana: The Flower We Saw That Day         → not found in Anilibria
+✓ FOUND    tt2622982     The Devil is a Part-Timer!                  → anilibria#8470
+✓ FOUND    tt4869896     Overlord                                    → anilibria#774
+✓ FOUND    tt15765670    My Dress-Up Darling                         → anilibria#9122
+✓ FOUND    tt4728568     Is It Wrong to Try to Pick Up Girls in a D  → anilibria#9786
+✓ FOUND    tt2176165     Another                                     → anilibria#660
+✓ FOUND    tt1214085     Soul Eater                                  → anilibria#656
+✗ MISSING  tt1528406     Fairy Tail                                  → not found in Anilibria
+✓ FOUND    tt5370118     KONOSUBA -God's blessing on this wonderful  → anilibria#9661
+✗ MISSING  tt0948103     Gurren Lagann                               → not found in Anilibria
+✓ FOUND    tt2703720     My Teen Romantic Comedy SNAFU               → anilibria#8679
+✓ FOUND    tt9458304     Dororo                                      → anilibria#8034
+✗ MISSING  tt3837246     Assassination Classroom Second Season       → not found in Anilibria
+✓ FOUND    tt3398540     HAIKYU!! 3rd Season                         → anilibria#3052
+✓ FOUND    tt5607616     Re:ZERO -Starting Life in Another World- S  → anilibria#8665
+✓ FOUND    tt7236034     I Want to Eat Your Pancreas                 → anilibria#8292
+✓ FOUND    tt0994314     Code Geass: Lelouch of the Rebellion R2     → anilibria#10151
+✗ MISSING  tt0347149     Howl‘s Moving Castle                        → not found in Anilibria
+✓ FOUND    tt2379308     PSYCHO-PASS                                 → anilibria#9527
+✓ FOUND    tt9335498     Demon Slayer: Kimetsu no Yaiba Swordsmith   → anilibria#9406
+✗ MISSING  -             Devilman Crybaby                            → not found in Anilibria
+✓ FOUND    tt2340841     Hyouka                                      → anilibria#893
+✗ MISSING  tt2051178     Fate/Zero                                   → not found in Anilibria
+✓ FOUND    tt6354518     The Disastrous Life of Saiki K.             → anilibria#8757
+✗ MISSING  tt9426210     Weathering With You                         → not found in Anilibria
+✓ FOUND    tt9335498     Demon Slayer: Kimetsu no Yaiba Mugen Train  → anilibria#9103
+✓ FOUND    tt2321542     Love, Chunibyo & Other Delusions            → anilibria#870
+✓ FOUND    -             Cyberpunk: Edgerunners                      → anilibria#9307
+✓ FOUND    tt30217403    DAN DA DAN                                  → anilibria#9789
+✓ FOUND    tt1480925     Bakemonogatari                              → anilibria#9156
+✓ FOUND    tt2359704     JoJo's Bizarre Adventure: Stardust Crusade  → anilibria#8682
+✓ FOUND    tt12057106    Tower of God                                → anilibria#8606
+✓ FOUND    tt6185782     Miss Kobayashi's Dragon Maid                → anilibria#3542
+✓ FOUND    tt9679542     Dr. STONE: STONE WARS                       → anilibria#8856
+✓ FOUND    tt13911284    Hell’s Paradise                             → anilibria#1225
+✓ FOUND    tt0434706     Monster                                     → anilibria#809
+✓ FOUND    tt8788458     The Promised Neverland Season 2             → anilibria#8893
+✓ FOUND    tt8254880     Wotakoi: Love is Hard for Otaku             → anilibria#6194
+✓ FOUND    tt4584326     Seraph of the End: Vampire Reign            → anilibria#422
+✓ FOUND    tt1773185     Puella Magi Madoka Magica                   → anilibria#3401
+✓ FOUND    tt13706018    SPY x FAMILY Cour 2                         → anilibria#9259
+✓ FOUND    tt3225270     Noragami Aragoto                            → anilibria#834
+✗ MISSING  tt8515016     BANANA FISH                                 → not found in Anilibria
+✗ MISSING  tt12063450    To Your Eternity                            → not found in Anilibria
+✓ FOUND    tt14626352    Komi Can’t Communicate                      → anilibria#9060
+✓ FOUND    tt21030032    Oshi No Ko                                  → anilibria#9420
+✓ FOUND    tt2359704     JoJo's Bizarre Adventure: Diamond is Unbre  → anilibria#7438
+✓ FOUND    tt9304350     Fruits Basket (2019)                        → anilibria#8315
+✓ FOUND    tt11448214    Rent-a-Girlfriend                           → anilibria#8657
+✓ FOUND    tt2230051     High School DxD                             → anilibria#569
+✓ FOUND    tt3741634     Tokyo Ghoul:re                              → anilibria#6089
+✓ FOUND    tt9054364     That Time I Got Reincarnated as a Slime Se  → anilibria#10154
+✗ MISSING  tt15222080    BLUE LOCK                                   → not found in Anilibria
+✓ FOUND    tt9584920     The Quintessential Quintuplets              → anilibria#9642
+✗ MISSING  tt13293588    Mushoku Tensei: Jobless Reincarnation Cour  → not found in Anilibria
+✓ FOUND    tt13718450    86 EIGHTY-SIX                               → anilibria#8964
+✗ MISSING  tt0119698     Princess Mononoke                           → not found in Anilibria
+✓ FOUND    tt8690728     GOBLIN SLAYER                               → anilibria#7440
+✓ FOUND    tt12227418    The God of High School                      → anilibria#8666
+✗ MISSING  tt1118804     Clannad                                     → not found in Anilibria
+✓ FOUND    tt3398540     HAIKYU!! TO THE TOP                         → anilibria#8546
+✓ FOUND    tt1584000     Durarara!!                                  → anilibria#8916
+✓ FOUND    tt2359704     JoJo's Bizarre Adventure: Golden Wind       → anilibria#7438
+✗ MISSING  tt9307686     Fire Force Season 2                         → not found in Anilibria
+✓ FOUND    tt0988818     Gintama                                     → anilibria#5685
+✓ FOUND    tt5607616     Re:ZERO -Starting Life in Another World- S  → anilibria#8665
+✓ FOUND    tt13248076    WONDER EGG PRIORITY                         → anilibria#8891
+✗ MISSING  tt3909224     The Seven Deadly Sins: Revival of the Comm  → not found in Anilibria
+✓ FOUND    tt3613454     Terror in Resonance                         → anilibria#434
+✗ MISSING  tt2359704     JoJo's Bizarre Adventure: Stardust Crusade  → not found in Anilibria
+✓ FOUND    tt2250192     Sword Art Online: Alicization               → anilibria#7439
+✗ MISSING  tt1634208     Maid-Sama!                                  → not found in Anilibria
+✓ FOUND    tt14115938    The Eminence in Shadow                      → anilibria#9265
+✓ FOUND    tt9522300     Kaguya-sama: Love is War -Ultra Romantic-   → anilibria#9159
+✗ MISSING  tt1685401     High School of the Dead                     → not found in Anilibria
+✓ FOUND    tt26743760    The Apothecary Diaries                      → anilibria#9555
+✓ FOUND    tt3114376     Beyond the Boundary                         → anilibria#8295
+✓ FOUND    tt2348803     Kuroko's Basketball                         → anilibria#5216
+✗ MISSING  tt0096283     My Neighbor Totoro                          → not found in Anilibria
+✗ MISSING  tt0423731     Samurai Champloo                            → not found in Anilibria
+✓ FOUND    tt1410218     K-ON!                                       → anilibria#824
+✓ FOUND    tt2296348     The Pet Girl of Sakurasou                   → anilibria#8632
+✗ MISSING  tt0480489     Elfen Lied                                  → not found in Anilibria
+✓ FOUND    tt21209876    Solo Leveling Season 2 -Arise from the Sha  → anilibria#9839
+✓ FOUND    tt2703720     My Teen Romantic Comedy SNAFU TOO!          → anilibria#575
+✓ FOUND    tt3115338     Nisekoi                                     → anilibria#482
+✓ FOUND    tt21209804    MASHLE: MAGIC AND MUSCLES                   → anilibria#9416
+✓ FOUND    tt3621796     Fate/stay night: Unlimited Blade Works      → anilibria#429
+✓ FOUND    tt12635162    DON'T TOY WITH ME, MISS NAGATORO            → anilibria#8952
+✓ FOUND    tt4731072     Food Wars! The Second Plate                 → anilibria#2628
+✓ FOUND    tt0421357     Fullmetal Alchemist                         → anilibria#9528
+✓ FOUND    tt4869896     Overlord II                                 → anilibria#5614
+✓ FOUND    tt11043632    BEASTARS                                    → anilibria#8479
+✓ FOUND    tt1316554     Black Butler                                → anilibria#8681
+✓ FOUND    tt6455986     Saga of Tanya the Evil                      → anilibria#3570
+✗ MISSING  tt2309302     My Little Monster                           → not found in Anilibria
+✗ MISSING  tt3105452     Golden Time                                 → not found in Anilibria
+✓ FOUND    tt12432936    The Misfit of Demon King Academy: History’  → anilibria#8659
+✓ FOUND    tt15975122    Call of the Night                           → anilibria#9217
+✓ FOUND    tt21975436    Kaiju No. 8                                 → anilibria#9663
+✓ FOUND    tt4603222     Plastic Memories                            → anilibria#578
+✓ FOUND    tt3874528     The Irregular at Magic High School          → anilibria#8918
+✓ FOUND    tt10233448    Vinland Saga Season 2                       → anilibria#8424
+✗ MISSING  tt0816397     Ouran High School Host Club                 → not found in Anilibria
+✗ MISSING  tt0121220     Dragon Ball Z                               → not found in Anilibria
+✓ FOUND    tt3398540     HAIKYU!! TO THE TOP Part 2                  → anilibria#8546
+✓ FOUND    tt9054364     That Time I Got Reincarnated as a Slime Se  → anilibria#10154
+✓ FOUND    tt10472884    Rascal Does Not Dream of a Dreaming Girl    → anilibria#8841
+✓ FOUND    tt5626028     My Hero Academia Season 6                   → anilibria#9260
+✓ FOUND    tt5857720     ReLIFE                                      → anilibria#2630
+✓ FOUND    tt5897304     Mob Psycho 100 III                          → anilibria#9262
+✗ MISSING  tt1909447     Deadman Wonderland                          → not found in Anilibria
+✓ FOUND    tt9335498     Demon Slayer: Kimetsu no Yaiba Hashira Tra  → anilibria#9660
+✗ MISSING  tt0983213     5 Centimeters per Second                    → not found in Anilibria
+✗ MISSING  tt2591814     The Garden of Words                         → not found in Anilibria
+✓ FOUND    tt17158756    BOCCHI THE ROCK!                            → anilibria#9293
+✗ MISSING  tt0169858     Neon Genesis Evangelion: The End of Evange  → not found in Anilibria
+✗ MISSING  tt0962826     Black Lagoon                                → not found in Anilibria
+✗ MISSING  tt0500092     Serial Experiments Lain                     → not found in Anilibria
+✗ MISSING  tt2051178     Fate/Zero Season 2                          → not found in Anilibria
+✓ FOUND    tt7326322     The Ancient Magus' Bride                    → anilibria#5149
+✗ MISSING  tt4917066     Prison School                               → not found in Anilibria
+✓ FOUND    tt3592708     Blue Spring Ride                            → anilibria#414
+✓ FOUND    tt1745240     Kimi ni Todoke: From Me to You              → anilibria#8697
+✓ FOUND    tt7131720     Kakegurui xx                                → anilibria#4575
+✓ FOUND    tt7263328     Classroom of the Elite Season 2             → anilibria#9601
+✓ FOUND    tt2575684     Date A Live                                 → anilibria#8710
+✓ FOUND    tt2122656     Guilty Crown                                → anilibria#5325
+✓ FOUND    tt4869896     Overlord III                                → anilibria#6830
+✗ MISSING  tt2098308     Nichijou - My Ordinary Life                 → not found in Anilibria
+✓ FOUND    tt5679720     Bungo Stray Dogs 2                          → anilibria#8855
+✓ FOUND    tt4728568     Is It Wrong to Try to Pick Up Girls in a D  → anilibria#3853
+✓ FOUND    tt10777610    Toilet-bound Hanako-kun                     → anilibria#8556
+✗ MISSING  tt0156887     Perfect Blue                                → not found in Anilibria
+✓ FOUND    tt9529546     The Rising of the Shield Hero Season 2      → anilibria#9158
+✓ FOUND    tt9239552     KONOSUBA -God's blessing on this wonderful  → anilibria#9661
+✓ FOUND    tt12311976    TONIKAWA: Over The Moon For You             → anilibria#8806
+✗ MISSING  tt13129190    SK8 the Infinity                            → not found in Anilibria
+✓ FOUND    tt5100366     Chivalry of a Failed Knight                 → anilibria#1243
+✓ FOUND    tt2942218     Log Horizon                                 → anilibria#8439
+✓ FOUND    tt6402190     Masamune-kun's Revenge                      → anilibria#3465
+✗ MISSING  tt13293588    Mushoku Tensei: Jobless Reincarnation Seas  → not found in Anilibria
+✓ FOUND    tt5839732     Orange                                      → anilibria#2645
+✗ MISSING  tt6112556     Yuri!!! on ICE                              → not found in Anilibria
+✗ MISSING  tt2902582     Danganronpa: The Animation                  → not found in Anilibria
+✓ FOUND    tt3741634     Tokyo Ghoul:re 2                            → anilibria#6089
+✗ MISSING  -             Attack on Titan Final Season THE FINAL CHA  → not found in Anilibria
+✓ FOUND    tt2425098     Magi: The Labyrinth of Magic                → anilibria#9458
+✓ FOUND    tt11680468    Great Pretender                             → anilibria#8654
+✓ FOUND    tt5914996     No Game, No Life Zero                       → anilibria#6163
+✓ FOUND    tt4731072     Food Wars! The Third Plate                  → anilibria#5150
+✗ MISSING  tt0088509     Dragon Ball                                 → not found in Anilibria
+✓ FOUND    tt4379632     Blood Blockade Battlefront                  → anilibria#438
+✗ MISSING  tt0094625     Akira                                       → not found in Anilibria
+✓ FOUND    tt8086718     Grand Blue Dreaming                         → anilibria#8721
+✓ FOUND    tt25811262    Zom 100: Bucket List of the Dead            → anilibria#9484
+✓ FOUND    tt6342474     Boruto: Naruto Next Generations             → anilibria#3996
+✓ FOUND    tt3615002     Monthly Girls' Nozaki-kun                   → anilibria#7309
+✗ MISSING  tt1118804     Clannad: After Story                        → not found in Anilibria
+✓ FOUND    tt7745068     My Hero Academia: Two Heroes                → anilibria#8393
+✓ FOUND    tt9584920     The Quintessential Quintuplets 2            → anilibria#8859
+✓ FOUND    tt13706018    SPY x FAMILY Season 2                       → anilibria#9535
+✓ FOUND    tt5514358     Steins;Gate 0                               → anilibria#6140
+✓ FOUND    tt9817980     Domestic Girlfriend                         → anilibria#8043
+✓ FOUND    tt13409432    Ranking of Kings                            → anilibria#9072
+✓ FOUND    tt10431290    Arifureta: From Commonplace to World's Str  → anilibria#8395
+✓ FOUND    tt8670784     Angels of Death                             → anilibria#6808
+✓ FOUND    tt2703720     My Teen Romantic Comedy SNAFU Climax!       → anilibria#8671
+✓ FOUND    tt2250192     Sword Art Online: Alicization - War of Und  → anilibria#8670
+✓ FOUND    tt3957196     Yona of the Dawn                            → anilibria#384
+✓ FOUND    tt6074794     March comes in like a lion                  → anilibria#3055
+✓ FOUND    tt15686254    Summer Time Rendering                       → anilibria#9174
+✗ MISSING  tt4644488     Dragon Ball Super                           → not found in Anilibria
+✓ FOUND    tt10479420    given                                       → anilibria#8430
+✓ FOUND    -             FLCL                                        → anilibria#6759
+✓ FOUND    tt8673610     Cells at Work!                              → anilibria#6835
+✓ FOUND    tt21621494    Delicious in Dungeon                        → anilibria#9612
+✓ FOUND    tt3621796     Fate/stay night: Unlimited Blade Works 2nd  → anilibria#429
+✓ FOUND    tt16755706    Lycoris Recoil                              → anilibria#9233
+✓ FOUND    tt14641098    The Case Study of Vanitas                   → anilibria#9028
+✓ FOUND    tt4967674     SHIMONETA: A Boring World Where the Concep  → anilibria#8733
+✓ FOUND    tt5225712     Kiznaiver                                   → anilibria#2110
+✓ FOUND    tt22817632    Tengoku Daimakyo                            → anilibria#9439
+✗ MISSING  tt32612521    Gachiakuta                                  → not found in Anilibria
+✓ FOUND    tt15529074    Shikimori's Not Just a Cutie                → anilibria#9163
+✓ FOUND    tt3909224     The Seven Deadly Sins: Imperial Wrath of t  → anilibria#8500
+✓ FOUND    tt0810705     NANA                                        → anilibria#9315
+✗ MISSING  tt0816407     The Melancholy of Haruhi Suzumiya           → not found in Anilibria
+✓ FOUND    tt8438524     How NOT to Summon a Demon Lord              → anilibria#6687
+✓ FOUND    tt5839706     91 Days                                     → anilibria#2621
+✗ MISSING  tt0095327     Grave of the Fireflies                      → not found in Anilibria
+✓ FOUND    tt5679720     Bungo Stray Dogs 3                          → anilibria#8307
+✗ MISSING  tt2061702     Into the Forest of Fireflies' Light         → not found in Anilibria
+✓ FOUND    tt3257166     Black Bullet                                → anilibria#505
+✓ FOUND    tt4584326     Seraph of the End: Battle in Nagoya         → anilibria#1211
+✓ FOUND    tt17069148    SAKAMOTO DAYS                               → anilibria#9886
+✓ FOUND    tt30217403    DAN DA DAN Season 2                         → anilibria#9789
+✓ FOUND    tt8652818     Violet Evergarden: the Movie                → anilibria#9147
+✗ MISSING  tt2140203     Wolf Children                               → not found in Anilibria
+✓ FOUND    tt0857297     Welcome to the N-H-K                        → anilibria#638
+✗ MISSING  tt7155052     Tsuredure Children                          → not found in Anilibria
+✓ FOUND    tt2230051     High School DxD NEW                         → anilibria#570
+✓ FOUND    tt4728568     Is It Wrong to Try to Pick Up Girls in a D  → anilibria#412
+✓ FOUND    tt5544384     Sword Art Online the Movie: Ordinal Scale   → anilibria#5162
+✓ FOUND    tt2180883     Daily Lives of High School Boys             → anilibria#8680
+✓ FOUND    tt6845846     Akashic Records of Bastard Magic Instructo  → anilibria#3949
+✓ FOUND    tt3532752     TRINITY SEVEN                               → anilibria#435
+✓ FOUND    tt5556656     Kabaneri of the Iron Fortress               → anilibria#2112
+✓ FOUND    tt10974198    Cautious Hero: The Hero Is Overpowered but  → anilibria#8509
+✓ FOUND    tt2250192     Sword Art Online: Alicization - War of Und  → anilibria#8670
+✓ FOUND    tt1334722     Baccano!                                    → anilibria#8648
+✓ FOUND    tt0807832     MUSHI-SHI                                   → anilibria#9323
+✓ FOUND    tt4958580     Gate                                        → anilibria#762
+✗ MISSING  tt2250034     Kokoro Connect                              → not found in Anilibria
+✓ FOUND    tt5701624     Haven't You Heard? I'm Sakamoto             → anilibria#2128
+✓ FOUND    tt1308089     A Certain Magical Index                     → anilibria#8675
+✓ FOUND    tt9679542     Dr. STONE New World                         → anilibria#9407
+✗ MISSING  tt0434665     BLEACH: Thousand-Year Blood War             → not found in Anilibria
+✓ FOUND    tt1480925     Nisemonogatari                              → anilibria#8997
+✓ FOUND    tt14061838    The World's Finest Assassin Gets Reincarna  → anilibria#9012
+✓ FOUND    tt16428256    Suzume                                      → anilibria#9520
+✗ MISSING  tt6783056     Eromanga Sensei                             → not found in Anilibria
+✗ MISSING  tt4623042     Yamada and the Seven Witches                → not found in Anilibria
+✓ FOUND    tt2904418     Free! -Iwatobi Swim Club-                   → anilibria#424
+✓ FOUND    tt0774809     Fate/stay night                             → anilibria#429
+✓ FOUND    tt6354518     The Disastrous Life of Saiki K. Season 2    → anilibria#6175
+✓ FOUND    tt11958344    A Whisker Away                              → anilibria#9254
+✓ FOUND    tt9304350     Fruits Basket Season 2                      → anilibria#8595
+✓ FOUND    tt13198632    Higehiro: After Being Rejected, I Shaved a  → anilibria#8958
+✓ FOUND    tt22297712    My Love Story with Yamada-kun at Lv999      → anilibria#9409
+✗ MISSING  tt1528406     Fairy Tail Series 2                         → not found in Anilibria
+✗ MISSING  tt0876563     Ponyo                                       → not found in Anilibria
+✓ FOUND    tt7657580     BLEND-S                                     → anilibria#5224
+✗ MISSING  tt0097814     Kiki's Delivery Service                     → not found in Anilibria
+✓ FOUND    -             JoJo's Bizarre Adventure: STONE OCEAN       → anilibria#9097
+✗ MISSING  tt13718450    86 EIGHTY-SIX Part 2                        → not found in Anilibria
+✓ FOUND    tt2321542     Love, Chunibyo & Other Delusions - Heart T  → anilibria#469
+✓ FOUND    tt6197170     Scum's Wish                                 → anilibria#3467
+✓ FOUND    tt1158671     Spice and Wolf                              → anilibria#9666
+✓ FOUND    tt2348803     Kuroko's Basketball 2                       → anilibria#5216
+✗ MISSING  -             Hellsing Ultimate                           → not found in Anilibria
+✓ FOUND    tt2309320     From the New World                          → anilibria#8371
+✓ FOUND    tt4542568     Snow White with the Red Hair                → anilibria#1751
+✓ FOUND    tt1799631     Blue Exorcist: Kyoto Saga                   → anilibria#3464
+✗ MISSING  tt13293588    Mushoku Tensei: Jobless Reincarnation Seas  → not found in Anilibria
+✓ FOUND    tt5341430     Grimgar of Fantasy and Ash                  → anilibria#1752
+✓ FOUND    tt13851958    Vivy -Fluorite Eye's Song-                  → anilibria#8977
+✓ FOUND    tt12343534    JUJUTSU KAISEN Season 3: The Culling Game   → anilibria#10088
+✓ FOUND    tt0845738     When They Cry                               → anilibria#740
+✓ FOUND    tt11147852    Dorohedoro                                  → anilibria#8543
+✗ MISSING  tt30472557    Chainsaw Man – The Movie: Reze Arc          → not found in Anilibria
+✓ FOUND    tt3612626     Saekano: How to Raise a Boring Girlfriend   → anilibria#4010
+✓ FOUND    tt4731072     Food Wars! The Fourth Plate                 → anilibria#8510
+✓ FOUND    tt0995941     Darker than Black                           → anilibria#8678
+✗ MISSING  tt0808506     The Girl Who Leapt Through Time             → not found in Anilibria
+✓ FOUND    tt11428630    BOFURI: I Don't Want to Get Hurt, so I'll   → anilibria#8555
+✓ FOUND    tt9828724     Wise Man’s Grandchild                       → anilibria#8324
+✗ MISSING  tt12879624    Josee, the Tiger and the Fish               → not found in Anilibria
+✓ FOUND    tt9304350     Fruits Basket The Final Season              → anilibria#8963
+✓ FOUND    tt0318871     Berserk                                     → anilibria#2637
+✗ MISSING  tt6340502     INUYASHIKI LAST HERO                        → not found in Anilibria
+✓ FOUND    tt2230051     High School DxD BorN                        → anilibria#398
+✗ MISSING  tt2377452     K                                           → not found in Anilibria
+✓ FOUND    tt1480925     Monogatari Series Second Season             → anilibria#9156
+✗ MISSING  tt31131295    Alya Sometimes Hides Her Feelings in Russi  → not found in Anilibria
+✓ FOUND    tt14115938    The Eminence in Shadow Season 2             → anilibria#9534
+✓ FOUND    tt4731072     Food Wars! The Third Plate: Totsuki Train   → anilibria#5150
+✓ FOUND    tt11107074    My Hero Academia: Heroes Rising             → anilibria#9206
+✓ FOUND    tt7163698     GAMERS!                                     → anilibria#4577
+✓ FOUND    tt5059866     Himouto! Umaru-chan                         → anilibria#796
+✗ MISSING  tt0290223     InuYasha                                    → not found in Anilibria
+✗ MISSING  tt11405390    Darwin's Game                               → not found in Anilibria
+✓ FOUND    tt29605391    WIND BREAKER                                → anilibria#9674
+✗ MISSING  tt0315008     GTO: Great Teacher Onizuka                  → not found in Anilibria
+✗ MISSING  tt3909224     The Seven Deadly Sins: Signs of A Holy War  → not found in Anilibria
+✓ FOUND    tt26743760    The Apothecary Diaries Season 2             → anilibria#9841
+✗ MISSING  tt0113568     Ghost in the Shell                          → not found in Anilibria
+✓ FOUND    tt7808344     Teasing Master Takagi-san                   → anilibria#5682
+✓ FOUND    tt2425098     Magi: The Kingdom of Magic                  → anilibria#9458
+✓ FOUND    tt4869896     Overlord IV                                 → anilibria#9209
+✗ MISSING  tt7836688     A Place Further Than the Universe           → not found in Anilibria
+✗ MISSING  tt14935960    takt op.Destiny                             → not found in Anilibria
+✓ FOUND    tt4831392     Monster Musume: Everyday Life With Monster  → anilibria#809
+✗ MISSING  tt7742120     Laid-Back Camp                              → not found in Anilibria
+✓ FOUND    tt0251439     Trigun                                      → anilibria#8910
+✓ FOUND    tt1410218     K-ON! Season 2                              → anilibria#824
+✓ FOUND    tt7978710     Sword Art Online Alternative: Gun Gale Onl  → anilibria#6190
+✓ FOUND    tt6352180     Little Witch Academia (TV)                  → anilibria#3558
+✓ FOUND    -             Kizumonogatari Part 1: Tekketsu             → anilibria#8998
+✓ FOUND    tt21209804    MASHLE: MAGIC AND MUSCLES Season 2          → anilibria#9416
+✓ FOUND    tt6185782     Miss Kobayashi's Dragon Maid S              → anilibria#9006
+✓ FOUND    tt5370118     KONOSUBA -God's blessing on this wonderful  → anilibria#9661
+✓ FOUND    tt3115338     Nisekoi:                                    → anilibria#577
+✓ FOUND    tt7263328     Classroom of the Elite Season 3             → anilibria#9601
+✗ MISSING  -             Link Click                                  → not found in Anilibria
+✓ FOUND    tt12117218    The Millionaire Detective - Balance: UNLIM  → anilibria#8596
+✓ FOUND    tt2329220     BTOOOM!                                     → anilibria#877
+✓ FOUND    tt2645500     Haganai                                     → anilibria#872
+✓ FOUND    tt5607616     Re:ZERO -Starting Life in Another World- S  → anilibria#8665
+✓ FOUND    tt2320220     Kamisama Kiss                               → anilibria#5495
+✗ MISSING  tt3950084     Amagi Brilliant Park                        → not found in Anilibria
+✓ FOUND    tt36592690    The Fragrant Flower Blooms With Dignity     → anilibria#9966
+✓ FOUND    tt5626028     My Hero Academia Season 7                   → anilibria#9710
+✓ FOUND    tt28776190    Shangri-La Frontier                         → anilibria#9562
+✓ FOUND    tt21030032    Oshi no Ko Season 2                         → anilibria#9420
+✓ FOUND    tt12331342    Akudama Drive                               → anilibria#8771
+✗ MISSING  tt14626352    Komi Can't Communicate Part 2               → not found in Anilibria
+✓ FOUND    tt10068916    Made in Abyss: Dawn of the Deep Soul        → anilibria#8926
+✓ FOUND    tt2348803     Kuroko's Basketball 3                       → anilibria#5216
+✓ FOUND    tt9054364     That Time I Got Reincarnated as a Slime Se  → anilibria#10154
+✓ FOUND    tt14271890    Mieruko-chan                                → anilibria#9066
+✓ FOUND    tt21210326    Tomo-chan Is a Girl!                        → anilibria#9338
+✓ FOUND    tt7790776     Land of the Lustrous                        → anilibria#5228
+✓ FOUND    tt11328872    In/Spectre                                  → anilibria#8559
+✗ MISSING  -             Attack on Titan Final Season THE FINAL CHA  → not found in Anilibria
+✗ MISSING  tt0185133     Yu Yu Hakusho: Ghostfiles                   → not found in Anilibria
+✗ MISSING  tt4219258     The Testament of Sister New Devil           → not found in Anilibria
+✓ FOUND    -             The Way of the Househusband                 → anilibria#9001
+✓ FOUND    tt6472710     Tsukigakirei                                → anilibria#3989
+✓ FOUND    tt13311344    TSUKIMICHI -Moonlit Fantasy-                → anilibria#9015
+✓ FOUND    -             Demon Slayer: Kimetsu no Yaiba Infinity Ca  → anilibria#10144
+✓ FOUND    tt11034066    Welcome to Demon School! Iruma-kun          → anilibria#8498
+✓ FOUND    tt22248376    Frieren: Beyond Journey’s End Season 2      → anilibria#10085
+✓ FOUND    tt15830678    Tomodachi Game                              → anilibria#9177
+✓ FOUND    tt9054354     ZOMBIE LAND SAGA                            → anilibria#7474
+✓ FOUND    tt4616700     My Love Story!!                             → anilibria#489
+✓ FOUND    tt1515996     A Certain Scientific Railgun                → anilibria#8920
+✓ FOUND    tt15765670    My Dress-Up Darling Season 2                → anilibria#9964
+✗ MISSING  tt2309312     Say "I love you".                           → not found in Anilibria
+✗ MISSING  tt0791205     Ergo Proxy                                  → not found in Anilibria
+✓ FOUND    tt5095466     The Asterisk War                            → anilibria#1206
+✓ FOUND    tt12831098    Moriarty the Patriot                        → anilibria#8808
+✓ FOUND    tt2622982     The Devil is a Part-Timer! Season 2         → anilibria#8470
+✓ FOUND    tt3660104     Barakamon                                   → anilibria#3327
+✗ MISSING  tt0978553     The Familiar of Zero                        → not found in Anilibria
+✓ FOUND    tt2963556     WataMote: No Matter How I Look At It, It's  → anilibria#9838
+✓ FOUND    tt14115912    Blue Period                                 → anilibria#9070
+✓ FOUND    -             Nekomonogatari Black                        → anilibria#8459
+✗ MISSING  -             Attack on Titan: No Regrets                 → not found in Anilibria
+✗ MISSING  tt0851578     Paprika                                     → not found in Anilibria
+✓ FOUND    tt4384306     Sound! Euphonium                            → anilibria#8720
+✓ FOUND    tt7222086     Made in Abyss: The Golden City of the Scor  → anilibria#9215
+✗ MISSING  tt8253044     HINAMATSURI                                 → not found in Anilibria
+✓ FOUND    tt7088332     In Another World With My Smartphone         → anilibria#4576
+✓ FOUND    tt11988478    Gleipnir                                    → anilibria#8598
+✗ MISSING  tt1847445     The Tatami Galaxy                           → not found in Anilibria
+✓ FOUND    tt12457334    Wandering Witch: The Journey of Elaina      → anilibria#8797
+✓ FOUND    tt4731072     Food Wars! The Fifth Plate                  → anilibria#8620
+✓ FOUND    tt8515062     Asobi Asobase - workshop of fun -           → anilibria#6877
+✗ MISSING  tt1572781     The Disappearance of Haruhi Suzumiya        → not found in Anilibria
+✗ MISSING  tt14134550    ODDTAXI                                     → not found in Anilibria
+✓ FOUND    tt28261206    Horimiya: The Missing Pieces                → anilibria#9480
+✓ FOUND    tt1751305     Oreimo                                      → anilibria#8440
+✓ FOUND    -             Kizumonogatari Part 3: Reiketsu             → anilibria#9000
+✓ FOUND    tt12598008    So I'm a Spider, So What?                   → anilibria#8871
+✓ FOUND    tt2575684     Date A Live II                              → anilibria#9662
+✓ FOUND    tt12464182    Uzaki-chan Wants to Hang Out!               → anilibria#8669
+✗ MISSING  -             Redo of Healer                              → not found in Anilibria
+✓ FOUND    tt11821792    My Next Life as a Villainess: All Routes L  → anilibria#8614
+✗ MISSING  tt0168366     Pokémon                                     → not found in Anilibria
+✗ MISSING  tt3909210     The Fruit of Grisaia                        → not found in Anilibria
+✓ FOUND    -             Fate/stay night [Heaven's Feel] I. presage  → anilibria#7709
+✗ MISSING  tt7339826     Maquia: When the Promised Flower Blooms     → not found in Anilibria
+✗ MISSING  tt1086236     Lucky☆Star                                  → not found in Anilibria
+✗ MISSING  tt7521578     Citrus                                      → not found in Anilibria
+✓ FOUND    -             Kizumonogatari Part 2: Nekketsu             → anilibria#8999
+✗ MISSING  tt0923811     Evangelion: 1.0 You Are (Not) Alone         → not found in Anilibria
+✓ FOUND    tt19064770    The Angel Next Door Spoils Me Rotten        → anilibria#9334
+✓ FOUND    tt21423786    The Dangers in My Heart                     → anilibria#9426
+✓ FOUND    tt10477558    Violet Evergarden: Eternity and the Auto M  → anilibria#8641
+✓ FOUND    tt11043632    BEASTARS Season 2                           → anilibria#8854
+✓ FOUND    tt6538106     My First Girlfriend is a Gal                → anilibria#4583
+✓ FOUND    tt2379308     PSYCHO-PASS 2                               → anilibria#418
+✗ MISSING  tt1528406     Fairy Tail Final Season                     → not found in Anilibria
+✓ FOUND    tt7965802     Megalobox                                   → anilibria#6219
+✗ MISSING  tt3717532     The Last: Naruto the Movie                  → not found in Anilibria
+✓ FOUND    tt16231800    More than a Married Couple, but Not Lovers  → anilibria#9280
+✗ MISSING  tt2760784     Blood Lad                                   → not found in Anilibria
+✓ FOUND    tt9529546     The Rising of the Shield Hero Season 3      → anilibria#9536
+✗ MISSING  tt0325547     Hellsing                                    → not found in Anilibria
+✗ MISSING  tt2967286     Steins;Gate The Movie – Load Region of Déj  → not found in Anilibria
+✓ FOUND    tt3104236     A Lull in the Sea                           → anilibria#9647
+✓ FOUND    tt1216222     To Love Ru                                  → anilibria#8922
+✓ FOUND    tt23770418    Kaguya-sama: Love is War -The First Kiss T  → anilibria#9459
+✓ FOUND    tt4508902     One-Punch Man Season 3                      → anilibria#1210
+✓ FOUND    tt13196080    Tokyo Revengers Season 2                    → anilibria#9331
+✓ FOUND    tt5643030     And you thought there is never a girl onli  → anilibria#2111
+✗ MISSING  tt0481256     Hajime no Ippo: The Fighting!               → not found in Anilibria
+✓ FOUND    tt5321046     Myriad Colors Phantom World                 → anilibria#1759
+✓ FOUND    tt3909224     The Seven Deadly Sins: Dragon's Judgement   → anilibria#8876
+✓ FOUND    tt13103028    Bottom-Tier Character Tomozaki              → anilibria#8867
+✗ MISSING  tt8993464     Bloom Into You                              → not found in Anilibria
+✓ FOUND    tt10883006    ORESUKI: Are you the only one who loves me  → anilibria#8503
+✓ FOUND    tt5025394     GANGSTA.                                    → anilibria#753
+✓ FOUND    tt1945730     Katanagatari                                → anilibria#8694
+✓ FOUND    tt6755926     Re:CREATORS                                 → anilibria#3993
+✓ FOUND    tt7662364     Recovery of an MMO Junkie                   → anilibria#5154
+✓ FOUND    tt1899022     The World God Only Knows                    → anilibria#8360
+✗ MISSING  -             BAKI                                        → not found in Anilibria
+✓ FOUND    tt2230051     High School DxD HERO                        → anilibria#6062
+✓ FOUND    tt13248062    I've Been Killing Slimes for 300 Years and  → anilibria#8954
+✗ MISSING  -             The Daily Life of the Immortal King         → not found in Anilibria
+✓ FOUND    tt8225204     Golden Kamuy                                → anilibria#6197
+✓ FOUND    tt11418324    Plunderer                                   → anilibria#8566
+✓ FOUND    tt21975436    Kaiju No. 8 Season 2                        → anilibria#9963
+✓ FOUND    tt4958610     Rokka -Braves of the Six Flowers-           → anilibria#777
+✓ FOUND    tt7474942     Girls' Last Tour                            → anilibria#5207
+✓ FOUND    tt2339875     Accel World                                 → anilibria#9400
+✓ FOUND    tt19869172    My Happy Marriage                           → anilibria#9490
+✓ FOUND    tt11448214    Rent-a-Girlfriend Season 2                  → anilibria#9476
+✓ FOUND    tt0860906     Evangelion: 2.0 You Can (Not) Advance       → anilibria#5009
+✓ FOUND    -             High-Rise Invasion                          → anilibria#9003
+✓ FOUND    tt6074794     March comes in like a lion Season 2         → anilibria#5221
+✗ MISSING  tt0092067     Castle in the Sky                           → not found in Anilibria
+✓ FOUND    tt6424454     Fate/Apocrypha                              → anilibria#4580
+✓ FOUND    tt6407994     Gabriel DropOut                             → anilibria#3621
+✓ FOUND    tt1480925     Owarimonogatari                             → anilibria#9398
+✓ FOUND    tt7712706     Death March to the Parallel World Rhapsody  → anilibria#5616
+✗ MISSING  -             Attack on Titan OVA                         → not found in Anilibria
+✗ MISSING  tt0426719     Hunter x Hunter                             → not found in Anilibria
+✓ FOUND    tt12013558    BNA                                         → anilibria#8592
+✗ MISSING  tt2552240     Oreshura                                    → not found in Anilibria
+✓ FOUND    tt27417996    I Got a Cheat Skill in Another World and B  → anilibria#9411
+✓ FOUND    tt5225764     DRIFTERS                                    → anilibria#3045
+✓ FOUND    tt2942218     Log Horizon 2                               → anilibria#410
+✓ FOUND    tt1929675     Infinite Stratos                            → anilibria#571
+✓ FOUND    tt12432936    The Misfit of Demon King Academy Ⅱ: Histor  → anilibria#9325
+✓ FOUND    tt2341379     Sankarea: Undying Love                      → anilibria#908
+✓ FOUND    tt31889371    Wistoria: Wand and Sword                    → anilibria#9740
+✓ FOUND    tt9883676     We Never Learn: BOKUBEN                     → anilibria#8306
+✗ MISSING  tt2016670     Shiki                                       → not found in Anilibria
+✓ FOUND    tt13676300    Platinum End                                → anilibria#9063
+✓ FOUND    tt14642342    Sonny Boy                                   → anilibria#9039
+✓ FOUND    tt13544802    Seirei Gensouki: Spirit Chronicles          → anilibria#9014
+✓ FOUND    tt2560604     Tamako Market                               → anilibria#8355
+✗ MISSING  tt0139774     Dragon Ball GT                              → not found in Anilibria
+✗ MISSING  -             Fate/stay night [Heaven's Feel] II. lost b  → not found in Anilibria
+✗ MISSING  tt13399402    How a Realist Hero Rebuilt the Kingdom      → not found in Anilibria
+✗ MISSING  tt0433722     Paranoia Agent                              → not found in Anilibria
+✗ MISSING  tt1587394     Lovely Complex                              → not found in Anilibria
+✓ FOUND    tt2789238     Strike the Blood                            → anilibria#8461
+✓ FOUND    tt1352421     Natsume's Book of Friends Season 1          → anilibria#9827
+✗ MISSING  tt7136968     AHO-GIRL                                    → not found in Anilibria
+✓ FOUND    tt30024091    A Sign of Affection                         → anilibria#9621
+✓ FOUND    tt13463778    Girlfriend, Girlfriend                      → anilibria#2086
+✗ MISSING  tt1068993     School Days (TV)                            → not found in Anilibria
+✗ MISSING  tt15222080    BLUE LOCK Season 2                          → not found in Anilibria
+✓ FOUND    tt32639706    Blue Box                                    → anilibria#9790
+✗ MISSING  tt0434665     BLEACH: Thousand-Year Blood War - The Sepa  → not found in Anilibria
+✓ FOUND    -             HAIKYU!! LAND VS. AIR                       → anilibria#8924
+✓ FOUND    tt16156718    Skip and Loafer                             → anilibria#9438
+✗ MISSING  tt5105452     SCHOOL-LIVE!                                → not found in Anilibria
+✓ FOUND    tt15219320    Uncle from Another World                    → anilibria#9225
+✗ MISSING  -             KONOSUBA -God's blessing on this wonderful  → not found in Anilibria
+✓ FOUND    tt13186542    Kemono Jihen                                → anilibria#8870
+✓ FOUND    tt10954274    ID: INVADED                                 → anilibria#8551
+✓ FOUND    tt5531604     Tanaka-kun is Always Listless               → anilibria#2115
+✓ FOUND    tt10362632    How Heavy Are the Dumbbells You Lift?       → anilibria#8399
+✓ FOUND    -             Owarimonogatari Second Season               → anilibria#6180
+✓ FOUND    tt13884052    The Detective Is Already Dead               → anilibria#9020
+✓ FOUND    -             Hanamonogatari                              → anilibria#9321
+✗ MISSING  tt3592032     Ping Pong the Animation                     → not found in Anilibria
+✓ FOUND    tt13911284    Hell’s Paradise Season 2                    → anilibria#1225
+✓ FOUND    tt10431290    Arifureta: From Commonplace to World's Str  → anilibria#9113
+✓ FOUND    tt2150751     Chihayafuru                                 → anilibria#8357
+✓ FOUND    tt8438524     How NOT to Summon a Demon Lord Ω            → anilibria#6687
+✓ FOUND    tt9679542     Dr. STONE New World Part 2                  → anilibria#9407
+✓ FOUND    tt5537534     AJIN: Demi-Human                            → anilibria#1745
+✓ FOUND    tt1738419     Bakuman.                                    → anilibria#8731
+✓ FOUND    -             Record of Ragnarok                          → anilibria#9044
+✓ FOUND    tt1161684     Rosario + Vampire                           → anilibria#8837
+✗ MISSING  tt5862798     NEW GAME!                                   → not found in Anilibria
+✓ FOUND    -             Tsukimonogatari                             → anilibria#9372
+✓ FOUND    tt4958580     Gate 2                                      → anilibria#762
+✓ FOUND    tt2575690     Problem Children Are Coming From Another W  → anilibria#4434
+✓ FOUND    tt16341212    Aharen-san wa Hakarenai                     → anilibria#9171
+✓ FOUND    tt21927720    Undead Unluck                               → anilibria#9549
+✓ FOUND    tt3114358     Non Non Biyori                              → anilibria#8877
+✗ MISSING  tt0860907     Evangelion: 3.0 You Can (Not) Redo          → not found in Anilibria
+✓ FOUND    tt1872328     Gosick                                      → anilibria#8705
+✓ FOUND    tt5637108     Twin Star Exorcists                         → anilibria#2121
+✓ FOUND    tt12728856    The Hidden Dungeon Only I Can Enter         → anilibria#8878
+✓ FOUND    tt4728568     Is It Wrong to Try to Pick Up Girls in a D  → anilibria#412
+✗ MISSING  tt7961060     Dragon Ball Super: Broly                    → not found in Anilibria
+✓ FOUND    tt4216878     Absolute Duo                                → anilibria#389
+✗ MISSING  tt0816407     The Melancholy of Haruhi Suzumiya (2009)    → not found in Anilibria
+✓ FOUND    tt22986710    Buddy Daddies                               → anilibria#9367
+✓ FOUND    tt0988818     Gintama Season 3                            → anilibria#5685
+✓ FOUND    tt12312018    Talentless Nana                             → anilibria#8799
+✗ MISSING  tt1655610     Baka and Test - Summon the Beasts           → not found in Anilibria
+✗ MISSING  tt3413018     Tamako -love story-                         → not found in Anilibria
+✓ FOUND    tt10635210    Science Fell in Love, So I Tried to Prove   → anilibria#9168
+✓ FOUND    tt13758670    Combatants Will Be Dispatched!              → anilibria#8959
+✓ FOUND    tt4431276     Magi: Adventure of Sinbad                   → anilibria#8704
+✓ FOUND    tt0985344     Claymore                                    → anilibria#405
+✗ MISSING  tt10320398    Keep Your Hands Off Eizouken!               → not found in Anilibria
+✓ FOUND    tt18311412    NieR:Automata Ver1.1a                       → anilibria#9335
+✓ FOUND    tt5346952     Dagashi Kashi                               → anilibria#1756
+✓ FOUND    tt27329086    KONOSUBA -An Explosion on This Wonderful W  → anilibria#9412
+✓ FOUND    tt1745240     Kimi ni Todoke: From Me to You Season 2     → anilibria#9650
+✗ MISSING  tt33028568    The Summer Hikaru Died                      → not found in Anilibria
+✓ FOUND    -             Puella Magi Madoka Magica the Movie -Rebel  → anilibria#8302
+✓ FOUND    -             Fate/stay night [Heaven’s Feel] III. sprin  → anilibria#9395
+✓ FOUND    tt12057106    Tower of God Season 2                       → anilibria#8606
+✗ MISSING  tt3950102     World Trigger                               → not found in Anilibria
+✓ FOUND    tt0899258     D.Gray-man                                  → anilibria#2644
+✓ FOUND    tt13483212    Banished from the Hero’s Party, I Decided   → anilibria#9011
+✓ FOUND    tt2294048     Blast of Tempest                            → anilibria#8741
+✓ FOUND    tt32332831    Makeine: Too Many Losing Heroines!          → anilibria#9751
+✗ MISSING  tt2595486     Love Live! School Idol Project              → not found in Anilibria
+✗ MISSING  tt1474276     Summer Wars                                 → not found in Anilibria
+✓ FOUND    -             Steins;Gate: Egoistic Poriomania            → anilibria#8674
+✓ FOUND    tt2458948     Evangelion: 3.0+1.0 Thrice Upon a Time      → anilibria#9148
+✓ FOUND    -             Takopi's Original Sin                       → anilibria#10026
+✓ FOUND    tt1780262     Is this a Zombie?                           → anilibria#554
+✓ FOUND    tt3985228     SHIROBAKO                                   → anilibria#8523
+✗ MISSING  tt28919914    The 100 Girlfriends Who Really, Really, Re  → not found in Anilibria
+✓ FOUND    -             Dr. STONE Special Episode – RYUSUI          → anilibria#9451
+✓ FOUND    tt7158574     LOVE and LIES                               → anilibria#4582
+✓ FOUND    tt6819736     WorldEnd: What are you doing at the end of  → anilibria#3948
+✓ FOUND    -             JoJo's Bizarre Adventure: STONE OCEAN Part  → anilibria#9097
+✗ MISSING  tt0385426     Initial D 1st Stage                         → not found in Anilibria
+✗ MISSING  tt9307686     Fire Force Season 3                         → not found in Anilibria
+✓ FOUND    tt5240222     God Eater                                   → anilibria#758
+✓ FOUND    -             Violet Evergarden: Special                  → anilibria#7031
+✓ FOUND    tt8690728     GOBLIN SLAYER II                            → anilibria#9537
+✓ FOUND    tt3874528     The Irregular at Magic High School: Visito  → anilibria#8796
+✓ FOUND    tt1584000     Durarara!! X2                               → anilibria#8916
+✓ FOUND    tt1415054     Eden of the East                            → anilibria#4806
+✗ MISSING  -             the Garden of sinners Chapter 1: Thanatos.  → not found in Anilibria
+✗ MISSING  tt1727444     Panty & Stocking with Garterbelt            → not found in Anilibria
+✗ MISSING  -             KONOSUBA -God's blessing on this wonderful  → not found in Anilibria
+✓ FOUND    tt1483797     Redline                                     → anilibria#8640
+✓ FOUND    tt8496638     Boarding School Juliet                      → anilibria#7436
+✓ FOUND    tt4272866     The Boy and The Beast                       → anilibria#4477
+✗ MISSING  tt9116358     Promare                                     → not found in Anilibria
+✗ MISSING  tt2013293     The Wind Rises                              → not found in Anilibria
+✓ FOUND    tt15192340    My Senpai is Annoying                       → anilibria#9069
+✓ FOUND    tt1694038     Seitokai Yakuindomo                         → anilibria#483
+✓ FOUND    tt0988818     Gintama Season 2                            → anilibria#5184
+✓ FOUND    tt10973152    ASSASSINS PRIDE                             → anilibria#8476
+✓ FOUND    tt4379632     Blood Blockade Battlefront & Beyond         → anilibria#5155
+✓ FOUND    tt2575684     Date A Live III                             → anilibria#8032
+✗ MISSING  -             GOLDEN BOY                                  → not found in Anilibria
+✓ FOUND    tt10417586    O Maidens in Your Savage Season             → anilibria#8394
+✓ FOUND    tt16255458    Trapped in a Dating Sim: The World of Otom  → anilibria#9170
+✓ FOUND    tt13706018    SPY x FAMILY Season 3                       → anilibria#10029
+✓ FOUND    tt15237152    The Wrong Way to Use Healing Magic          → anilibria#9609
+✓ FOUND    tt10885406    Ascendance of a Bookworm                    → anilibria#8491
+✓ FOUND    tt9883346     The Helpful Fox Senko-san                   → anilibria#8339
+✗ MISSING  tt31711040    LOOK BACK                                   → not found in Anilibria
+✗ MISSING  tt0113824     Whisper of the Heart                        → not found in Anilibria
+✓ FOUND    tt11299538    Kakushigoto                                 → anilibria#8605
+✓ FOUND    tt13528102    Remake Our Life!                            → anilibria#9018
+✗ MISSING  -             Interspecies Reviewers                      → not found in Anilibria
+✗ MISSING  -             To Be Hero X                                → not found in Anilibria
+✓ FOUND    -             Re:ZERO -Starting Life in Another World- O  → anilibria#8665
+✓ FOUND    tt6220550     Keijo!!!!!!!!                               → anilibria#3054
+✓ FOUND    tt2552230     Maoyu: Archenemy & Hero                     → anilibria#8458
+✓ FOUND    tt32536168    Sentenced to Be a Hero                      → anilibria#10092
+✓ FOUND    tt9193770     ISEKAI QUARTET                              → anilibria#8320
+✓ FOUND    tt9826344     Why the hell are you here, Teacher!?        → anilibria#8333
+✗ MISSING  tt0087544     Nausicaä of the Valley of the Wind          → not found in Anilibria
+✗ MISSING  tt1568921     The Secret World of Arrietty                → not found in Anilibria
+✓ FOUND    -             ReLIFE: Final Arc                           → anilibria#2630
+✓ FOUND    tt33044444    Orb: On the Movements of the Earth          → anilibria#9821
+✗ MISSING  tt1882240     Beelzebub                                   → not found in Anilibria
+✓ FOUND    tt3952100     When Supernatural Battles Became Commonpla  → anilibria#426
+✗ MISSING  tt1634209     kiss×sis (TV)                               → not found in Anilibria
+✓ FOUND    tt5679720     Bungo Stray Dogs 4                          → anilibria#9336
+✗ MISSING  tt0339955     Azumanga Daioh                              → not found in Anilibria
+✓ FOUND    tt12331304    Our Last Crusade or the Rise of a New Worl  → anilibria#9727
+✗ MISSING  tt24229160    Campfire Cooking in Another World with my   → not found in Anilibria
+✓ FOUND    tt13311344    TSUKIMICHI -Moonlit Fantasy- Season 2       → anilibria#9614
+✓ FOUND    tt15721650    The Quintessential Quintuplets Movie        → anilibria#9397
+✓ FOUND    tt3544556     ALDNOAH.ZERO                                → anilibria#390
+✗ MISSING  tt0962826     Black Lagoon: The Second Barrage            → not found in Anilibria
+✓ FOUND    tt14400866    A Couple of Cuckoos                         → anilibria#9169
+✓ FOUND    tt8747928     SSSS.GRIDMAN                                → anilibria#7471
+✗ MISSING  tt8107988     Carole & Tuesday                            → not found in Anilibria
+✓ FOUND    tt0103369     Sailor Moon                                 → anilibria#8921
+✓ FOUND    tt5626028     My Hero Academia FINAL SEASON               → anilibria#10031
+✓ FOUND    tt28454008    LAZARUS                                     → anilibria#9918
+✓ FOUND    tt15483602    Reincarnated as a Sword                     → anilibria#9276
+✓ FOUND    tt2645500     Haganai NEXT                                → anilibria#873
+✗ MISSING  tt2350826     No.6                                        → not found in Anilibria
+✓ FOUND    tt3612626     Saekano: How to Raise a Boring Girlfriend   → anilibria#4010
+✓ FOUND    tt5879454     Kiss Him, Not Me                            → anilibria#9838
+✓ FOUND    tt15978212    Ya Boy Kongming!                            → anilibria#9192
+✓ FOUND    tt1316554     Black Butler II                             → anilibria#9460
+✓ FOUND    tt6435350     Interviews with Monster Girls               → anilibria#3595
+✓ FOUND    tt1308089     A Certain Magical Index II                  → anilibria#9203
+✓ FOUND    tt2061551     Bunny Drop                                  → anilibria#3974
+✓ FOUND    tt14476236    Skeleton Knight in Another World            → anilibria#9165
+✓ FOUND    tt13956466    The Genius Prince's Guide to Raising a Nat  → anilibria#9118
+✓ FOUND    tt5095466     The Asterisk War 2                          → anilibria#2116
+✗ MISSING  tt9731082     A Sister's All You Need.                    → not found in Anilibria
+✓ FOUND    -             B: The Beginning                            → anilibria#6011
+✓ FOUND    tt2704454     Little Witch Academia                       → anilibria#707
+✓ FOUND    tt15447890    The Greatest Demon Lord Is Reborn as a Typ  → anilibria#9162
+✓ FOUND    tt10483250    ASTRA LOST IN SPACE                         → anilibria#8406
+✗ MISSING  -             Yosuga no Sora: In Solitude Where We are L  → not found in Anilibria
+✗ MISSING  tt0221735     Cardcaptor Sakura                           → not found in Anilibria
+✓ FOUND    tt7964088     School Babysitters                          → anilibria#5683
+✓ FOUND    tt14476244    The Faraway Paladin                         → anilibria#9065
+✓ FOUND    tt32332970    My Deer Friend Nokotan                      → anilibria#9756
+✗ MISSING  tt12063450    To Your Eternity Season 2                   → not found in Anilibria
+✓ FOUND    tt26450257    Insomniacs After School                     → anilibria#9434
+✓ FOUND    tt3950092     Wolf Girl and Black Prince                  → anilibria#1713
+✓ FOUND    tt3475064     Mekakucity Actors                           → anilibria#1663
+✓ FOUND    tt3104072     Tokyo Ravens                                → anilibria#780
+✗ MISSING  tt8696458     Happy Sugar Life                            → not found in Anilibria
+✗ MISSING  tt15723722    I'm Quitting Heroing                        → not found in Anilibria
+✓ FOUND    tt18561422    Vermeil in Gold                             → anilibria#9218
+✗ MISSING  tt9886006     Kono Oto Tomare!: Sounds of Life            → not found in Anilibria
+✓ FOUND    tt19848112    My Stepmom's Daughter is My Ex              → anilibria#9219
+✓ FOUND    tt13362302    SHADOWS HOUSE                               → anilibria#8972
+✗ MISSING  tt2008252     Mayo Chiki!                                 → not found in Anilibria
+✓ FOUND    tt12443322    DECA-DENCE                                  → anilibria#8649
+✗ MISSING  tt9193612     Ride Your Wave                              → not found in Anilibria
+✓ FOUND    -             BURN THE WITCH                              → anilibria#8842
+✗ MISSING  tt3358240     Engaged to the Unidentified                 → not found in Anilibria
+✓ FOUND    tt28685470    Ragna Crimson                               → anilibria#9554
+✓ FOUND    tt1209393     Vampire Knight                              → anilibria#787
+✓ FOUND    tt13544716    My Hero Academia: World Heroes' Mission     → anilibria#9255
+✓ FOUND    tt10204658    SING "YESTERDAY" FOR ME                     → anilibria#8625
+✓ FOUND    tt4618398     Boruto: Naruto the Movie                    → anilibria#2495
+✗ MISSING  -             Romantic Killer                             → not found in Anilibria
+✓ FOUND    tt11034066    Welcome to Demon School! Iruma-kun Season   → anilibria#8951
+✓ FOUND    tt0328738     Fruits Basket                               → anilibria#8315
+✗ MISSING  tt1636694     Demon King Daimao                           → not found in Anilibria
+✓ FOUND    tt12735338    Words Bubble Up Like Soda Pop               → anilibria#9102
+✗ MISSING  tt4489416     The Anthem of the Heart                     → not found in Anilibria
+✓ FOUND    tt14641098    The Case Study of Vanitas Part 2            → anilibria#9028
+✓ FOUND    tt9679542     Dr. STONE SCIENCE FUTURE                    → anilibria#9842
+✓ FOUND    tt9050480     IRODUKU: The World in Colors                → anilibria#7465
+✓ FOUND    tt1890725     Blood-C                                     → anilibria#876
+✗ MISSING  tt13424422    Sword Art Online the Movie -Progressive- A  → not found in Anilibria
+✓ FOUND    tt1158671     Spice and Wolf II                           → anilibria#9666
+✓ FOUND    tt11151982    GOBLIN SLAYER -GOBLIN’S CROWN-              → anilibria#8830
+✓ FOUND    tt16156736    Chained Soldier                             → anilibria#9606
+✗ MISSING  tt1202625     Kaiji - Ultimate Survivor                   → not found in Anilibria
+✗ MISSING  tt0434665     BLEACH: Thousand-Year Blood War - The Conf  → not found in Anilibria
+✓ FOUND    tt11428586    Somali and the Forest Spirit                → anilibria#8572
+✓ FOUND    tt9402026     Run with the Wind                           → anilibria#7454
+✓ FOUND    tt2341375     Kids on the Slope                           → anilibria#4699
+✓ FOUND    tt15467380    That Time I Got Reincarnated as a Slime th  → anilibria#10154
+✓ FOUND    -             PLUTO                                       → anilibria#9598
+✓ FOUND    tt12635162    DON'T TOY WITH ME, MISS NAGATORO 2nd Attac  → anilibria#9329
+✓ FOUND    tt0972713     Shakugan no Shana                           → anilibria#644
+✓ FOUND    tt1515996     A Certain Scientific Railgun S              → anilibria#8935
+✗ MISSING  tt1224144     REBORN!                                     → not found in Anilibria
+✗ MISSING  tt26684398    SPY x FAMILY CODE: White                    → not found in Anilibria
+✓ FOUND    tt14408130    The Slime Diaries                           → anilibria#10154
+✗ MISSING  -             The Disastrous Life of Saiki K.: Reawakene  → not found in Anilibria
+✓ FOUND    -             Given The Movie                             → anilibria#9207
+✗ MISSING  tt10470356    Hensuki: Are you willing to fall in love w  → not found in Anilibria
+✗ MISSING  tt2622974     Hentai Prince & the Stony Cat               → not found in Anilibria
+✓ FOUND    tt6591406     After the Rain                              → anilibria#5698
+✓ FOUND    tt28776190    Shangri-La Frontier Season 2                → anilibria#9787
+✓ FOUND    tt10431262    Isekai Cheat Magician                       → anilibria#8404
+✓ FOUND    tt11886236    Princess Connect! Re:Dive                   → anilibria#8615
+✗ MISSING  tt0380113     Haibane Renmei                              → not found in Anilibria
+✓ FOUND    tt5334364     Undefeated Bahamut Chronicle                → anilibria#1753
+✓ FOUND    tt2196757     Inu X Boku Secret Service                   → anilibria#568
+✓ FOUND    tt12885610    Noblesse                                    → anilibria#8800
+✓ FOUND    tt6344664     Code Geass: Lelouch of the Re;surrection    → anilibria#8673
+✓ FOUND    tt6768600     Sword Oratoria: Is it Wrong to Try to Pick  → anilibria#3945
+✓ FOUND    tt9013220     Armed Girl's Machiavellism                  → anilibria#4008
+✓ FOUND    tt17382524    The Tunnel to Summer, the Exit of Goodbyes  → anilibria#9516
+✗ MISSING  tt1409055     Dragon Ball Z Kai                           → not found in Anilibria
+✓ FOUND    tt12305588    The Day I Became a God                      → anilibria#8790
+✓ FOUND    tt7112156     Real Girl                                   → anilibria#6195
+✗ MISSING  tt3158246     Space Dandy                                 → not found in Anilibria
+✗ MISSING  -             Attack on Titan: Lost Girls                 → not found in Anilibria
+✗ MISSING  tt9418812     HELLO WORLD                                 → not found in Anilibria
+✓ FOUND    tt12706854    I'm Standing on a Million Lives             → anilibria#8767
+✓ FOUND    tt1751305     Oreimo 2                                    → anilibria#8440
+✗ MISSING  tt1685484     Wagnaria!!                                  → not found in Anilibria
+✓ FOUND    tt0433498     Kino's Journey                              → anilibria#5206
+✓ FOUND    tt28534254    Spice and Wolf: MERCHANT MEETS THE WISE WO  → anilibria#9666
+✓ FOUND    tt0328739     Full Metal Panic!                           → anilibria#6171
+✓ FOUND    tt9507276     Saga of Tanya the Evil - the Movie -        → anilibria#3570
+✓ FOUND    tt22868844    Black Clover: Sword of the Wizard King      → anilibria#9518
+✗ MISSING  tt1528567     Heaven's Lost Property                      → not found in Anilibria
+✓ FOUND    -             Lord of Mysteries                           → anilibria#10025
+✓ FOUND    -             One-Punch Man: Road to Hero                 → anilibria#8763
+✓ FOUND    tt27489241    Dead Mount Death Play                       → anilibria#9427
+✓ FOUND    tt8673610     Cells at Work!!                             → anilibria#6835
+✓ FOUND    tt7808344     Teasing Master Takagi-san Season 2          → anilibria#8407
+✓ FOUND    tt3981938     Rage of Bahamut: Genesis                    → anilibria#439
+✓ FOUND    tt19223420    Farming Life in Another World               → anilibria#10160
+✓ FOUND    tt21423786    The Dangers in My Heart Season 2            → anilibria#9603
+✗ MISSING  tt1992935     Mononoke                                    → not found in Anilibria
+✓ FOUND    tt12898990    Suppose a Kid from the Last Dungeon Boonie  → anilibria#8886
+✓ FOUND    tt2320220     Kamisama Kiss◎                              → anilibria#5495
+✓ FOUND    tt2902582     Danganronpa 3: The End of Hope’s Peak High  → anilibria#2641
+✗ MISSING  tt3105434     My Mental Choices Are Completely Interferi  → not found in Anilibria
+✓ FOUND    tt0845738     When They Cry Kai                           → anilibria#741
+✓ FOUND    tt6777074     Love Tyrant                                 → anilibria#3984
+✗ MISSING  tt4728568     Is It Wrong to Try to Pick Up Girls in a D  → not found in Anilibria
+✓ FOUND    tt2340511     Dusk Maiden of Amnesia                      → anilibria#8587
+✗ MISSING  tt9089294     The Seven Deadly Sins the Movie: Prisoners  → not found in Anilibria
+✗ MISSING  tt1610860     Rainbow                                     → not found in Anilibria
+✓ FOUND    -             Kaguya-sama wa Kokurasetai: Tensaitachi no  → anilibria#8041
+✗ MISSING  tt3909210     The Eden of Grisaia                         → not found in Anilibria
+✗ MISSING  tt0326672     Chobits                                     → not found in Anilibria
+✗ MISSING  tt2785038     YuruYuri                                    → not found in Anilibria
+✓ FOUND    tt0182629     Rurouni Kenshin                             → anilibria#9486
+✓ FOUND    -             The Disastrous Life of Saiki K. Season 3    → anilibria#8757
+✗ MISSING  tt31624309    I Was Reincarnated as the 7th Prince so I   → not found in Anilibria
+✗ MISSING  tt0388473     Tokyo Godfathers                            → not found in Anilibria
+✗ MISSING  tt1909796     K-ON!: The Movie                            → not found in Anilibria
+✓ FOUND    tt21929398    The Ice Guy and His Cool Female Colleague   → anilibria#9353
+✓ FOUND    tt2904418     Free! -Eternal Summer-                      → anilibria#424
+✓ FOUND    -             The King's Avatar                           → anilibria#9723
+✓ FOUND    tt6027642     Danganronpa 3: The End of Hope’s Peak High  → anilibria#2639
+✗ MISSING  tt1584000     Durarara!! X2 The Second Arc                → not found in Anilibria
+✗ MISSING  tt0181696     HAIKYU!! The Dumpster Battle                → not found in Anilibria
+✗ MISSING  tt16360006    Bubble                                      → not found in Anilibria
+✓ FOUND    tt8391976     Bungo Stray Dogs: DEAD APPLE                → anilibria#9515
+✗ MISSING  -             The Future Diary: Redial                    → not found in Anilibria
+✓ FOUND    tt2269368     Aesthetica of a Rogue Hero                  → anilibria#878
+✓ FOUND    tt15441424    The Strongest Sage with the Weakest Crest   → anilibria#9117
+✓ FOUND    tt13167196    EDENS ZERO                                  → anilibria#8956
+✓ FOUND    tt3296914     D-Frag!                                     → anilibria#467
+✓ FOUND    tt21844614    Kubo Won't Let Me Be Invisible              → anilibria#9346
+✗ MISSING  tt25809288    The Reincarnation of the Strongest Exorcis  → not found in Anilibria
+✗ MISSING  tt4542568     Snow White with the Red Hair Season 2       → not found in Anilibria
+✗ MISSING  tt4219258     The Testament of Sister New Devil BURST     → not found in Anilibria
+✗ MISSING  tt0765491     Eureka Seven                                → not found in Anilibria
+✗ MISSING  tt0978553     The Familiar of Zero: Knight of the Twin M  → not found in Anilibria
+✓ FOUND    tt1685397     Amagami SS                                  → anilibria#7988
+✓ FOUND    tt7382936     NANBAKA                                     → anilibria#3061
+✓ FOUND    tt17069148    SAKAMOTO DAYS Part 2                        → anilibria#9969
+✓ FOUND    tt3398268     When Marnie Was There                       → anilibria#4673
+✓ FOUND    -             Koyomimonogatari                            → anilibria#9529
+✓ FOUND    tt29605391    WIND BREAKER Season 2                       → anilibria#9901
+✓ FOUND    -             Corpse Party                                → anilibria#1128
+✓ FOUND    tt7161104     Welcome to the Ballroom                     → anilibria#4588
+✓ FOUND    tt28685497    Berserk of Gluttony                         → anilibria#9546
+✓ FOUND    tt8249034     Tada Never Falls In Love                    → anilibria#6236
+✓ FOUND    tt6728390     Kuroko's Basketball: Last Game              → anilibria#5216
+✗ MISSING  tt2259737     Jormungand                                  → not found in Anilibria
+✓ FOUND    -             Zoku Owarimonogatari                        → anilibria#10141
+✓ FOUND    tt21114720    Engage Kiss                                 → anilibria#9224
+✗ MISSING  tt2187287     Waiting in the Summer                       → not found in Anilibria
+✓ FOUND    tt12311976    TONIKAWA: Over The Moon For You Season 2    → anilibria#8806
+✗ MISSING  tt2250064     So, I Can't Play H!                         → not found in Anilibria
+✓ FOUND    tt33165027    WITCH WATCH                                 → anilibria#9916
+✓ FOUND    tt7513452     Just Because!                               → anilibria#5201
+✓ FOUND    tt11192890    Life Lessons with Uramichi Oniisan          → anilibria#9034
+✓ FOUND    tt13211062    Osamake: Romcom Where The Childhood Friend  → anilibria#8961
+✓ FOUND    tt3517016     Chaika -The Coffin Princess-                → anilibria#513
+✓ FOUND    tt2017925     Penguindrum                                 → anilibria#8359
+✓ FOUND    tt21249100    Black Summoner                              → anilibria#9222
+✓ FOUND    tt4045510     I Can't Understand What My Husband Is Sayi  → anilibria#440
+✓ FOUND    tt21216104    TRIGUN STAMPEDE                             → anilibria#9355
+✓ FOUND    tt15792808    Aoashi                                      → anilibria#9182
+✓ FOUND    tt5853222     Sweetness & Lightning                       → anilibria#2646
+✓ FOUND    tt0247902     Yu-Gi-Oh!                                   → anilibria#9202
+✓ FOUND    tt10905902    Uzumaki                                     → anilibria#9834
+✗ MISSING  tt2294076     Girls und Panzer                            → not found in Anilibria
+✓ FOUND    tt6915208     Love, Chunibyo & Other Delusions: Take on   → anilibria#8276
+✓ FOUND    tt0988818     Gintama Season 2 Part 2                     → anilibria#5184
+✗ MISSING  tt0465316     Afro Samurai                                → not found in Anilibria
+✓ FOUND    tt14470072    The Great Jahy Will Not Be Defeated!        → anilibria#9029
+✓ FOUND    tt10443344    Do You Love Your Mom and Her Two-Hit Multi  → anilibria#8843
+✗ MISSING  -             Doukyuusei -Classmates-                     → not found in Anilibria
+✓ FOUND    tt29521186    Chillin' in Another World with Level 2 Sup  → anilibria#9668
+✓ FOUND    tt0275277     Cowboy Bebop: The Movie - Knockin' on Heav  → anilibria#8443
+✗ MISSING  tt22889156    The Magical Revolution of the Reincarnated  → not found in Anilibria
+✓ FOUND    tt11428630    BOFURI: I Don't Want to Get Hurt, so I'll   → anilibria#9326
+✓ FOUND    tt31186547    No Longer Allowed in Another World          → anilibria#9732
+✗ MISSING  tt3196310     Outbreak Company                            → not found in Anilibria
+✓ FOUND    tt12831098    Moriarty the Patriot Part 2                 → anilibria#8808
+✗ MISSING  -             Legend of the Galactic Heroes               → not found in Anilibria
+✗ MISSING  tt5419278     Showa Genroku Rakugo Shinju                 → not found in Anilibria
+✓ FOUND    tt8948304     Yuuna and the Haunted Hot Springs           → anilibria#6917
+✓ FOUND    tt15975122    Call of the Night Season 2                  → anilibria#9970
+✓ FOUND    tt12367868    Higurashi: When They Cry - GOU              → anilibria#8784
+✓ FOUND    tt9883676     We Never Learn!: BOKUBEN Season 2           → anilibria#8306
+✗ MISSING  tt1161699     Sayonara, Zetsubou-Sensei                   → not found in Anilibria
+✓ FOUND    tt9828696     Ao-chan Can't Study!                        → anilibria#8330
+✓ FOUND    tt2564106     Nyaruko: Crawling with Love!                → anilibria#420
+✓ FOUND    tt0988818     Gintama Season 4                            → anilibria#5685
+✓ FOUND    tt9525238     Fate/Grand Order Absolute Demonic Front: B  → anilibria#8486
+✓ FOUND    tt0409630     Texhnolyze                                  → anilibria#8700
+✓ FOUND    tt8314920     Devils' Line                                → anilibria#6193
+✓ FOUND    tt21230432    The Yakuza's Guide to Babysitting           → anilibria#9228
+✗ MISSING  tt8253268     Umamusume: Pretty Derby                     → not found in Anilibria
+✓ FOUND    tt10671282    High School Prodigies Have It Easy Even In  → anilibria#8483
+✗ MISSING  -             Steins;Gate 0: 23β -Divide by Zero-         → not found in Anilibria
+✓ FOUND    tt3341534     Witch Craft Works                           → anilibria#484
+✓ FOUND    -             That Time I Got Reincarnated as a Slime OA  → anilibria#10154
+✓ FOUND    tt14187728    Sabikui Bisco                               → anilibria#9131
+✗ MISSING  tt13399402    How a Realist Hero Rebuilt the Kingdom Par  → not found in Anilibria
+✓ FOUND    tt32469108    Failure Frame: I Became the Strongest and   → anilibria#9734
+✓ FOUND    tt14396202    Love After World Domination                 → anilibria#9173
+✗ MISSING  tt2981768     Patema Inverted                             → not found in Anilibria
+✓ FOUND    tt13971512    The Duke of Death and His Maid              → anilibria#9022
+✗ MISSING  tt1316554     Black Butler: Book of Circus                → not found in Anilibria
+✓ FOUND    tt27187054    The Elusive Samurai                         → anilibria#9755
+✓ FOUND    tt5271506     Hundred                                     → anilibria#2131
+✓ FOUND    tt0434662     Beck: Mongolian Chop Squad                  → anilibria#7012
+✗ MISSING  tt1584000     Durarara!! X2 The Third Arc                 → not found in Anilibria
+✓ FOUND    tt21030032    【OSHI NO KO】Season 3                        → anilibria#10089
+✓ FOUND    tt1929675     Infinite Stratos 2                          → anilibria#572
+✓ FOUND    tt0346314     Ghost in the Shell: Stand Alone Complex     → anilibria#579
+✗ MISSING  tt1820941     Hanasaku Iroha ~Blossoms for Tomorrow~      → not found in Anilibria
+✓ FOUND    tt3888026     Lord Marksman and Vanadis                   → anilibria#393
+✓ FOUND    tt13593022    Full Dive: This Ultimate Next-Gen Full Div  → anilibria#8966
+✓ FOUND    tt5903040     This Art Club Has a Problem!                → anilibria#2633
+✗ MISSING  -             Shelter                                     → not found in Anilibria
+✗ MISSING  tt11008522    Stars Align                                 → not found in Anilibria
+✓ FOUND    tt18574004    Parallel World Pharmacy                     → anilibria#9221
+✓ FOUND    tt28265657    The Girl I Like Forgot Her Glasses          → anilibria#9483
+✗ MISSING  tt10427926    Magical Sempai                              → not found in Anilibria
+✗ MISSING  tt2341219     Mysterious Girlfriend X                     → not found in Anilibria
+✓ FOUND    tt32552529    Pseudo Harem                                → anilibria#9736
+✓ FOUND    tt3498072     The Kawai Complex Guide to Manors and Host  → anilibria#516
+✓ FOUND    tt5878004     Handa-kun                                   → anilibria#8929
+✗ MISSING  tt7742120     LAID-BACK CAMP SEASON2                      → not found in Anilibria
+✓ FOUND    tt34119820    The Beginning After the End                 → anilibria#9905
+✓ FOUND    -             One-Punch Man OVA                           → anilibria#8763
+✓ FOUND    tt12502782    SHAMAN KING (2021)                          → anilibria#8953
+✗ MISSING  tt11193002    The Stranger by the Shore                   → not found in Anilibria
+✗ MISSING  tt0205410     Revolutionary Girl Utena                    → not found in Anilibria
+✓ FOUND    tt27419998    KamiKatsu: Working for God in a Godless Wo  → anilibria#9429
+✗ MISSING  tt8010544     PERSONA5 the Animation                      → not found in Anilibria
+✓ FOUND    -             Sword Art Online EXTRA EDITION              → anilibria#1807
+✓ FOUND    tt7897050     Record of Grancrest War                     → anilibria#5684
+✗ MISSING  tt0347618     The Cat Returns                             → not found in Anilibria
+✓ FOUND    tt2575684     Date A Live IV                              → anilibria#8710
+✓ FOUND    tt1899022     The World God Only Knows II                 → anilibria#8360
+✗ MISSING  -             Kiss x Sis                                  → not found in Anilibria
+✓ FOUND    tt13196080    Tokyo Revengers Season 2 Part 2             → anilibria#9545
+✓ FOUND    -             Love, Chunibyo & Other Delusions: Glimmeri  → anilibria#469
+✗ MISSING  tt0131179     Case Closed                                 → not found in Anilibria
+✓ FOUND    tt4384306     Sound! Euphonium 2                          → anilibria#9900
+✓ FOUND    -             Noragami OVA                                → anilibria#882
+✓ FOUND    tt1216222     To Love Ru Darkness                         → anilibria#8922
+✓ FOUND    tt6402190     Masamune-kun's Revenge R                    → anilibria#9472
+✗ MISSING  tt2552262     The Troubled Life of Miss Kotoura           → not found in Anilibria
+✓ FOUND    tt28685624    7th Time Loop: The Villainess Enjoys a Car  → anilibria#9630
+✓ FOUND    tt15441076    My Isekai Life: I Gained a Second Characte  → anilibria#9214
+✓ FOUND    tt12728882    Adachi and Shimamura                        → anilibria#8770
+✗ MISSING  -             Mushoku Tensei: Jobless Reincarnation Cour  → not found in Anilibria
+✗ MISSING  tt14980764    Sasaki and Miyano                           → not found in Anilibria
+✗ MISSING  tt3741446     Blade Dance of the Elementalers             → not found in Anilibria
+✓ FOUND    tt32395862    I Parry Everything                          → anilibria#9747
+✓ FOUND    -             Miss Kobayashi's Dragon Maid: Valentines a  → anilibria#3542
+✓ FOUND    tt27348312    Rascal Does Not Dream of a Sister Venturin  → anilibria#9649
+✗ MISSING  tt0978553     The Familiar of Zero: "Rondo" of Princesse  → not found in Anilibria
+✗ MISSING  tt0978553     The Familiar of Zero F                      → not found in Anilibria
+✓ FOUND    tt11886172    The 8th Son? Are You Kidding Me?            → anilibria#8600
+✓ FOUND    tt28774702    The Kingdoms of Ruin                        → anilibria#9551
+✗ MISSING  tt1639471     Arakawa Under the Bridge                    → not found in Anilibria
+✓ FOUND    tt11821792    My Next Life as a Villainess: All Routes L  → anilibria#9007
+✓ FOUND    tt1121794     Sword of the Stranger                       → anilibria#608
+✓ FOUND    tt23029874    Hokkaido Gals Are Super Adorable!           → anilibria#9610
+✓ FOUND    tt12402550    Sleepy Princess in the Demon Castle         → anilibria#8798
+✗ MISSING  tt0285368     Ghost Stories                               → not found in Anilibria
+✓ FOUND    tt0962740     Hell Girl                                   → anilibria#4641
+✓ FOUND    tt3481364     One Week Friends                            → anilibria#7077
+✓ FOUND    -             My Teen Romantic Comedy SNAFU OVA           → anilibria#9514
+✓ FOUND    tt33317800    Secrets of the Silent Witch                 → anilibria#9979
+✓ FOUND    tt7224994     Restaurant to Another World                 → anilibria#4581
+✗ MISSING  tt5905350     Alderamin on the Sky                        → not found in Anilibria
+✗ MISSING  -             World's End Harem                           → not found in Anilibria
+✗ MISSING  tt5862798     NEW GAME!!                                  → not found in Anilibria
+✓ FOUND    tt3563898     Brynhildr in the Darkness                   → anilibria#520
+✓ FOUND    tt28278738    The Dreaming Boy is a Realist               → anilibria#9491
+✓ FOUND    tt22017206    Our Dating Story: The Experienced You and   → anilibria#9543
+✗ MISSING  tt0104652     Porco Rosso                                 → not found in Anilibria
+✗ MISSING  tt2250160     Campione!                                   → not found in Anilibria
+✓ FOUND    tt5621006     Flying Witch                                → anilibria#2127
+✗ MISSING  tt1339238     Sekirei                                     → not found in Anilibria
+✓ FOUND    tt5679720     Bungo Stray Dogs 5                          → anilibria#9503
+✓ FOUND    tt9828562     Hitoribocchi no Marumaruseikatsu            → anilibria#8374
+✗ MISSING  -             Harem in the Labyrinth of Another World     → not found in Anilibria
+✓ FOUND    tt8250240     MAGICAL GIRL SITE                           → anilibria#6249
+✗ MISSING  tt5023666     The Heroic Legend of Arslan                 → not found in Anilibria
+✗ MISSING  tt1343645     PandoraHearts                               → not found in Anilibria
+✗ MISSING  tt2323836     Anohana the Movie: The Flower We Saw That   → not found in Anilibria
+✓ FOUND    tt1936037     Aria the Scarlet Ammo                       → anilibria#821
+✓ FOUND    tt28082379    Go! Go! Loser Ranger!                       → anilibria#9686
+✓ FOUND    tt2309934     Place to Place                              → anilibria#826
+✓ FOUND    tt7694276     JUNI TAISEN：ZODIAC WAR                      → anilibria#5203
+✓ FOUND    tt10443362    Demon Lord, Retry!                          → anilibria#8413
+✓ FOUND    tt5847454     Berserk (2016)                              → anilibria#2637
+✓ FOUND    tt6317962     Fireworks                                   → anilibria#8390
+✓ FOUND    tt4728568     Is It Wrong To Try To Pick Up Girls in a D  → anilibria#9786
+✗ MISSING  tt16183464    One Piece Film: Red                         → not found in Anilibria
+✗ MISSING  tt1161669     Kaze no Stigma                              → not found in Anilibria
+✓ FOUND    tt13049906    The Saint's Magic Power is Omnipotent       → anilibria#8971
+✓ FOUND    tt2632044     Gargantia on the Verdurous Planet           → anilibria#8441
+✗ MISSING  tt2263944     Dragon Ball Z: Battle of Gods               → not found in Anilibria
+✓ FOUND    tt1308089     A Certain Magical Index III                 → anilibria#7445
+✓ FOUND    -             The Ancient Magus' Bride: Those Awaiting a  → anilibria#3070
+✓ FOUND    tt21975478    Days with My Stepsister                     → anilibria#9728
+✓ FOUND    tt12642654    By the Grace of the Gods                    → anilibria#8791
+✓ FOUND    tt2379308     PSYCHO-PASS 3                               → anilibria#8506
+✓ FOUND    tt28480255    Ninja Kamui                                 → anilibria#9657
+✓ FOUND    tt16764368    Urusei Yatsura (2022)                       → anilibria#9282
+✓ FOUND    tt27404658    The Aristocrat’s Otherworldly Adventure: S  → anilibria#9417
+✓ FOUND    tt36592736    The Water Magician                          → anilibria#9980
+✓ FOUND    tt5861670     Tales of Zestiria the X                     → anilibria#2632
+✓ FOUND    tt28254867    Am I Actually the Strongest?                → anilibria#9510
+✓ FOUND    tt8644562     My Girlfriend is Shobitch                   → anilibria#5151
+✓ FOUND    tt28036417    Rascal Does Not Dream of a Knapsack Kid     → anilibria#9780
+✓ FOUND    tt9458372     Boogiepop and Others                        → anilibria#8042
+✓ FOUND    tt30177477    The Unwanted Undead Adventurer              → anilibria#9615
+✗ MISSING  tt8963328     Hi Score Girl                               → not found in Anilibria
+✓ FOUND    tt7484994     Children of the Whales                      → anilibria#5223
+✗ MISSING  tt2576852     The Tale of The Princess Kaguya             → not found in Anilibria
+✓ FOUND    tt5236254     Anti-Magic Academy: The 35th Test Platoon   → anilibria#1201
+✓ FOUND    tt2290828     Road to Ninja: Naruto the Movie             → anilibria#413
+✗ MISSING  tt1440068     Tokyo Magnitude 8.0                         → not found in Anilibria
+✓ FOUND    -             My Teen Romantic Comedy SNAFU TOO! OVA      → anilibria#575
+✗ MISSING  tt3114350     Diabolik Lovers                             → not found in Anilibria
+✓ FOUND    tt7089878     Liz and the Blue Bird                       → anilibria#8377
+✓ FOUND    tt9054354     ZOMBIE LAND SAGA REVENGE                    → anilibria#8960
+✗ MISSING  tt3196524     I Couldn’t Become a Hero, So I Reluctantly  → not found in Anilibria
+✓ FOUND    tt15533674    Akebi’s Sailor Uniform                      → anilibria#9137
+✓ FOUND    tt29605390    Gushing Over Magical Girls                  → anilibria#3060
+✓ FOUND    tt15433166    Mobile Suit Gundam: The Witch from Mercury  → anilibria#9431
+✗ MISSING  tt0965547     Slam Dunk                                   → not found in Anilibria
+✗ MISSING  tt3198956     Sakura Trick                                → not found in Anilibria
+✗ MISSING  tt0210418     Digimon: Digital Monsters                   → not found in Anilibria
+✗ MISSING  tt1634165     Yamada's First Time: B Gata H Kei           → not found in Anilibria
+✓ FOUND    -             Wotaku ni Koi wa Muzukashii OVA             → anilibria#8995
+✗ MISSING  tt2904426     Fate/kaleid liner Prisma☆Illya              → not found in Anilibria
+✓ FOUND    tt6692956     Princess Principal                          → anilibria#4646
+✓ FOUND    tt10256918    A Certain Scientific Accelerator            → anilibria#8420
+✓ FOUND    tt8993398     Rascal Does Not Dream of Santa Claus        → anilibria#9968
+✓ FOUND    tt13943462    The Dungeon of Black Company                → anilibria#9017
+✓ FOUND    tt2909912     Silver Spoon                                → anilibria#8368
+✓ FOUND    tt1515996     A Certain Scientific Railgun T              → anilibria#8573
+✓ FOUND    tt6213810     Fate/Grand Order: First Order               → anilibria#3788
+✓ FOUND    tt5889338     I've Always Liked You                       → anilibria#5505
+✓ FOUND    tt12779780    Fena: Pirate Princess                       → anilibria#9055
+✓ FOUND    tt8565136     Sirius the Jaeger                           → anilibria#6686
+✗ MISSING  tt5373222     My Wife is the Student Council President    → not found in Anilibria
+✓ FOUND    tt4906830     Attack on Titan: Junior High                → anilibria#1410
+✗ MISSING  tt3625280     Ben-To                                      → not found in Anilibria
+✗ MISSING  tt2390038     OniAi                                       → not found in Anilibria
+✗ MISSING  tt2697872     Ground Control to Psychoelectric Girl       → not found in Anilibria
+✓ FOUND    tt2309408     Little Busters!                             → anilibria#8361
+✓ FOUND    tt13444580    Battle Game in 5 Seconds                    → anilibria#9024
+✗ MISSING  tt3517010     Is the Order a Rabbit?                      → not found in Anilibria
+✓ FOUND    tt2942218     Log Horizon: Destruction of the Round Tabl  → anilibria#8872
+✓ FOUND    tt21345944    Beast Tamer                                 → anilibria#9286
+✓ FOUND    tt30495119    Villainess Level 99: I May Be the Hidden B  → anilibria#9613
+✗ MISSING  tt1216222     Motto To Love Ru                            → not found in Anilibria
+✓ FOUND    tt9526152     Is It Wrong to Try to Pick Up Girls in a D  → anilibria#8455
+✓ FOUND    tt0488477     xxxHOLiC                                    → anilibria#8727
+✓ FOUND    tt25531288    The Iceblade Sorcerer Shall Rule the World  → anilibria#9339
+✗ MISSING  tt21929424    ONIMAI: I'm Now Your Sister!                → not found in Anilibria
+✓ FOUND    tt1161684     Rosario + Vampire Capu2                     → anilibria#8837
+✓ FOUND    tt6477270     Grimoire of Zero                            → anilibria#3944
+✗ MISSING  tt7124066     Knight's & Magic                            → not found in Anilibria
+✓ FOUND    tt10885406    Ascendance of a Bookworm Part 2             → anilibria#8601
+✓ FOUND    tt2198397     Black Rock Shooter                          → anilibria#9205
+✗ MISSING  tt7808370     Pop Team Epic                               → not found in Anilibria
+✓ FOUND    tt3590222     The World is Still Beautiful                → anilibria#521
+✗ MISSING  tt6422976     Fuuka                                       → not found in Anilibria
+✓ FOUND    tt5867902     Hybrid x Heart Magias Academy Ataraxia      → anilibria#2635
+✓ FOUND    tt13956452    The Executioner and Her Way of Life         → anilibria#9175
+✗ MISSING  tt21929358    Akiba Maid War                              → not found in Anilibria
+✓ FOUND    -             Beyond the Boundary -I'LL BE HERE-: Future  → anilibria#8295
+✓ FOUND    tt5861440     SERVAMP                                     → anilibria#2631
+✓ FOUND    -             The Founder of Diabolism                    → anilibria#6948
+✗ MISSING  tt6139566     FLIP FLAPPERS                               → not found in Anilibria
+✓ FOUND    tt4219244     World Break: Aria of Curse for a Holy Swor  → anilibria#382
+✗ MISSING  tt13651628    BELLE                                       → not found in Anilibria
+✓ FOUND    tt1899022     The World God Only Knows: Goddesses         → anilibria#8360
+✗ MISSING  tt2942202     Unbreakable Machine-Doll                    → not found in Anilibria
+✗ MISSING  tt0807832     MUSHI-SHI The Next Passage                  → not found in Anilibria
+✓ FOUND    tt31596104    The Ossan Newbie Adventurer, Trained to De  → anilibria#9749
+✓ FOUND    tt9679542     Dr. STONE SCIENCE FUTURE Cour 2             → anilibria#9972
+✓ FOUND    tt21844644    Handyman Saitou in Another World            → anilibria#9347
+✓ FOUND    tt11448214    Rent-a-Girlfriend Season 3                  → anilibria#9476
+✓ FOUND    -             Boku no Hero Academia: Sukue! Kyuujo Kunre  → anilibria#2114
+✓ FOUND    tt5059866     Himouto! Umaru-chan R                       → anilibria#796
+✓ FOUND    tt31940008    An Archdemon's Dilemma: How to Love Your E  → anilibria#9667
+✓ FOUND    -             WONDER EGG PRIORITY: My Priority            → anilibria#8891
+✓ FOUND    tt4219130     PSYCHO-PASS: The Movie                      → anilibria#9655
+✗ MISSING  tt7351628     Our love has always been 10 centimeters ap  → not found in Anilibria
+✓ FOUND    tt9193770     Isekai Quartet 2                            → anilibria#8553
+✓ FOUND    tt1780262     Is this A Zombie? of the Dead               → anilibria#556
+✓ FOUND    tt15026576    The Fruit of Evolution: Before I Knew It,   → anilibria#9067
+✓ FOUND    tt5344382     Mobile Suit GUNDAM Iron Blooded Orphans     → anilibria#9431
+✓ FOUND    tt10431290    Arifureta: From Commonplace to World's Str  → anilibria#9113
+✓ FOUND    tt7462702     King's Game                                 → anilibria#5161
+✗ MISSING  tt2595486     Love Live! School Idol Project 2nd Season   → not found in Anilibria
+✓ FOUND    tt36230718    My Status as an Assassin Obviously Exceeds  → anilibria#10034
+✓ FOUND    tt13618148    Koikimo                                     → anilibria#8967
+✓ FOUND    tt35346717    From Old Country Bumpkin to Master Swordsm  → anilibria#9908
+✓ FOUND    tt12150836    Cells at Work! CODE BLACK                   → anilibria#8861
+✗ MISSING  tt0202430     His and Her Circumstances                   → not found in Anilibria
+✗ MISSING  tt0208502     Angel's Egg                                 → not found in Anilibria
+✓ FOUND    tt30146725    My Instant Death Ability is Overpowered     → anilibria#9607
+✓ FOUND    tt27845099    Reign of the Seven Spellblades              → anilibria#9479
+✓ FOUND    tt11034066    Welcome to Demon School! Iruma-kun Season   → anilibria#9266
+✓ FOUND    tt10342048    Kyousougiga                                 → anilibria#4619
+✓ FOUND    tt10882992    Didn't I Say to Make My Abilities Average   → anilibria#8514
+✓ FOUND    tt32991344    Clevatess                                   → anilibria#9992
+✗ MISSING  tt5355196     Shomin Sample                               → not found in Anilibria
+✗ MISSING  tt1655610     Baka and Test - Summon the Beasts 2         → not found in Anilibria
+✓ FOUND    tt10347622    If It's for My Daughter, I'd Even Defeat a  → anilibria#8423
+✓ FOUND    tt15533960    I'm the Villainess, So I'm Taming the Fina  → anilibria#9281
+✓ FOUND    tt2377452     K: RETURN OF KINGS                          → anilibria#1209
+✗ MISSING  -             the Garden of sinners Chapter 2: …and noth  → not found in Anilibria
+✗ MISSING  tt4689276     Actually, I Am                              → not found in Anilibria
+✓ FOUND    tt31863730    ZENSHU                                      → anilibria#9874
+✓ FOUND    tt12464182    Uzaki-chan Wants to Hang Out! Season 2      → anilibria#9277
+✓ FOUND    tt9622614     WATATEN!: an Angel Flew Down to Me          → anilibria#8055
+✓ FOUND    tt13544802    Seirei Gensouki: Spirit Chronicles Season   → anilibria#9828
+✓ FOUND    tt8176578     Flavors of Youth                            → anilibria#8449
+✓ FOUND    tt5334292     Dimension W                                 → anilibria#1748
+✗ MISSING  -             Black Lagoon: Roberta's Blood Trail         → not found in Anilibria
+✗ MISSING  tt28919914    The 100 Girlfriends Who Really, Really, Re  → not found in Anilibria
+✓ FOUND    tt5679248     Taboo Tattoo                                → anilibria#2626
+✓ FOUND    tt20259190    Spy Classroom                               → anilibria#9344
+✗ MISSING  -             High School of the Dead: Drifters of the D  → not found in Anilibria
+✓ FOUND    tt27484853    Why Raeliana Ended Up at the Duke’s Mansio  → anilibria#9428
+✓ FOUND    tt3105422     Ace of the Diamond                          → anilibria#8348
+✗ MISSING  -             Link Click Season 2                         → not found in Anilibria
+✓ FOUND    tt9225320     RADIANT                                     → anilibria#7470
+✓ FOUND    tt12378990    Mother of the Goddess’ Dormitory            → anilibria#9019
+✓ FOUND    tt13851952    The aquatope on white sand                  → anilibria#9031
+✓ FOUND    tt10417572    The Demon Girl Next Door                    → anilibria#8412
+✗ MISSING  tt3544556     ALDNOAH.ZERO Season 2                       → not found in Anilibria
+✗ MISSING  tt1374990     Death Billiards                             → not found in Anilibria
+✗ MISSING  tt0482855     Blood+                                      → not found in Anilibria
+✗ MISSING  -             Clannad: Another World, Tomoyo Chapter      → not found in Anilibria
+✗ MISSING  tt0995941     Darker than Black: Gemini of the Meteor     → not found in Anilibria
+✓ FOUND    tt30089363    The Witch and the Beast                     → anilibria#9622
+✗ MISSING  tt2294070     Code:Breaker                                → not found in Anilibria
+✗ MISSING  tt2918988     Hunter x Hunter: Phantom Rouge              → not found in Anilibria
+✗ MISSING  -             The Daily Life of the Immortal King Season  → not found in Anilibria
+✗ MISSING  tt0291350     Millennium Actress                          → not found in Anilibria
+✓ FOUND    tt31975847    As a Reincarnated Aristocrat, I'll Use My   → anilibria#9669
+✓ FOUND    tt4769824     In This Corner of the World                 → anilibria#9748
+✓ FOUND    tt35636246    My Hero Academia: Vigilantes                → anilibria#9915
+✗ MISSING  tt1893520     [C] - CONTROL - The Money and Soul of Poss  → not found in Anilibria
+✓ FOUND    tt32741637    I'm Getting Married to a Girl I Hate in My  → anilibria#9846
+✓ FOUND    tt32344704    TOUGEN ANKI                                 → anilibria#9978
+✓ FOUND    tt12312004    Monster Girl Doctor                         → anilibria#8660
+✓ FOUND    tt1738419     Bakuman. 2                                  → anilibria#8731
+✓ FOUND    tt27206542    Undead Murder Farce                         → anilibria#9506
+✓ FOUND    tt3692198     Maken-Ki! Battling Venus                    → anilibria#474
+✗ MISSING  -             Aggretsuko                                  → not found in Anilibria
+✓ FOUND    tt0816398     Planetes                                    → anilibria#5831
+✓ FOUND    tt3399706     Hamatora                                    → anilibria#468
+✓ FOUND    tt15237164    Ningen Fushin: Adventurers Who Don’t Belie  → anilibria#9340
+✓ FOUND    tt21844490    Dark Gathering                              → anilibria#9496
+✓ FOUND    tt8225204     Golden Kamuy Season 2                       → anilibria#6197
+✗ MISSING  tt2375379     One Piece Film: Z                           → not found in Anilibria
+✓ FOUND    tt5537534     AJIN: Demi-Human 2                          → anilibria#3047
+✗ MISSING  tt2942224     White Album 2                               → not found in Anilibria
+✗ MISSING  tt1746043     Princess Jellyfish                          → not found in Anilibria
+✓ FOUND    tt12432936    The Misfit of Demon King Academy II (Cour   → anilibria#8659
+✓ FOUND    tt28100731    Reborn as a Vending Machine, I Now Wander   → anilibria#9494
+✗ MISSING  -             Kotaro Lives Alone                          → not found in Anilibria
+✓ FOUND    -             High School DxD OVA                         → anilibria#398
+✗ MISSING  -             The Labyrinth of Grisaia                    → not found in Anilibria
+✗ MISSING  tt1798188     From Up on Poppy Hill                       → not found in Anilibria
+✓ FOUND    tt15018116    Love of Kill                                → anilibria#9126
+✗ MISSING  tt1324968     Michiko & Hatchin                           → not found in Anilibria
+✗ MISSING  tt6587046     The Boy and the Heron                       → not found in Anilibria
+✓ FOUND    tt7940468     Fate/EXTRA Last Encore                      → anilibria#5691
+✗ MISSING  tt9307686     Fire Force Season 3 Part 2                  → not found in Anilibria
+✓ FOUND    tt31131310    Mission: Yozakura Family                    → anilibria#9670
+✓ FOUND    tt28100910    Liar, Liar                                  → anilibria#9477
+✗ MISSING  tt3443306     The Qwaser of Stigmata                      → not found in Anilibria
+✗ MISSING  tt31250134    Girls Band Cry                              → not found in Anilibria
+✓ FOUND    tt6453340     Seiren                                      → anilibria#3615
+✗ MISSING  -             the Garden of sinners Chapter 3: ever cry,  → not found in Anilibria
+✓ FOUND    tt1739796     My Bride is a Mermaid                       → anilibria#8748
+✓ FOUND    tt21844706    A Galaxy Next Door                          → anilibria#9424
+✗ MISSING  -             Kill la Kill: GOODBYE AGAIN                 → not found in Anilibria
+✗ MISSING  tt0190641     Pokémon: The First Movie                    → not found in Anilibria
+✓ FOUND    tt13409388    The Idaten Deities Know Only Peace          → anilibria#9023
+✗ MISSING  -             the Garden of sinners Chapter 5: Paradox P  → not found in Anilibria
+✓ FOUND    tt32864316    Fate/strange Fake                           → anilibria#9893
+✗ MISSING  tt3416460     Majikoi: Oh! Samurai Girls                  → not found in Anilibria
+✓ FOUND    -             TONIKAWA: Over The Moon For You ~SNS~       → anilibria#9532
+✓ FOUND    tt31514720    Re:Monster                                  → anilibria#9679
+✓ FOUND    -             Gantz                                       → anilibria#8433
+✓ FOUND    tt1347975     Phantom: Requiem for the Phantom            → anilibria#8702
+✗ MISSING  tt1216196     S.A: Special A                              → not found in Anilibria
+✗ MISSING  tt5789296     Love Live! Sunshine!!                       → not found in Anilibria
+✓ FOUND    tt7727278     Love is Like a Cocktail                     → anilibria#5188
+✓ FOUND    tt14669108    Life With an Ordinary Guy Who Reincarnated  → anilibria#9128
+✓ FOUND    tt27391405    Summoned to Another World for a Second Tim  → anilibria#9410
+✓ FOUND    tt9529546     The Rising of the Shield Hero Season 4      → anilibria#9967
+✗ MISSING  -             Charlotte: Strong People                    → not found in Anilibria
+✓ FOUND    tt28279848    Suicide Squad ISEKAI                        → anilibria#9730
+✗ MISSING  tt29171914    I'm in Love with the Villainess             → not found in Anilibria
+✗ MISSING  tt0169880     Neon Genesis Evangelion: Death & Rebirth    → not found in Anilibria
+✗ MISSING  -             Kokoro Connect ~ The OVAs                   → not found in Anilibria
+✗ MISSING  -             Angel Beats! Specials                       → not found in Anilibria
+✓ FOUND    tt0498443     Paradise Kiss                               → anilibria#8746
+✗ MISSING  tt2189248     Inazuma Eleven                              → not found in Anilibria
+✓ FOUND    tt14603848    OVERLORD: The Sacred Kingdom                → anilibria#774
+✗ MISSING  tt3396572     Riddle Story of Devil                       → not found in Anilibria
+✓ FOUND    tt28313387    A Returner's Magic Should Be Special        → anilibria#9550
+✓ FOUND    tt10981954    No Guns Life                                → anilibria#8501
+✗ MISSING  tt9430698     One Piece: Stampede                         → not found in Anilibria
+✓ FOUND    tt10937602    Ahiru no Sora                               → anilibria#8475
+✗ MISSING  -             Heaven Official's Blessing                  → not found in Anilibria
+✓ FOUND    tt5160872     PUNCH LINE                                  → anilibria#401
+✓ FOUND    tt32524709    The Brilliant Healer's New Life in the Sha  → anilibria#9906
+✓ FOUND    tt8994044     Tsurune                                     → anilibria#7472
+✗ MISSING  tt0367439     Wolf's Rain                                 → not found in Anilibria
+✗ MISSING  tt2250184     Joshiraku                                   → not found in Anilibria
+✓ FOUND    tt3588312     The Comic Artist & His Assistants           → anilibria#507
+✓ FOUND    -             Gintama.: Silver Soul Arc                   → anilibria#5685
+✓ FOUND    tt13022022    Peach Boy Riverside                         → anilibria#9021
+✓ FOUND    tt27237459    Jellyfish Can’t Swim in the Night           → anilibria#9688
+✓ FOUND    tt0367409     Shaman King                                 → anilibria#8953
+✓ FOUND    tt33384856    May I Ask for One Final Thing?              → anilibria#10035
+✓ FOUND    -             Tokyo Ghoul: [JACK]                         → anilibria#1531
+✗ MISSING  tt0928099     Nodame Cantabile                            → not found in Anilibria
+✗ MISSING  tt0437719     Gankutsuou: The Count of Monte Cristo       → not found in Anilibria
+✗ MISSING  tt2341171     Medaka Box                                  → not found in Anilibria
+✓ FOUND    tt1738419     Bakuman. 3                                  → anilibria#8731
+✓ FOUND    tt14979456    When Will Ayumu Make His Move?              → anilibria#9220
+✓ FOUND    tt32766897    Ranma1/2 (2024)                             → anilibria#9830
+✗ MISSING  -             Carnival Phantasm                           → not found in Anilibria
+✓ FOUND    tt2250100     The Ambition of Oda Nobuna                  → anilibria#8383
+✓ FOUND    tt7326322     The Ancient Magus' Bride Season 2           → anilibria#5149
+✓ FOUND    tt0878036     School Rumble                               → anilibria#8386
+✗ MISSING  tt3819668     Dragon Ball Z: Resurrection 'F'             → not found in Anilibria
+✗ MISSING  tt32508529    Let This Grieving Soul Retire               → not found in Anilibria
+✓ FOUND    tt33999377    KOWLOON GENERIC ROMANCE                     → anilibria#9923
+✓ FOUND    tt33059860    I May Be a Guild Receptionist, but I’ll So  → anilibria#9845
+✗ MISSING  tt0481256     Hajime no Ippo: The Fighting! New Challeng  → not found in Anilibria
+✓ FOUND    tt1048049     Devil May Cry                               → anilibria#9960
+✗ MISSING  tt12464204    Peter Grill and the Philosopher's Time      → not found in Anilibria
+✓ FOUND    tt1216222     To Love Ru Darkness 2                       → anilibria#8922
+✗ MISSING  tt0478838     Honey and Clover                            → not found in Anilibria
+✗ MISSING  tt0807832     MUSHI-SHI The Next Passage 2                → not found in Anilibria
+✓ FOUND    tt2636546     Flowers of Evil                             → anilibria#8456
+✓ FOUND    tt30844357    SHOSHIMIN: How to Become Ordinary           → anilibria#9754
+✓ FOUND    tt7965802     MEGALOBOX 2: NOMAD                          → anilibria#8962
+✓ FOUND    tt21345876    Shinobi no Ittoki                           → anilibria#9284
+✓ FOUND    tt21342052    Chillin’ in My 30s after Getting Fired fro  → anilibria#9348
+✗ MISSING  tt2250092     Humanity Has Declined                       → not found in Anilibria
+✓ FOUND    -             Saekano the Movie: Finale                   → anilibria#4010
+✗ MISSING  tt3296884     Tonari no Seki-kun: The Master of Killing   → not found in Anilibria
+✓ FOUND    tt1799631     Blue Exorcist -Shimane Illuminati Saga-     → anilibria#9605
+✗ MISSING  tt0385426     Initial D 2nd Stage                         → not found in Anilibria
+✓ FOUND    tt7263380     Clean Freak! Aoyama kun                     → anilibria#4643
+✗ MISSING  -             Baki Hanma                                  → not found in Anilibria
+✗ MISSING  -             the Garden of sinners Chapter 4: garan-no-  → not found in Anilibria
+✓ FOUND    tt12415504    Kuma Kuma Kuma Bear                         → anilibria#8794
+✗ MISSING  tt0953916     Air Gear                                    → not found in Anilibria
+✓ FOUND    tt9522316     My Roommate is a Cat                        → anilibria#8044
+✓ FOUND    tt2387612     Persona 4 the Animation                     → anilibria#6112
+✗ MISSING  tt15830702    Sword Art Online the Movie -Progressive- S  → not found in Anilibria
+✓ FOUND    tt11405370    Nekopara                                    → anilibria#5672
+✓ FOUND    tt2150751     Chihayafuru 2                               → anilibria#8357
+✓ FOUND    tt0988982     Naruto Shippuden the Movie                  → anilibria#413
+✓ FOUND    -             Record of Ragnarok II                       → anilibria#9403
+✓ FOUND    tt22249034    Rurouni Kenshin (2023)                      → anilibria#9801
+✗ MISSING  tt0481256     Hajime No Ippo: The Fighting! - Rising -    → not found in Anilibria
+✓ FOUND    tt11428682    Seton Academy: Join the Pack!               → anilibria#8580
+✓ FOUND    tt7591766     UQ Holder!                                  → anilibria#5189
+✓ FOUND    tt25971150    Reborn to Master the Blade: From Hero-King  → anilibria#9337
+✗ MISSING  tt31141567    2.5 Dimensional Seduction                   → not found in Anilibria
+✓ FOUND    tt9828800     Senryu Girl                                 → anilibria#8338
+✗ MISSING  tt21606344    LOVE FLOPS                                  → not found in Anilibria
+✓ FOUND    tt2904418     Free! -Dive to the Future-                  → anilibria#6840
+✓ FOUND    tt9635464     Kemono Michi: Rise Up                       → anilibria#8489
+✓ FOUND    -             The Way of the Househusband Part 2          → anilibria#9107
+✓ FOUND    tt36034547    You and I Are Polar Opposites               → anilibria#10100
+✗ MISSING  tt8086718     Grand Blue Dreaming Season 2                → not found in Anilibria
+✓ FOUND    tt15052770    Summer Ghost                                → anilibria#9201
+✗ MISSING  tt1999167     Naruto Shippuden the Movie: Blood Prison    → not found in Anilibria
+✓ FOUND    tt11295582    Infinite Dendrogram                         → anilibria#8552
+✓ FOUND    -             Danganronpa 3: The End of Hope's Peak High  → anilibria#3114
+✓ FOUND    -             Thus Spoke Rohan Kishibe                    → anilibria#8833
+✓ FOUND    tt1690400     The Legend of the Legendary Heroes          → anilibria#8356
+✓ FOUND    tt3114358     Non Non Biyori Repeat                       → anilibria#8877
+✓ FOUND    tt1909463     Freezing                                    → anilibria#573
+✗ MISSING  tt5251328     One Piece Film: Gold                        → not found in Anilibria
+✗ MISSING  tt2266660     Love, Election and Chocolate                → not found in Anilibria
+✓ FOUND    tt9547400     Magia Record: Puella Magi Madoka Magica Si  → anilibria#8560
+✗ MISSING  -             Clannad: Another World, Kyou Chapter        → not found in Anilibria
+✓ FOUND    tt0977907     ARIA The ANIMATION                          → anilibria#9651
+✓ FOUND    tt15739134    The Demon Sword Master of Excalibur Academ  → anilibria#9539
+✗ MISSING  tt2404499     Kingdom                                     → not found in Anilibria
+✓ FOUND    tt12882132    Hitori no Shita - The Outcast               → anilibria#2636
+✓ FOUND    tt1694038     Seitokai Yakuindomo Season 2                → anilibria#483
+✓ FOUND    tt10980934    AZUR LANE                                   → anilibria#8477
+✓ FOUND    tt11328872    In/Spectre 2                                → anilibria#8559
+✗ MISSING  tt8372010     Tsugumomo                                   → not found in Anilibria
+✓ FOUND    tt0988818     Gintama.: Silver Soul Arc - Second Half Wa  → anilibria#5685
+✗ MISSING  tt0193253     Jin-Roh: The Wolf Brigade                   → not found in Anilibria
+✗ MISSING  tt1839494     Children who Chase Lost Voices              → not found in Anilibria
+✓ FOUND    tt29370857    Ron Kamonohashi's Forbidden Deductions      → anilibria#9563
+✓ FOUND    tt4831682     Little Witch Academia: The Enchanted Parad  → anilibria#3204
+✓ FOUND    tt0485323     Fullmetal Alchemist: The Movie - Conqueror  → anilibria#9528
+✓ FOUND    tt2374144     Gintama: The Final Chapter - Be Forever Yo  → anilibria#5184
+✗ MISSING  tt29485149    Dragon Ball DAIMA                           → not found in Anilibria
+✓ FOUND    -             Tokyo Ghoul: [PINTO]                        → anilibria#432
+✓ FOUND    tt31528958    Honey Lemon Soda                            → anilibria#9857
+✓ FOUND    tt14506186    In the Land of Leadale                      → anilibria#9124
+✗ MISSING  tt7456468     Kase-san and Morning Glories                → not found in Anilibria
+✗ MISSING  tt1685484     Wagnaria!!2                                 → not found in Anilibria
+✓ FOUND    tt32512773    Loner Life in Another World                 → anilibria#9791
+✓ FOUND    tt24326724    Unnamed Memory                              → anilibria#9672
+✓ FOUND    -             Japan Sinks: 2020                           → anilibria#8663
+✓ FOUND    tt35346400    Can a Boy-Girl Friendship Survive?          → anilibria#9904
+✓ FOUND    tt3519238     Nanana's Buried Treasure                    → anilibria#518
+✓ FOUND    tt7808344     Teasing Master Takagi-san Season 3          → anilibria#9123
+✓ FOUND    tt7814574     Junji Ito Collection                        → anilibria#5617
+✗ MISSING  tt1677561     Colorful ~ The Motion Picture               → not found in Anilibria
+✓ FOUND    -             Date A Live: Date to Date                   → anilibria#8032
+✗ MISSING  tt3028018     Blue Exorcist: The Movie                    → not found in Anilibria
+✗ MISSING  tt5419278     Descending Stories: Showa Genroku Rakugo S  → not found in Anilibria
+✓ FOUND    tt6638842     Kino's Journey -the Beautiful World- the A  → anilibria#5206
+✗ MISSING  tt1485763     One Piece Film: Strong World                → not found in Anilibria
+✓ FOUND    tt3794204     K: MISSING KINGS                            → anilibria#566
+✓ FOUND    tt5331768     Date A Live Mayuri Judgement                → anilibria#8032
+✗ MISSING  tt5159084     Sky Wizards Academy                         → not found in Anilibria
+✓ FOUND    tt7088332     In Another World With My Smartphone 2       → anilibria#9408
+✓ FOUND    tt2904596     Servant x Service                           → anilibria#611
+✓ FOUND    tt3639872     KanColle                                    → anilibria#5193
+✗ MISSING  -             Pokémon Origins                             → not found in Anilibria
+✓ FOUND    tt8271972     The Ryuo's Work is Never Done!              → anilibria#8454
+✓ FOUND    tt5686870     Big Order                                   → anilibria#2120
+✓ FOUND    tt14264160    Irina: The Vampire Cosmonaut                → anilibria#9076
+✗ MISSING  tt1703048     Naruto Shippuden the Movie: The Lost Tower  → not found in Anilibria
+✓ FOUND    tt1587156     Fate/stay night: Unlimited Blade Works (Mo  → anilibria#429
+✗ MISSING  -             Scissor Seven                               → not found in Anilibria
+✗ MISSING  -             My Hero Academia: Make It! Do-or-Die Survi  → not found in Anilibria
+✓ FOUND    tt0096686     Ranma ½                                     → anilibria#9830
+✓ FOUND    tt2622982     The Devil is a Part-Timer! Season 2 Part 2  → anilibria#9475
+✓ FOUND    -             Food Wars! The Second Plate OVA             → anilibria#2628
+✓ FOUND    tt19869172    My Happy Marriage Season 2                  → anilibria#9843
+✓ FOUND    tt32792739    Yakuza Fiancé: Raise wa Tanin ga Ii         → anilibria#9818
+✗ MISSING  -             the Garden of sinners Chapter 7: ……not not  → not found in Anilibria
+✓ FOUND    tt9573854     Lord El-Melloi II's Case Files {Rail Zeppe  → anilibria#8426
+✗ MISSING  tt15414478    FAIRY TAIL 100 YEARS QUEST                  → not found in Anilibria
+✗ MISSING  -             Mushoku Tensei: Jobless Reincarnation Seas  → not found in Anilibria
+✗ MISSING  tt1202625     Kaiji - Against All Rules                   → not found in Anilibria
+✓ FOUND    tt5194246     Beautiful Bones -Sakurako's Investigation-  → anilibria#1202
+✗ MISSING  -             Hyouka: What Should Be Had                  → not found in Anilibria
+✓ FOUND    tt10885406    Ascendance of a Bookworm Season 3           → anilibria#9160
+✗ MISSING  -             Berserk: The Golden Age Arc I - The Egg of  → not found in Anilibria
+✓ FOUND    tt3981938     Rage of Bahamut: Virgin Soul                → anilibria#3975
+✓ FOUND    tt15439344    To Every You I’ve Loved Before              → anilibria#9653
+✗ MISSING  tt9850064     Children of the Sea                         → not found in Anilibria
+✗ MISSING  tt1411815     One Outs                                    → not found in Anilibria
+✓ FOUND    tt10937632    BABYLON                                     → anilibria#8478
+✗ MISSING  -             Baki: The Great Raitai Tournament Saga      → not found in Anilibria
+✓ FOUND    tt32550889    Witch Hat Atelier                           → anilibria#10166
+✗ MISSING  tt1516239     Kämpfer                                     → not found in Anilibria
+✓ FOUND    -             Puella Magi Madoka Magica the Movie Part 1  → anilibria#8302
+✗ MISSING  -             the Garden of sinners Chapter 6: Fairy Tal  → not found in Anilibria
+✗ MISSING  tt3792116     LOVE STAGE!!                                → not found in Anilibria
+✓ FOUND    tt19853780    The Legendary Hero is Dead!                 → anilibria#9422
+✓ FOUND    -             Gintama.: Slip Arc                          → anilibria#5184
+✓ FOUND    tt3294136     Magical Warfare                             → anilibria#479
+✓ FOUND    tt10580768    My Sweet Tyrant                             → anilibria#6237
+✓ FOUND    tt32542096    DEMON LORD 2099                             → anilibria#9792
+✓ FOUND    tt15766292    The Dawn of the Witch                       → anilibria#9172
+✓ FOUND    tt4834194     Yu☆Gi☆Oh!                                   → anilibria#9202
+✓ FOUND    tt10766468    Gintama: THE VERY FINAL                     → anilibria#5184
+✓ FOUND    tt30689669    You are Ms. Servant                         → anilibria#9793
+✓ FOUND    tt9042408     The Master of Ragnarök & Blesser of Einher  → anilibria#6832
+✓ FOUND    tt7933666     KOKKOKU                                     → anilibria#5681
+✓ FOUND    tt22087138    The Café Terrace and Its Goddesses          → anilibria#9432
+✓ FOUND    tt5452096     Rainbow Days                                → anilibria#1834
+✗ MISSING  tt6335734     The Night is Short, Walk on Girl            → not found in Anilibria
+✓ FOUND    tt13483212    Banished from the Hero’s Party, I Decided   → anilibria#9604
+✗ MISSING  tt1967120     Heaven's Memo Pad                           → not found in Anilibria
+✓ FOUND    tt30495098    The Foolish Angel Dances with the Devil     → anilibria#9619
+✓ FOUND    tt6580380     The Irregular at Magic High School The Mov  → anilibria#5926
+✗ MISSING  tt1685410     Okami-san and Her Seven Companions          → not found in Anilibria
+✗ MISSING  tt2904686     Love Lab                                    → not found in Anilibria
+✗ MISSING  tt1409055     Dragon Ball Z Kai: The Final Chapters       → not found in Anilibria
+✓ FOUND    -             Puella Magi Madoka Magica the Movie Part 2  → anilibria#8302
+✓ FOUND    -             KENGAN ASHURA Part I                        → anilibria#8429
+✓ FOUND    tt6401396     ACCA: 13-Territory Inspection Dept.         → anilibria#3526
+✗ MISSING  tt9886006     Kono Oto Tomare!: Sounds of Life Season 2   → not found in Anilibria
+✗ MISSING  tt8096510     Sarazanmai                                  → not found in Anilibria
+✗ MISSING  tt2942228     Yowamushi Pedal                             → not found in Anilibria
+✓ FOUND    tt27504251    Ranking of Kings: The Treasure Chest of Co  → anilibria#9461
+✗ MISSING  tt3198698     Hunter x Hunter: The Last Mission           → not found in Anilibria
+✗ MISSING  tt1685484     Wagnaria!!3                                 → not found in Anilibria
+✗ MISSING  tt2904582     KINMOZA!                                    → not found in Anilibria
+✗ MISSING  tt0940874     Air                                         → not found in Anilibria
+✓ FOUND    tt8225204     Golden Kamuy Season 3                       → anilibria#6197
+✓ FOUND    -             Angel Beats!: Another Epilogue              → anilibria#495
+✗ MISSING  tt0476680     Naruto the Movie: Ninja Clash in the Land   → not found in Anilibria
+✗ MISSING  -             Plastic Elder Sister                        → not found in Anilibria
+✓ FOUND    tt5476944     Black Butler: Book of the Atlantic          → anilibria#8681
+✓ FOUND    tt14935892    maboroshi                                   → anilibria#9711
+✗ MISSING  tt3957232     Cross Ange: Rondo of Angel and Dragon       → not found in Anilibria
+✗ MISSING  -             Toradora!: Bento Battle                     → not found in Anilibria
+✓ FOUND    tt6900448     Mirai                                       → anilibria#8431
+✓ FOUND    -             The Seven Deadly Sins OVA                   → anilibria#1908
+✗ MISSING  tt1528567     Heaven's Lost Property: Forte               → not found in Anilibria
+✗ MISSING  tt0290223     InuYasha: The Final Act                     → not found in Anilibria
+✗ MISSING  -             Date A Live II: Kurumi Star Festival        → not found in Anilibria
+✓ FOUND    tt1352421     Natsume's Book of Friends Season 2          → anilibria#9827
+✓ FOUND    tt31146105    THE NEW GATE                                → anilibria#9707
+✓ FOUND    tt2250040     Good Luck Girl!                             → anilibria#8379
+✓ FOUND    tt0972713     Shakugan no Shana: Season II                → anilibria#2766
+✗ MISSING  tt5446578     Space Patrol Luluco                         → not found in Anilibria
+✓ FOUND    tt3874528     The Irregular at Magic High School Season   → anilibria#9664
+✗ MISSING  tt1738090     Squid Girl                                  → not found in Anilibria
+✓ FOUND    tt11443824    SSSS.DYNAZENON                              → anilibria#8976
+✓ FOUND    tt31844529    Why Does Nobody Remember Me in This World?  → anilibria#9737
+✗ MISSING  tt1422651     Gurren Lagann The Movie: The Lights in the  → not found in Anilibria
+✗ MISSING  -             Berserk: The Golden Age Arc III - The Adve  → not found in Anilibria
+✓ FOUND    tt1209393     Vampire Knight: Guilty                      → anilibria#787
+✗ MISSING  tt0381348     The Place Promised in Our Early Days        → not found in Anilibria
+✓ FOUND    -             Bungo Stray Dogs 2: Walking Alone           → anilibria#9515
+✓ FOUND    tt8400680     Revue Starlight                             → anilibria#8300
+✗ MISSING  tt0928093     Kanon (2006)                                → not found in Anilibria
+✓ FOUND    tt28254942    Classroom for Heroes                        → anilibria#9482
+✓ FOUND    tt29899598    A Condition Called Love                     → anilibria#9681
+✓ FOUND    tt32333026    The Strongest Magician in the Demon Lord's  → anilibria#9735
+✓ FOUND    tt1278254     ChäoS;HEAd                                  → anilibria#7823
+✗ MISSING  tt0216651     Vampire Hunter D: Bloodlust                 → not found in Anilibria
+✗ MISSING  tt0168366     Pokémon the Series: XY                      → not found in Anilibria
+✓ FOUND    tt2552204     AMNESIA                                     → anilibria#8463
+✓ FOUND    tt1424037     Kenichi: The Mightiest Disciple             → anilibria#8930
+✓ FOUND    tt13677314    Taisho Otome Fairy Tale                     → anilibria#9075
+✗ MISSING  tt31624309    I Was Reincarnated as the 7th Prince so I   → not found in Anilibria
+✓ FOUND    tt13103028    Bottom-Tier Character Tomozaki 2nd Stage    → anilibria#9608
+✗ MISSING  tt6344696     Trinity Seven: Eternal Library & Alchemic   → not found in Anilibria
+✓ FOUND    tt1160524     Naruto Shippuden the Movie: Bonds           → anilibria#413
+✗ MISSING  tt2716982     Nura: Rise of the Yokai Clan                → not found in Anilibria
+✗ MISSING  -             Mirai Nikki OVA                             → not found in Anilibria
+✗ MISSING  tt8253158     Comic Girls                                 → not found in Anilibria
+✓ FOUND    tt2061527     Tiger & Bunny                               → anilibria#9204
+✓ FOUND    tt15450826    To Me, The One Who Loved You                → anilibria#9654
+✓ FOUND    tt12706854    I'm Standing on a Million Lives Season 2    → anilibria#8767
+✓ FOUND    -             Is It Wrong to Try to Pick Up Girls in a D  → anilibria#3853
+✓ FOUND    tt1805647     Blue Literature Series                      → anilibria#8928
+✗ MISSING  tt34620612    Even Given the Worthless “Appraiser” Class  → not found in Anilibria
+✓ FOUND    tt7243824     Qualidea Code                               → anilibria#2643
+✗ MISSING  tt33349897    I Have a Crush at Work                      → not found in Anilibria
+✓ FOUND    tt1209386     Kaiba                                       → anilibria#502
+✓ FOUND    tt21345970    I've Somehow Gotten Stronger When I Improv  → anilibria#9279
+✓ FOUND    tt15538376    Sugar Apple Fairy Tale                      → anilibria#9356
+✓ FOUND    tt22410622    My Home Hero                                → anilibria#9433
+✗ MISSING  -             ONE PIECE FAN LETTER                        → not found in Anilibria
+✓ FOUND    tt1132203     ef ~ A Tale of Memories                     → anilibria#8745
+✗ MISSING  tt14614892    Dragon Ball Super: SUPER HERO               → not found in Anilibria
+✗ MISSING  tt2909936     The Eccentric Family                        → not found in Anilibria
+✓ FOUND    tt5614348     The Lost Village                            → anilibria#2124
+✗ MISSING  tt8646234     HANEBADO!                                   → not found in Anilibria
+✗ MISSING  -             Berserk: The Golden Age Arc II - The Battl  → not found in Anilibria
+✗ MISSING  tt3981902     Yuki Yuna is a Hero                         → not found in Anilibria
+✓ FOUND    tt32281073    Sword of the Demon Hunter: Kijin Gentosho   → anilibria#9949
+✓ FOUND    tt14201334    RE-MAIN                                     → anilibria#9035
+✓ FOUND    tt8228732     Kakuriyo -Bed & Breakfast for Spirits-      → anilibria#6214
+✓ FOUND    tt10635210    Science Fell in Love, So I Tried to Prove   → anilibria#9168
+✗ MISSING  tt32501772    The Most Notorious "Talker" Runs the World  → not found in Anilibria
+✓ FOUND    tt13457122    Pretty Boy Detective Club                   → anilibria#8981
+✗ MISSING  -             Today's Menu for the Emiya Family           → not found in Anilibria
+✗ MISSING  tt2267446     Space Brothers                              → not found in Anilibria
+✓ FOUND    -             Kakegurui Twin                              → anilibria#9312
+✓ FOUND    -             Strike the Blood Second                     → anilibria#3534
+✗ MISSING  tt3786608     Rail Wars!                                  → not found in Anilibria
+✗ MISSING  tt25275610    HIGH CARD                                   → not found in Anilibria
+✓ FOUND    -             K-ON!: Live House!                          → anilibria#824
+✓ FOUND    tt5683292     Rewrite                                     → anilibria#2634
+✓ FOUND    tt1352421     Natsume's Book of Friends Season 3          → anilibria#9827
+✓ FOUND    tt27990591    My Unique Skill Makes Me OP even at Level   → anilibria#9481
+✗ MISSING  tt0388130     Initial D 3rd Stage                         → not found in Anilibria
+✓ FOUND    tt1352421     Natsume's Book of Friends Season 4          → anilibria#9827
+✗ MISSING  tt35436364    Please Put Them On, Takamine-san            → not found in Anilibria
+✓ FOUND    tt6740188     Sakura Quest                                → anilibria#4011
+✓ FOUND    tt3199286     No-Rin                                      → anilibria#481
+✓ FOUND    tt6455986     Youjo Senki II                              → anilibria#3570
+✗ MISSING  tt3432596     Dragonar Academy                            → not found in Anilibria
+✓ FOUND    tt33478787    Possibly the Greatest Alchemist of All Tim  → anilibria#9847
+✗ MISSING  -             Miru Tights                                 → not found in Anilibria
+✓ FOUND    tt29233201    BARTENDER Glass of God                      → anilibria#9684
+✓ FOUND    tt12390384    Drug Store in Another World - The Slow Lif  → anilibria#9013
+✓ FOUND    tt7112156     Real Girl 2                                 → anilibria#6195
+✗ MISSING  tt1480947     Canaan                                      → not found in Anilibria
+✓ FOUND    tt29171919    The Vexations of a Shut-In Vampire Princes  → anilibria#9552
+✓ FOUND    tt30488398    Tales of Wedding Rings                      → anilibria#9611
+✓ FOUND    tt10253816    Kabaneri of the Iron Fortress: The Battle   → anilibria#8437
+✓ FOUND    tt3398976     Knights of Sidonia                          → anilibria#517
+✗ MISSING  tt0385426     Initial D 4th Stage                         → not found in Anilibria
+✓ FOUND    -             Fate/strange Fake -Whispers of Dawn-        → anilibria#9523
+✗ MISSING  tt0168366     Pokémon the Series: Ruby and Sapphire       → not found in Anilibria
+✗ MISSING  -             Gunbuster                                   → not found in Anilibria
+✗ MISSING  -             High School DxD: Fantasy Jiggles Unleashed  → not found in Anilibria
+✗ MISSING  tt14323890    Do It Yourself!!                            → not found in Anilibria
+✓ FOUND    tt13067534    Otherside Picnic                            → anilibria#8889
+✗ MISSING  tt0108432     Ocean Waves                                 → not found in Anilibria
+✗ MISSING  -             Tawawa on Monday                            → not found in Anilibria
+✓ FOUND    tt6138612     Granblue Fantasy: The Animation             → anilibria#4009
+✓ FOUND    tt29510641    Metallic Rouge                              → anilibria#9624
+✓ FOUND    tt10427920    Are You Lost?                               → anilibria#8417
+✗ MISSING  tt12448470    SUPER HXEROS                                → not found in Anilibria
+✓ FOUND    tt4045510     I Can't Understand What My Husband is Sayi  → anilibria#441
+✗ MISSING  tt12285778    Super Cub                                   → not found in Anilibria
+✗ MISSING  -             No Game No Life Specials                    → not found in Anilibria
+✓ FOUND    tt6135350     Occultic;Nine                               → anilibria#3049
+✗ MISSING  tt12814598    Those Snow White Notes                      → not found in Anilibria
+✗ MISSING  tt2785038     YuruYuri Season 2                           → not found in Anilibria
+✓ FOUND    tt6104656     Izetta: The Last Witch                      → anilibria#3050
+✓ FOUND    tt32812118    I’ll Become a Villainess Who Goes Down in   → anilibria#9794
+✗ MISSING  tt32550272    Medaka Kuroiwa is Impervious to My Charms   → not found in Anilibria
+✗ MISSING  tt1216124     Kanokon: The Girl Who Cried Fox             → not found in Anilibria
+✓ FOUND    tt7879138     Killing Bites                               → anilibria#5689
+✓ FOUND    -             Oreimo (ONA)                                → anilibria#8440
+✗ MISSING  tt1568632     Sound of the Sky                            → not found in Anilibria
+✓ FOUND    tt15799550    Fruits Basket -prelude-                     → anilibria#9373
+✗ MISSING  tt0113799     Memories                                    → not found in Anilibria
+✓ FOUND    -             Samurai X: Trust and Betrayal               → anilibria#9486
+✓ FOUND    tt6135388     Magical Girl Raising Project                → anilibria#3060
+✓ FOUND    -             Re:ZERO - Starting Life in Another World-   → anilibria#10157
+✓ FOUND    tt10981202    Her Blue Sky                                → anilibria#8925
+✓ FOUND    -             Black Butler: Book of Murder                → anilibria#8681
+✗ MISSING  tt12063450    To Your Eternity Season 3                   → not found in Anilibria
+✓ FOUND    tt1481363     Naruto Shippuden the Movie: The Will of Fi  → anilibria#413
+✓ FOUND    tt28634577    Grandpa and Grandma Turn Young Again        → anilibria#9677
+✗ MISSING  tt2230531     Symphogear                                  → not found in Anilibria
+✗ MISSING  tt2904550     Sunday Without God                          → not found in Anilibria
+✓ FOUND    tt9828600     Fairy gone                                  → anilibria#8314
+✗ MISSING  tt1909586     SKET Dance                                  → not found in Anilibria
+✗ MISSING  tt6548966     Fairy Tail: Dragon Cry                      → not found in Anilibria
+✓ FOUND    tt13286958    2.43: Seiin High School Boys Volleyball Te  → anilibria#8851
+✗ MISSING  tt4801510     Ushio and Tora (TV)                         → not found in Anilibria
+✗ MISSING  tt0102587     Only Yesterday                              → not found in Anilibria
+✓ FOUND    tt0493334     Yu-Gi-Oh! GX                                → anilibria#9202
+✓ FOUND    tt9826402     YU-NO: A Girl Who Chants Love at the Bound  → anilibria#8328
+✓ FOUND    tt26713948    ISHURA                                      → anilibria#9625
+✗ MISSING  tt28671146    BLUE LOCK THE MOVIE -EPISODE NAGI-          → not found in Anilibria
+✗ MISSING  tt0865827     SHUFFLE!                                    → not found in Anilibria
+✓ FOUND    tt30644010    The Weakest Tamer Began a Journey to Pick   → anilibria#9616
+✗ MISSING  tt6994582     Hitorijime My Hero                          → not found in Anilibria
+✗ MISSING  tt1132201     Bokurano                                    → not found in Anilibria
+✓ FOUND    tt27571597    My Tiny Senpai                              → anilibria#9495
+✓ FOUND    tt5614180     Joker Game                                  → anilibria#2133
+✓ FOUND    tt1475263     Ga-Rei-Zero                                 → anilibria#8358
+✓ FOUND    tt2959370     Gatchaman Crowds                            → anilibria#567
+✓ FOUND    -             FLCL Progressive                            → anilibria#6759
+✓ FOUND    -             Another: The Other                          → anilibria#660
+✗ MISSING  tt1105263     Bleach the Movie: Memories of Nobody        → not found in Anilibria
+✓ FOUND    tt0159172     Mobile Suit Gundam                          → anilibria#9954
+✗ MISSING  tt0444745     Princess Tutu                               → not found in Anilibria
+✗ MISSING  tt1584003     Ladies Versus Butlers                       → not found in Anilibria
+✓ FOUND    tt5345050     Please tell me! Galko-chan                  → anilibria#1772
+✗ MISSING  tt0791188     Naruto the Movie: Legend of the Stone of G  → not found in Anilibria
+✗ MISSING  tt1516294     Nyan Koi!                                   → not found in Anilibria
+✓ FOUND    tt21237634    The Maid I Hired Recently is Mysterious     → anilibria#9235
+✗ MISSING  tt24229160    Campfire Cooking in Another World with my   → not found in Anilibria
+✓ FOUND    tt28101962    The Great Cleric                            → anilibria#9492
+✗ MISSING  tt0210234     Pokémon the Movie 2000                      → not found in Anilibria
+✗ MISSING  tt36592708    There's No Freaking Way I'll Be Your Lover  → not found in Anilibria
+✓ FOUND    -             Lookism                                     → anilibria#9394
+✓ FOUND    tt12415634    MARS RED                                    → anilibria#8969
+✗ MISSING  tt10265146    Miss Caretaker of Sunohara-sou              → not found in Anilibria
+✗ MISSING  tt5071764     Castle Town Dandelion                       → not found in Anilibria
+✗ MISSING  -             Mob Psycho 100 II: The First Spirits and S  → not found in Anilibria
+✗ MISSING  tt3432310     If Her Flag Breaks                          → not found in Anilibria
+✓ FOUND    tt7535746     KONOHANA KITAN                              → anilibria#5185
+✓ FOUND    tt2150751     Chihayafuru 3                               → anilibria#8482
+✗ MISSING  tt0328739     Full Metal Panic? Fumoffu                   → not found in Anilibria
+✗ MISSING  tt2085795     Fairy Tail: Phoenix Priestess               → not found in Anilibria
+✓ FOUND    tt7122440     Netsuzou Trap -NTR-                         → anilibria#4640
+✓ FOUND    tt3185682     Pupa                                        → anilibria#477
+✗ MISSING  tt2904426     Fate/kaleid liner Prisma☆Illya 2wei!        → not found in Anilibria
+✓ FOUND    tt21689900    My Life as Inukai-san’s Dog                 → anilibria#9349
+✗ MISSING  tt3158246     Space Dandy 2                               → not found in Anilibria
+✓ FOUND    tt11714178    APPARE-RANMAN!                              → anilibria#8589
+✗ MISSING  tt2293988     NAKAIMO - My Little Sister Is Among Them!   → not found in Anilibria
+✗ MISSING  -             Kubikiri Cycle: The Blue Savant and the No  → not found in Anilibria
+✗ MISSING  -             Darker than Black: Origins                  → not found in Anilibria
+✓ FOUND    -             When They Cry Rei                           → anilibria#742
+✓ FOUND    tt10452436    The Ones Within                             → anilibria#8414
+✗ MISSING  tt35331428    The Shiunji Family Children                 → not found in Anilibria
+✓ FOUND    -             JoJo's Bizarre Adventure                    → anilibria#7438
+✗ MISSING  tt1952071     MM!                                         → not found in Anilibria
+✓ FOUND    tt13362302    SHADOWS HOUSE 2nd Season                    → anilibria#8972
+✓ FOUND    tt6452968     Aoharu x Machinegun                         → anilibria#783
+✗ MISSING  tt36593026    My Gift Lvl 9999 Unlimited Gacha: Backstab  → not found in Anilibria
+✓ FOUND    tt3517016     Chaika -The Coffin Princess- AVENGING BATT  → anilibria#394
+✗ MISSING  tt1329466     Skip Beat!                                  → not found in Anilibria
+✗ MISSING  tt33615810    I Left My A-Rank Party to Help My Former S  → not found in Anilibria
+✓ FOUND    tt3894916     Terra Formars                               → anilibria#436
+✓ FOUND    tt8400662     Dropkick on My Devil!                       → anilibria#6842
+✓ FOUND    tt14476244    The Faraway Paladin: The Lord of Rust Moun  → anilibria#9540
+✓ FOUND    tt1029248     Moribito: Guardian of the Spirit            → anilibria#7566
+✓ FOUND    tt2649756     The Idol Master                             → anilibria#5222
+✗ MISSING  tt0279570     Love Hina                                   → not found in Anilibria
+✗ MISSING  tt3950102     World Trigger 2nd Season                    → not found in Anilibria
+✓ FOUND    tt13248062    I've Been Killing Slimes For 300 Years And  → anilibria#9903
+✓ FOUND    tt22443832    Arknights: PRELUDE TO DAWN                  → anilibria#9317
+✓ FOUND    -             STEEL BALL RUN JoJo's Bizarre Adventure     → anilibria#7438
+✗ MISSING  tt30989692    Whisper Me a Love Song                      → not found in Anilibria
+✓ FOUND    tt27489241    Dead Mount Death Play Part 2                → anilibria#9541
+✗ MISSING  tt8693818     Back Street Girls -GOKUDOLS-                → not found in Anilibria
+✓ FOUND    tt5346952     Dagashi Kashi 2                             → anilibria#5693
+✓ FOUND    -             7SEEDS                                      → anilibria#8435
+✓ FOUND    tt0346314     Ghost in the Shell: Stand Alone Complex 2n  → anilibria#8844
+✗ MISSING  tt10470444    Wasteful Days of High School Girls          → not found in Anilibria
+✓ FOUND    tt32731400    Apocalypse Bringer Mynoghra: World Conques  → anilibria#9973
+✗ MISSING  tt9085692     DAKAICHI -I'm being harassed by the sexies  → not found in Anilibria
+✓ FOUND    tt9826314     Ultramarine Magmell                         → anilibria#8316
+✓ FOUND    -             Made in Abyss: Wandering Twilight           → anilibria#4644
+✓ FOUND    -             One-Punch Man Season 2 OVA                  → anilibria#8335
+✓ FOUND    tt0972713     Shakugan no Shana: Season III               → anilibria#8392
+✗ MISSING  tt13064272    Sing a Bit of Harmony                       → not found in Anilibria
+✓ FOUND    -             Kimi ni Todoke: From Me to You Season 3     → anilibria#9768
+✓ FOUND    tt3453204     Soul Eater Not!                             → anilibria#511
+✓ FOUND    tt5247480     The Perfect Insider                         → anilibria#1286
+✓ FOUND    tt11754514    Arte                                        → anilibria#8591
+✗ MISSING  -             Prison School: Mad Wax                      → not found in Anilibria
+✓ FOUND    tt11886236    Princess Connect! Re:Dive Season 2          → anilibria#9119
+✗ MISSING  tt29141921    Tying the Knot with an Amagami Sister       → not found in Anilibria
+✓ FOUND    tt2575684     Date A Live V                               → anilibria#9662
+✓ FOUND    tt27497575    365 Days to the Wedding                     → anilibria#9815
+✓ FOUND    tt12642634    Ikebukuro West Gate Park                    → anilibria#8811
+✗ MISSING  tt1470836     Princess Lover!                             → not found in Anilibria
+✓ FOUND    -             Noragami ARAGOTO OVA                        → anilibria#834
+✗ MISSING  tt1033796     Den-noh Coil                                → not found in Anilibria
+✗ MISSING  -             Spice and Wolf II: Wolf and the Amber Mela  → not found in Anilibria
+✗ MISSING  -             Bludgeoning Angel Dokuro-chan               → not found in Anilibria
+✓ FOUND    tt26688817    Helck                                       → anilibria#9497
+✓ FOUND    tt8129662     Hakata Tonkotsu Ramens                      → anilibria#5695
+✓ FOUND    -             ORESUKI: Are you the only one who loves me  → anilibria#8927
+✓ FOUND    tt7900936     BEATLESS                                    → anilibria#5690
+✗ MISSING  tt0318898     Now and Then, Here and There                → not found in Anilibria
+✗ MISSING  tt1785394     Bleach the Movie: Hell Verse                → not found in Anilibria
+✓ FOUND    tt27548413    I'm Giving the Disgraced Noble Lady I Resc  → anilibria#9553
+✓ FOUND    tt15433166    Mobile Suit Gundam: The Witch from Mercury  → anilibria#9289
+✓ FOUND    tt1450620     Umineko: When They Cry                      → anilibria#564
+✗ MISSING  -             Yahari Ore no Seishun Love Come wa Machiga  → not found in Anilibria
+✓ FOUND    -             Death Note: Relight                         → anilibria#5158
+✗ MISSING  tt35127440    SANDA                                       → not found in Anilibria
+✗ MISSING  tt0235679     Pokémon 3: The Movie                        → not found in Anilibria
+✗ MISSING  tt33472011    CITY THE ANIMATION                          → not found in Anilibria
+✗ MISSING  -             GANBARE DOUKICHAN                           → not found in Anilibria
+✗ MISSING  tt3029762     Omamori Himari                              → not found in Anilibria
+✗ MISSING  tt0476042     Gunslinger Girl                             → not found in Anilibria
+✗ MISSING  tt1288461     Gurren Lagann The Movie: Childhood's End    → not found in Anilibria
+✓ FOUND    -             Seraph of the End: Vampire Reign - Owarana  → anilibria#8450
+✗ MISSING  -             Love, Chunibyo & Other Delusions - Heart T  → not found in Anilibria
+✓ FOUND    -             That Time I Got Reincarnated as a Slime: V  → anilibria#10154
+✓ FOUND    tt6901486     Seven Mortal Sins                           → anilibria#3951
+✗ MISSING  tt0324700     Boogiepop Phantom                           → not found in Anilibria
+✓ FOUND    tt19389868    RWBY: Ice Queendom                          → anilibria#9251
+✗ MISSING  tt1214373     ItaKiss                                     → not found in Anilibria
+✓ FOUND    tt1134000     Mobile Suit Gundam 00                       → anilibria#9954
+✗ MISSING  -             My Hero Academia the Movie: Two Heroes Spe  → not found in Anilibria
+✓ FOUND    tt4838372     Mr. Osomatsu                                → anilibria#9322
+✓ FOUND    tt21197084    Raven of the Inner Palace                   → anilibria#9292
+✗ MISSING  tt1339238     Sekirei: Pure Engagement                    → not found in Anilibria
+✗ MISSING  tt27571647    TenPuru                                     → not found in Anilibria
+✓ FOUND    tt1161697     True Tears                                  → anilibria#8442
+✗ MISSING  tt0235119     Casshern Sins                               → not found in Anilibria
+✓ FOUND    tt2293974     Robotics;Notes                              → anilibria#8385
+✗ MISSING  tt13412606    Backflip!!                                  → not found in Anilibria
+✗ MISSING  tt2595478     GJ Club                                     → not found in Anilibria
+✗ MISSING  tt8253268     Umamusume: Pretty Derby Season 2            → not found in Anilibria
+✗ MISSING  tt1694025     Cat Planet Cuties                           → not found in Anilibria
+✓ FOUND    tt9054364     That Time I Got Reincarnated as a Slime Se  → anilibria#10154
+✓ FOUND    tt2242720     Tari Tari                                   → anilibria#8466
+✗ MISSING  tt0983962     Hayate the Combat Butler                    → not found in Anilibria
+✗ MISSING  -             Nisekoi OVA                                 → not found in Anilibria
+✓ FOUND    tt31975847    As a Reincarnated Aristocrat, I'll Use My   → anilibria#9829
+✓ FOUND    tt2564106     Nyaruko-san: Another Crawling Chaos W       → anilibria#420
+✗ MISSING  tt0168366     Pokémon the Series: Diamond and Pearl       → not found in Anilibria
+✗ MISSING  tt13463778    Girlfriend, Girlfriend Season 2             → not found in Anilibria
+✓ FOUND    tt12642654    By the Grace of the Gods 2                  → anilibria#9328
+✗ MISSING  tt7797662     OneRoom                                     → not found in Anilibria
+✗ MISSING  tt1085074     Black Cat                                   → not found in Anilibria
+✗ MISSING  tt3761860     Sabagebu! - Survival Game Club!             → not found in Anilibria
+✗ MISSING  tt2259737     Jormungand: Perfect Order                   → not found in Anilibria
+✓ FOUND    tt15170340    ORIENT                                      → anilibria#9125
+✓ FOUND    tt0328739     Full Metal Panic! The Second Raid           → anilibria#6171
+✓ FOUND    tt32742508    My Friend's Little Sister Has It In for Me  → anilibria#10032
+✓ FOUND    -             High School DxD NEW OVA Oppai, Tsutsumimas  → anilibria#570
+✗ MISSING  tt0142236     Dragon Ball Z: Fusion Reborn                → not found in Anilibria
+✓ FOUND    -             Hori-san to Miyamura-kun                    → anilibria#8642
+✗ MISSING  tt6562012     Student Council's Discretion                → not found in Anilibria
+✗ MISSING  tt14523706    Puella Magi Madoka Magica the Movie -Walpu  → not found in Anilibria
+✗ MISSING  tt3837248     Love Live! The School Idol Movie            → not found in Anilibria
+✗ MISSING  -             The Daily Life of the Immortal King Season  → not found in Anilibria
+✓ FOUND    -             Star Wars: Visions                          → anilibria#9095
+✗ MISSING  tt3985216     Gonna be the Twin-Tail!!                    → not found in Anilibria
+✗ MISSING  tt2189661     Listen to Me, Girls. I Am Your Father!      → not found in Anilibria
+✓ FOUND    tt14960284    She Professed Herself Pupil of the Wise Ma  → anilibria#9120
+✓ FOUND    -             To LOVE-Ru OVA                              → anilibria#8922
+✗ MISSING  tt3633800     Invaders of the Rokujoma!?                  → not found in Anilibria
+✗ MISSING  tt1586814     Dance in the Vampire Bund                   → not found in Anilibria
+✓ FOUND    tt3114358     Non Non Biyori Nonstop                      → anilibria#8877
+✗ MISSING  tt1071815     Naruto the Movie: Guardians of the Crescen  → not found in Anilibria
+✗ MISSING  tt0473578     Genshiken                                   → not found in Anilibria
+✓ FOUND    -             Beyond the Boundary -I'LL BE HERE-: Past    → anilibria#8295
+✗ MISSING  -             the Garden of sinners Chapter 8: The Final  → not found in Anilibria
+✓ FOUND    tt28454318    BUCCHIGIRI?!                                → anilibria#9633
+✓ FOUND    tt1148261     Bleach the Movie: The DiamondDust Rebellio  → anilibria#8452
+✗ MISSING  tt0142242     Dragon Ball Z: Broly - The Legendary Super  → not found in Anilibria
+✓ FOUND    tt33021990    Headhunted to Another World: From Salaryma  → anilibria#9858
+✗ MISSING  tt11177400    Smile Down the Runway                       → not found in Anilibria
+✗ MISSING  tt0495596     Tales from Earthsea                         → not found in Anilibria
+✗ MISSING  tt0385426     Initial D Fifth Stage                       → not found in Anilibria
+✓ FOUND    tt27462671    My One-Hit Kill Sister                      → anilibria#9425
+✓ FOUND    -             Yona of the Dawn OVA                        → anilibria#384
+✓ FOUND    tt3957586     Gugure! Kokkuri-san                         → anilibria#399
+✗ MISSING  tt0435961     Gungrave                                    → not found in Anilibria
+✗ MISSING  -             K-ON! Season 2: Plan!                       → not found in Anilibria
+✗ MISSING  tt0168366     Pokémon the Series: XYZ                     → not found in Anilibria
+✗ MISSING  tt2552218     Karneval (TV)                               → not found in Anilibria
+✓ FOUND    tt10431310    To the Abandoned Sacred Beasts              → anilibria#8408
+✓ FOUND    tt5847454     Berserk 2                                   → anilibria#3952
+✗ MISSING  -             Orange: Future                              → not found in Anilibria
+✗ MISSING  tt8076344     Penguin Highway                             → not found in Anilibria
+✗ MISSING  -             Hetalia Axis Powers                         → not found in Anilibria
+✓ FOUND    tt7120888     Clockwork Planet                            → anilibria#3946
+✗ MISSING  tt1339302     Bleach the Movie: Fade to Black             → not found in Anilibria
+✓ FOUND    tt3341584     Recently, My Sister Is Unusual              → anilibria#480
+✓ FOUND    -             Fate/stay night: Unlimited Blade Works 2nd  → anilibria#429
+✓ FOUND    tt8693220     How to Keep a Mummy                         → anilibria#7264
+✓ FOUND    tt1352421     Natsume's Book of Friends Season 6          → anilibria#4057
+✓ FOUND    tt1352421     Natsume's Book of Friends Season 5          → anilibria#4057
+✗ MISSING  tt0347246     Ghost in the Shell 2: Innocence             → not found in Anilibria
+✗ MISSING  tt0985285     Ghost Hunt                                  → not found in Anilibria
+✗ MISSING  -             Time of Eve                                 → not found in Anilibria
+✓ FOUND    tt8343748     Seven Senses of the Re'Union                → anilibria#6833
+✓ FOUND    tt8526106     ISLAND                                      → anilibria#6829
+✓ FOUND    tt23132598    The Most Heretical Last Boss Queen: From V  → anilibria#10167
+✓ FOUND    -             Detroit Metal City                          → anilibria#8645
+✓ FOUND    -             Classroom of the Elite 2nd Year             → anilibria#10155
+✓ FOUND    -             MONOGATARI Series: OFF & MONSTER Season     → anilibria#9770
+✓ FOUND    tt15026576    The Fruit of Evolution: Before I Knew It,   → anilibria#9332
+✓ FOUND    tt1300176     Strike Witches                              → anilibria#1408
+✗ MISSING  tt1301972     Yozakura Quartet                            → not found in Anilibria
+✗ MISSING  tt6460600     BanG Dream!                                 → not found in Anilibria
+✓ FOUND    tt32510166    The Healer Who Was Banished From His Party  → anilibria#9795
+✗ MISSING  tt0138919     Vision of Escaflowne                        → not found in Anilibria
+✗ MISSING  tt1636780     Gintama - The Movie                         → not found in Anilibria
+✗ MISSING  tt0327386     The Twelve Kingdoms                         → not found in Anilibria
+✓ FOUND    tt5603356     Ace Attorney                                → anilibria#2129
+✓ FOUND    tt6410184     Triage X                                    → anilibria#402
+✗ MISSING  tt1346122     Maria†Holic                                 → not found in Anilibria
+✓ FOUND    tt7978710     Sword Art Online Alternative: Gun Gale Onl  → anilibria#9788
+✓ FOUND    tt38648925    Jack-of-All-Trades, Party of None           → anilibria#9286
+✓ FOUND    -             Made in Abyss: Journey's Dawn               → anilibria#8926
+✗ MISSING  tt0210418     Digimon: Digital Monsters 02                → not found in Anilibria
+✓ FOUND    tt2341757     Tsuritama                                   → anilibria#3502
+✗ MISSING  tt1133480     Shugo Chara!                                → not found in Anilibria
+✗ MISSING  tt14364238    Laid-Back Camp The Movie                    → not found in Anilibria
+✓ FOUND    -             TONIKAWA: Over The Moon For You ~Uniform~   → anilibria#8806
+✓ FOUND    tt9567240     How clumsy you are, Miss Ueno.              → anilibria#8053
+✗ MISSING  -             Tenchi Muyo! War on Geminar                 → not found in Anilibria
+✓ FOUND    tt1776196     Fullmetal Alchemist: The Sacred Star of Mi  → anilibria#9528
+✓ FOUND    tt28100780    The Masterful Cat is Depressed Again Today  → anilibria#9504
+✗ MISSING  tt2904426     Fate/kaleid liner Prisma☆Illya 2wei! Herz!  → not found in Anilibria
+✓ FOUND    tt5321184     Prince of Stride: Alternative               → anilibria#1760
+✗ MISSING  tt0287635     Pokémon 4Ever                               → not found in Anilibria
+✓ FOUND    tt7164706     You and Me.                                 → anilibria#8457
+✓ FOUND    -             Oreimo 2 (ONA)                              → anilibria#8440
+✓ FOUND    -             Baccano! Specials                           → anilibria#8648
+✗ MISSING  tt2074035     Horizon in the Middle of Nowhere            → not found in Anilibria
+✗ MISSING  tt5789296     Love Live! Sunshine!! Season 2              → not found in Anilibria
+✓ FOUND    tt31860621    Gods' Games We Play                         → anilibria#9671
+✓ FOUND    tt32083095    Mysterious Disappearances                   → anilibria#9685
+✓ FOUND    -             HAIKYU!!: Lev Appears!                      → anilibria#1337
+✓ FOUND    tt12331304    Our Last Crusade or the Rise of a New Worl  → anilibria#8792
+✓ FOUND    tt5321682     She and Her Cat -Everything Flows-          → anilibria#2086
+✓ FOUND    tt32176689    My Hero Academia: You’re Next               → anilibria#8393
+✗ MISSING  tt6473260     Urara Meirocho                              → not found in Anilibria
+✓ FOUND    -             The Quintessential Quintuplets Specials     → anilibria#9642
+✓ FOUND    tt0861287     Rozen Maiden                                → anilibria#8693
+✓ FOUND    tt7537488     Sagrada Reset                               → anilibria#3987
+✓ FOUND    -             Kage no Jitsuryokusha ni Naritakute!: Zank  → anilibria#9265
+✗ MISSING  tt6475250     Assassination Classroom the Movie: 365 Day  → not found in Anilibria
+✗ MISSING  tt21608762    Saving 80,000 Gold in Another World for My  → not found in Anilibria
+✓ FOUND    tt9203780     Mysteria Friends                            → anilibria#439
+✗ MISSING  tt8530992     Harukana Receive                            → not found in Anilibria
+✗ MISSING  tt2859264     Hyperdimension Neptunia                     → not found in Anilibria
+✓ FOUND    tt10347516    Cop Craft                                   → anilibria#8397
+✗ MISSING  tt21345982    Play It Cool, Guys                          → not found in Anilibria
+✓ FOUND    tt35437675    Umamusume: Cinderella Gray                  → anilibria#9955
+✗ MISSING  tt0385426     Initial D Final Stage                       → not found in Anilibria
+✗ MISSING  tt9050410     My Sister, My Writer                        → not found in Anilibria
+✗ MISSING  tt0295080     Digimon Tamers                              → not found in Anilibria
+✓ FOUND    -             BEASTARS Final Season Part 1                → anilibria#9890
+✓ FOUND    tt3417860     Inari Kon Kon                               → anilibria#475
+✗ MISSING  tt1210339     Junjo Romantica                             → not found in Anilibria
+✓ FOUND    tt6142628     The Great Passage                           → anilibria#8831
+✓ FOUND    tt33384314    Ameku M.D.: Doctor Detective                → anilibria#9876
+✗ MISSING  tt27524116    Sasaki and Peeps                            → not found in Anilibria
+✗ MISSING  tt5373222     My Wife is the Student Council President+!  → not found in Anilibria
+✓ FOUND    tt2632048     Valvrave the Liberator                      → anilibria#8365
+✗ MISSING  -             Baki Hanma Season 2                         → not found in Anilibria
+✗ MISSING  tt0161952     Saint Seiya: Knights of the Zodiac          → not found in Anilibria
+✓ FOUND    tt28247170    Doctor Elise: The Royal Lady with the Lamp  → anilibria#9617
+✓ FOUND    tt36469298    Dealing with Mikadono Sisters Is a Breeze   → anilibria#9986
+✓ FOUND    -             Super Crooks                                → anilibria#9146
+✗ MISSING  tt3517010     Is the Order a Rabbit?? Season 2            → not found in Anilibria
+✗ MISSING  tt31975747    Train to the End of the World               → not found in Anilibria
+✗ MISSING  tt9100954     Skull-face Bookseller Honda-san             → not found in Anilibria
+✗ MISSING  tt3496018     selector infected WIXOSS                    → not found in Anilibria
+✓ FOUND    -             DEAD DEAD DEMONS DEDEDEDE DESTRUCTION       → anilibria#9722
+✓ FOUND    -             Seraph of the End: Kyuuketsuki Shahal       → anilibria#8450
+✗ MISSING  tt32579866    Bogus Skill <<Fruitmaster>> ~About that ti  → not found in Anilibria
+✓ FOUND    tt29467317    Mr. Villain's Day Off                       → anilibria#9629
+✗ MISSING  tt1515976     11eyes                                      → not found in Anilibria
+✓ FOUND    -             Angels of Death (ONA)                       → anilibria#6808
+✗ MISSING  -             Beyond the Boundary: Daybreak               → not found in Anilibria
+✓ FOUND    tt18566706    Immoral Guild                               → anilibria#9287
+✓ FOUND    -             Love, Chunibyo & Other Delusions Lite       → anilibria#469
+✗ MISSING  tt5235870     Valkyrie Drive: Mermaid                     → not found in Anilibria
+✗ MISSING  tt5344382     Mobile Suit GUNDAM Iron Blooded Orphans 2   → not found in Anilibria
+✗ MISSING  tt8963328     Hi Score Girl II                            → not found in Anilibria
+✗ MISSING  tt1685397     Amagami SS+ plus                            → not found in Anilibria
+✗ MISSING  tt1690397     Tomorrow's Joe                              → not found in Anilibria
+✓ FOUND    tt33309549    SHIBOYUGI: Playing Death Games to Put Food  → anilibria#10097
+✗ MISSING  tt2082624     Dog Days                                    → not found in Anilibria
+✗ MISSING  tt30970523    The Magical Girl and the Evil Lieutenant U  → not found in Anilibria
+✓ FOUND    tt12367868    Higurashi: When They Cry - SOTSU            → anilibria#9025
+✓ FOUND    tt2147761     We Were There                               → anilibria#8713
+✓ FOUND    tt8836500     Chio's School Road                          → anilibria#6839
+✗ MISSING  -             Tatsuki Fujimoto 17-26                      → not found in Anilibria
+✓ FOUND    tt9050366     Karakuri Circus                             → anilibria#7466
+✓ FOUND    -             Is It Wrong to Try to Pick Up Girls in a D  → anilibria#3853
+✗ MISSING  tt1125254     Dragon Ball Z: Cooler's Revenge             → not found in Anilibria
+✗ MISSING  tt0477543     Tsubasa RESERVoir CHRoNiCLE                 → not found in Anilibria
+✗ MISSING  tt2011519     Wandering Son                               → not found in Anilibria
+✗ MISSING  -             Steins;Gate 0: Valentine's of Crystal Poly  → not found in Anilibria
+✓ FOUND    tt11405408    Asteroid in Love                            → anilibria#8557
+✗ MISSING  -             Boku no Hero Academia: Training of the Dea  → not found in Anilibria
+✓ FOUND    tt13192574    Bungo Stray Dogs WAN!                       → anilibria#8855
+✗ MISSING  tt33258199    A Wild Last Boss Appeared!                  → not found in Anilibria
+✗ MISSING  -             Eromanga Sensei OVA                         → not found in Anilibria
+✗ MISSING  tt6478612     Akiba's Trip the Animation                  → not found in Anilibria
+✗ MISSING  tt1244315     Kannagi: Crazy Shrine Maidens               → not found in Anilibria
+✓ FOUND    tt5954268     D.Gray-man HALLOW                           → anilibria#2644
+✓ FOUND    -             Full-Time Magister                          → anilibria#3954
+✗ MISSING  tt2904426     Fate/kaleid liner Prisma☆Illya 3rei!!       → not found in Anilibria
+✓ FOUND    tt13221420    Burning Kabaddi                             → anilibria#8973
+✓ FOUND    tt5861670     Tales of Zestiria the X Season 2            → anilibria#2632
+✗ MISSING  -             Electromagnetic Girlfriend                  → not found in Anilibria
+✗ MISSING  tt0981456     Baki the Grappler                           → not found in Anilibria
+✗ MISSING  -             Aggretsuko: Season 2                        → not found in Anilibria
+✓ FOUND    tt21621494    Dungeon Meshi 2nd Season                    → anilibria#9612
+✓ FOUND    tt3399706     Re: Hamatora                                → anilibria#396
+✓ FOUND    -             The Way of the Househusband: Season 2       → anilibria#9399
+✗ MISSING  tt8993614     UzaMaid!                                    → not found in Anilibria
+✓ FOUND    tt8043492     Forest of Piano                             → anilibria#8051
+✓ FOUND    tt5236260     Heavy Object                                → anilibria#1203
+✗ MISSING  tt1196027     RIN ~Daughters of Mnemosyne~                → not found in Anilibria
+✓ FOUND    -             Kaguya-sama: Love Is War -Stairway to Adul  → anilibria#10147
+✓ FOUND    -             Kamisama Kiss◎ OVA                          → anilibria#383
+✓ FOUND    tt34621652    The Daily Life of a Middle-Aged Online Sho  → anilibria#9887
+✗ MISSING  tt3399620     World Conquest Zvezda Plot                  → not found in Anilibria
+✓ FOUND    tt13884144    The Seven Deadly Sins: Cursed by Light      → anilibria#9324
+✗ MISSING  tt0977907     ARIA The ORIGINATION                        → not found in Anilibria
+✓ FOUND    -             Recovery of an MMO Junkie OVA               → anilibria#5154
+✗ MISSING  tt6176438     WWW.WAGNARIA!!                              → not found in Anilibria
+✓ FOUND    tt9826484     Trinity Seven: Heavens Library & Crimson L  → anilibria#8446
+✗ MISSING  tt0168366     Pokémon the Series: Sun & Moon              → not found in Anilibria
+✓ FOUND    -             Mob Psycho 100 REIGEN The Miraculous Unkno  → anilibria#2622
+✓ FOUND    tt13715764    The Honor at Magic High School              → anilibria#9010
+✓ FOUND    tt5330856     Divine Gate                                 → anilibria#1750
+✓ FOUND    -             Code Geass: Akito the Exiled - The Wyvern   → anilibria#8084
+✗ MISSING  tt0387775     Cromartie High School                       → not found in Anilibria
+✗ MISSING  -             Record of Ragnarok II Part 2                → not found in Anilibria
+✗ MISSING  tt35936938    This Monster Wants to Eat Me                → not found in Anilibria
+✓ FOUND    tt2573198     Hal                                         → anilibria#414
+✓ FOUND    tt22297732    Saint Cecilia & Pastor Lawrence             → anilibria#9487
+✗ MISSING  -             The Testament of Sister New Devil: Tojo Ba  → not found in Anilibria
+✓ FOUND    tt10777610    Toilet-bound Hanako-kun Season 2            → anilibria#9852
+✓ FOUND    -             KONOSUBA -God's Blessing on This Wonderful  → anilibria#10024
+✗ MISSING  tt1132205     Minami-ke                                   → not found in Anilibria
+✓ FOUND    -             Scott Pilgrim Takes Off                     → anilibria#9626
+✓ FOUND    tt30689448    Welcome to Japan, Ms. Elf!                  → anilibria#9848
+✓ FOUND    -             Masamune-kun's Revenge OAD                  → anilibria#8299
+✗ MISSING  tt0370754     Voices of a Distant Star                    → not found in Anilibria
+✗ MISSING  tt35014218    The Unaware Atelier Meister                 → not found in Anilibria
+✗ MISSING  -             Dawang Raoming                              → not found in Anilibria
+✓ FOUND    tt37113118    Ruri Rocks                                  → anilibria#10020
+✗ MISSING  tt9085330     Ms. vampire who lives in my neighborhood.   → not found in Anilibria
+✗ MISSING  tt31131295    Tokidoki Bosotto Russiago de Dereru Tonari  → not found in Anilibria
+✗ MISSING  -             Fate/Grand Order Divine Realm of the Round  → not found in Anilibria
+✗ MISSING  tt6327570     The Moment You Fall in Love                 → not found in Anilibria
+✓ FOUND    tt12287748    Yashahime: Princess Half-Demon              → anilibria#8783
+✓ FOUND    -             New PANTY & STOCKING with GARTERBELT        → anilibria#9988
+✓ FOUND    -             Cosmic Princess Kaguya!                     → anilibria#10152
+✗ MISSING  tt3169618     Samurai Flamenco                            → not found in Anilibria
+✗ MISSING  tt2309408     Little Busters! Refrain                     → not found in Anilibria
+✗ MISSING  tt7742120     Laid-Back Camp Season 3                     → not found in Anilibria
+✓ FOUND    tt33058180    From Bureaucrat to Villainess: Dad's Been   → anilibria#9870
+✓ FOUND    tt14648592    Magical Destroyers                          → anilibria#9437
+✗ MISSING  -             Elfen Lied: Just How Did the Young Girl Ar  → not found in Anilibria
+✗ MISSING  tt25721166    Endo and Kobayashi Live! The Latest on Tsu  → not found in Anilibria
+✗ MISSING  tt8075454     Mitsuboshi Colors                           → not found in Anilibria
+✗ MISSING  -             Persona 3 the Movie: #1 Spring of Birth     → not found in Anilibria
+✗ MISSING  tt0466352     The Prince of Tennis                        → not found in Anilibria
+✗ MISSING  tt0107692     Ninja Scroll                                → not found in Anilibria
+✓ FOUND    tt6424452     The Royal Tutor                             → anilibria#4063
+✗ MISSING  tt3163844     A Certain Magical Index: The Miracle of En  → not found in Anilibria
+✗ MISSING  tt5354314     AOKANA: Four Rhythm Across the Blue         → not found in Anilibria
+✗ MISSING  tt0142243     Dragon Ball Z: Wrath of the Dragon          → not found in Anilibria
+✓ FOUND    tt4292186     The Disappearance of Nagato Yuki-chan       → anilibria#443
+✗ MISSING  tt15353550    The Heike Story                             → not found in Anilibria
+✗ MISSING  tt2983564     the Garden of sinners -recalled out summer  → not found in Anilibria
+✓ FOUND    -             FLCL Alternative                            → anilibria#8579
+✗ MISSING  tt1394286     Chrome Shelled Regios                       → not found in Anilibria
+✓ FOUND    -             Strike the Blood III                        → anilibria#8351
+✓ FOUND    tt33310730    Medalist                                    → anilibria#9875
+✗ MISSING  tt1515993     The Sacred Blacksmith                       → not found in Anilibria
+✗ MISSING  tt0266171     Outlaw Star                                 → not found in Anilibria
+✗ MISSING  -             FAIRY TAIL OVA                              → not found in Anilibria
+✗ MISSING  tt4219154     Maria the Virgin Witch                      → not found in Anilibria
+✗ MISSING  tt12407004    Assault Lily BOUQUET                        → not found in Anilibria
+✗ MISSING  tt35436553    Rock is a Lady’s Modesty                    → not found in Anilibria
+✓ FOUND    tt3611294     Glasslip                                    → anilibria#417
+✗ MISSING  tt13351056    Kageki Shojo!!                              → not found in Anilibria
+✗ MISSING  tt0978215     Utawarerumono                               → not found in Anilibria
+✗ MISSING  tt0168366     Pokémon Journeys: The Series                → not found in Anilibria
+✓ FOUND    tt0103369     Sailor Moon R                               → anilibria#8921
+✓ FOUND    tt4219158     Unlimited Fafnir                            → anilibria#392
+✗ MISSING  tt3169640     Yozakura Quartet: Hana no Uta               → not found in Anilibria
+✓ FOUND    tt6931266     Dies irae                                   → anilibria#5153
+✗ MISSING  tt0142239     Dragon Ball Z: Broly - Second Coming        → not found in Anilibria
+✗ MISSING  tt6336356     Mary and The Witch's Flower                 → not found in Anilibria
+✓ FOUND    tt7089882     Sound! Euphonium: The Movie - Our Promise:  → anilibria#9896
+✓ FOUND    -             PSYCHO-PASS: Sinners of the System 1 - Cri  → anilibria#418
+✓ FOUND    tt14271876    Scarlet Nexus                               → anilibria#9027
+✗ MISSING  tt2487126     Aura                                        → not found in Anilibria
+✗ MISSING  -             Overflow                                    → not found in Anilibria
+✗ MISSING  tt0810056     Strawberry Marshmallow                      → not found in Anilibria
+✓ FOUND    -             MUSHI-SHI OVA                               → anilibria#9323
+✓ FOUND    tt31975855    Viral Hit                                   → anilibria#9705
+✗ MISSING  tt1482965     Kobato                                      → not found in Anilibria
+✗ MISSING  tt0361140     .hack//SIGN                                 → not found in Anilibria
+✗ MISSING  tt0791098     Lunar Legend Tsukihime                      → not found in Anilibria
+✗ MISSING  -             Inferno Cop                                 → not found in Anilibria
+✓ FOUND    -             Food Wars! Shokugeki no Soma OVA            → anilibria#421
+✗ MISSING  tt2074011     Samurai Girls                               → not found in Anilibria
+✗ MISSING  tt4928988     Ultimate Otaku Teacher                      → not found in Anilibria
+✗ MISSING  tt2073864     C3                                          → not found in Anilibria
+✓ FOUND    tt13580730    SAKUGAN                                     → anilibria#9074
+✗ MISSING  tt2785038     YuruYuri Season 3                           → not found in Anilibria
+✗ MISSING  tt3950102     World Trigger 3rd Season                    → not found in Anilibria
+✗ MISSING  tt27990718    Sweet Reincarnation                         → not found in Anilibria
+✓ FOUND    tt1460738     Eden of the East the Movie I: The King of   → anilibria#8471
+✗ MISSING  tt2622978     Yuyushiki                                   → not found in Anilibria
+✓ FOUND    tt0390733     Last Exile                                  → anilibria#825
+✓ FOUND    tt3774792     Tokyo ESP                                   → anilibria#431
+✓ FOUND    tt12767982    Iwakakeru -Sport Climbing Girls-            → anilibria#8788
+✓ FOUND    tt1908018     A Bridge to the Starry Skies                → anilibria#664
+✓ FOUND    -             Durarara!! Specials                         → anilibria#8916
+✓ FOUND    -             NANBAKA - Part Two                          → anilibria#3061
+✓ FOUND    tt5895314     Kuromukuro                                  → anilibria#2118
+✗ MISSING  tt32307386    Senpai is an Otokonoko                      → not found in Anilibria
+✓ FOUND    tt4384306     Sound! Euphonium 3                          → anilibria#9683
+✓ FOUND    tt1097194     Ghost Hound                                 → anilibria#8848
+✗ MISSING  tt3639864     Himegoto                                    → not found in Anilibria
+✓ FOUND    -             Sailor Moon Crystal                         → anilibria#9112
+✗ MISSING  tt2904570     Dog & Scissors                              → not found in Anilibria
+✗ MISSING  -             Trinity Seven: Nanatsu no Taizai to Nana M  → not found in Anilibria
+✓ FOUND    tt16156736    Chained Soldier Season 2                    → anilibria#9606
+✓ FOUND    tt6344982     Poco's Udon World                           → anilibria#3062
+✓ FOUND    -             Otonari no Tenshi-sama ni Itsunomanika Dam  → anilibria#9334
+✓ FOUND    tt8225204     Golden Kamuy Season 4                       → anilibria#9283
+✗ MISSING  tt0831888     Tekkonkinkreet                              → not found in Anilibria
+✗ MISSING  tt1907374     Sekai Ichi Hatsukoi - The World's Greatest  → not found in Anilibria
+✓ FOUND    tt22524872    SHY                                         → anilibria#9569
+✓ FOUND    tt18311412    NieR:Automata Ver1.1a Cour 2                → anilibria#9743
+✗ MISSING  -             High School DxD BorN: Yomigaeranai Fushich  → not found in Anilibria
+✓ FOUND    tt15498356    Super Danganronpa 2.5 Komaeda Nagito to Se  → anilibria#4145
+✗ MISSING  tt7742120     ROOM CAMP                                   → not found in Anilibria
+✓ FOUND    tt32524882    The Do-Over Damsel Conquers the Dragon Emp  → anilibria#9796
+✗ MISSING  tt0814243     ONE PIECE: The Movie                        → not found in Anilibria
+✓ FOUND    tt28329410    The Fable                                   → anilibria#9690
+✓ FOUND    tt32582999    Hero Without a Class: Who Even Needs Skill  → anilibria#10037
+✗ MISSING  -             HAIKYU!!: VS Failing Marks                  → not found in Anilibria
+✗ MISSING  tt0293416     Metropolis                                  → not found in Anilibria
+✗ MISSING  tt2595474     Encouragement of Climb                      → not found in Anilibria
+✓ FOUND    tt34814625    I'm the Evil Lord of an Intergalactic Empi  → anilibria#9910
+✗ MISSING  tt0078570     Lady Oscar: The Rose of Versailles          → not found in Anilibria
+✗ MISSING  -             Monthly Girls' Nozaki-kun Specials          → not found in Anilibria
+✗ MISSING  tt12415546    Attack on Titan ~Chronicle~                 → not found in Anilibria
+✗ MISSING  tt3981544     Yurikuma Arashi                             → not found in Anilibria
+✓ FOUND    tt35636155    Apocalypse Hotel                            → anilibria#9939
+✓ FOUND    tt1799631     Blue Exorcist -Beyond the Snow Saga-        → anilibria#9799
+✗ MISSING  tt1639471     Arakawa Under the Bridge x Bridge           → not found in Anilibria
+✗ MISSING  tt0996695     Eyeshield 21                                → not found in Anilibria
+✗ MISSING  tt2360110     Senran Kagura: Ninja Flash!                 → not found in Anilibria
+✓ FOUND    tt3104246     Arpeggio of Blue Steel                      → anilibria#686
+✓ FOUND    tt32524468    I’m a Noble on the Brink of Ruin, So I Mig  → anilibria#9850
+✓ FOUND    tt28131643    The Banished Former Hero Lives as He Pleas  → anilibria#9676
+✓ FOUND    tt7326322     The Ancient Magus' Bride Season 2 Part 2    → anilibria#3070
+✓ FOUND    tt2909912     Silver Spoon Season 2                       → anilibria#8368
+✗ MISSING  -             Fate/Prototype                              → not found in Anilibria
+✓ FOUND    tt6844136     Hinako Note                                 → anilibria#4064
+✓ FOUND    tt15494038    Drifting Home                               → anilibria#9310
+✓ FOUND    tt0434670     Chrono Crusade                              → anilibria#9835
+✓ FOUND    -             A.I.C.O. -Incarnation-                      → anilibria#6143
+✓ FOUND    -             Mobile Suit Gundam: The Witch from Mercury  → anilibria#9431
+✓ FOUND    tt6858404     Anonymous Noise                             → anilibria#3986
+✓ FOUND    tt31889371    Tsue to Tsurugi no Wistoria Season 2        → anilibria#10156
+✓ FOUND    -             The World God Only Knows: Tenri Arc         → anilibria#8360
+✓ FOUND    tt28102247    My Daughter Left the Nest and Returned an   → anilibria#9548
+✗ MISSING  tt2127216     UN-GO                                       → not found in Anilibria
+✗ MISSING  tt32832435    Good Bye, Dragon Life                       → not found in Anilibria
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+SUMMARY: 2000 checked  |  ✓ 1290 found  |  ✗ 710 missing
+Generated: 09 Mar 2026, 22:46:52 GMT+2
+────────────────────────────────────────────────────────────────────────────────────────────────────

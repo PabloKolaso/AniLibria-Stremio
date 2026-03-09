@@ -114,16 +114,33 @@ function toAlias(title) {
     .replace(/^-|-$/g, '');
 }
 
+/** Strip trailing year, season, part, or Roman-numeral suffixes from a title. */
+function stripSuffixes(title) {
+  return title
+    .replace(/\s*\(\d{4}\)\s*$/i, '')               // "(2011)"
+    .replace(/\s+(?:season|part|s)\s*\d+\s*$/i, '') // "Season 2", "Part 3", "S2"
+    .replace(/\s+[IVX]{1,4}\s*$/i, '')              // trailing " II", " III", " IV"
+    .trim();
+}
+
 /**
  * Try to find an Anilibria release directly by its URL alias.
  * This is fast and accurate — no fuzzy matching needed.
  * Returns the release object or null.
  */
 async function tryAliasList(titles) {
+  // Expand each title with a suffix-stripped variant to handle e.g. "Hunter x Hunter (2011)"
+  const expanded = [];
+  for (const t of titles) {
+    expanded.push(t);
+    const s = stripSuffixes(t);
+    if (s && s !== t) expanded.push(s);
+  }
+
   // Build unique aliases, preserving title order (romaji first)
   const aliases = [];
   const seen = new Set();
-  for (const title of titles) {
+  for (const title of expanded) {
     const alias = toAlias(title);
     if (!alias || alias.length < 2 || seen.has(alias)) continue;
     seen.add(alias);

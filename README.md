@@ -95,7 +95,7 @@ Or paste it directly into **Stremio → Addons → search bar**.
 **Requirements:** Node.js ≥ 18
 
 ```bash
-git clone https://github.com/<user>/stremio-anilibria-addon.git
+git clone https://github.com/PabloKolaso/stremio-anilibria-addon.git
 cd stremio-anilibria-addon
 npm install
 npm start
@@ -267,7 +267,7 @@ https://stremio-anilibria-addon.onrender.com/manifest.json
 **Требования:** Node.js ≥ 18
 
 ```bash
-git clone https://github.com/<user>/stremio-anilibria-addon.git
+git clone https://github.com/PabloKolaso/stremio-anilibria-addon.git
 cd stremio-anilibria-addon
 npm install
 npm start

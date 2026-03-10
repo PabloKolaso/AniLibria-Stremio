@@ -8,6 +8,7 @@ const { router: debugRouter } = require('./debug');
 const { addonBuilder, getRouter } = require('stremio-addon-sdk');
 const express = require('express');
 const cors    = require('cors');
+const path    = require('path');
 
 const axios = require('axios');
 
@@ -30,11 +31,13 @@ process.on('unhandledRejection', (reason) => {
 });
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Build the addon
-const builder = new addonBuilder(manifest);
-builder.defineStreamHandler(streamHandler);
-
 async function start() {
+  const host = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  manifest.logo = `${host}/logo.jpg`;
+
+  // Build the addon
+  const builder = new addonBuilder(manifest);
+  builder.defineStreamHandler(streamHandler);
   console.log('=== Stremio AniLibria Addon ===');
 
   // Load the Fribb IMDB mapping (required for all lookups)
@@ -58,6 +61,11 @@ async function start() {
     next();
   });
 
+  // Serve local logo
+  app.get('/logo.jpg', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../assets/logo.jpg'));
+  });
+
   // Health endpoint (before SDK router so it doesn't intercept)
   app.get('/health', (req, res) => {
     res.json({
@@ -72,8 +80,6 @@ async function start() {
   app.use('/', debugRouter);
 
   const server = app.listen(PORT);
-
-  const host = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
   console.log(`\nAddon running at: ${host}/manifest.json`);
   console.log(`Debug page:       ${host}/debug`);
   console.log(`Health check:     ${host}/health`);

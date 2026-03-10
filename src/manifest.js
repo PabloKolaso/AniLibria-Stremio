@@ -13,6 +13,10 @@ const manifest = {
     adult: false,
     p2p: false,
   },
+  stremioAddonsConfig: {
+    issuer: 'https://stremio-addons.net',
+    signature: 'eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..asLrIRuDIa5l_CpoSgPcFQ.xP4WfZpHYOMGZC80zogUn3DyWj-Ojyl1zVJFObHCRbwBTO3WnX6AvaZJJRml50DbVGlx_qidb3BUU_MgOLW3rjSIuCl5T_x2kaDrrXIp_7QLEoo8Wb0XcZLiKROrwYAo.4reCpQN5TXgFwZmoozT3Aw',
+  },
 };
 
 module.exports = manifest;

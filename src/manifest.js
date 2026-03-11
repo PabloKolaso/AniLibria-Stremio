@@ -1,6 +1,8 @@
+const { version } = require('../../package.json');
+
 const manifest = {
   id: 'community.anilibria.stremio',
-  version: '1.0.0',
+  version,
   name: 'AniLibria',
   description: 'Russian anime dub streams from AniLibria. Shows stream options for anime series and movies.',
   resources: ['stream'],

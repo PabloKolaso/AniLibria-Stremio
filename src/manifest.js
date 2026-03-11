@@ -1,4 +1,4 @@
-const { version } = require('../../package.json');
+const { version } = require('../package.json');
 
 const manifest = {
   id: 'community.anilibria.stremio',

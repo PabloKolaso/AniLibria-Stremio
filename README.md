@@ -74,7 +74,7 @@ The alias lookup is instant and exact. The search API and fuzzy index serve as p
 **Hosted on Render** — no setup needed. Open the manifest URL in any browser and Stremio will prompt you to install:
 
 ```
-https://stremio-anilibria-addon.onrender.com/manifest.json
+https://anilibria-stremio.onrender.com/manifest.json
 ```
 
 Or paste it directly into **Stremio → Addons → search bar**.
@@ -248,7 +248,7 @@ Stremio  ──▶  IMDB ID  (напр. tt0388629)
 Аддон размещён на Render — ничего устанавливать не нужно. Откройте ссылку на манифест в браузере или вставьте её в **Stremio → Addons → строка поиска**:
 
 ```
-https://stremio-anilibria-addon.onrender.com/manifest.json
+https://anilibria-stremio.onrender.com/manifest.json
 ```
 
 ---

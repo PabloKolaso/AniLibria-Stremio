@@ -36,6 +36,7 @@ Watch Russian-dubbed anime in Stremio without leaving the app or managing a sepa
 | Geo-block detection | Shows a readable message instead of a dead spinner |
 | Fast cold starts | Full AniLibria index pre-warmed on server boot |
 | Session caching | Each title resolved once; failed lookups retry after 2 hours |
+| Admin dashboard | Password-protected `/dashboard` — Overview, Analytics, Logs, Failed Lookups |
 
 ---
 
@@ -118,12 +119,20 @@ npm start
 
 ---
 
+## Dashboard
+
+A password-protected admin panel is available at `/dashboard`. The password is printed to the server log on startup.
+
+- **Overview** — top resolved anime, system resource stats
+- **Analytics** — hourly / daily / monthly request and bandwidth charts
+- **Logs** — queryable request history with CSV export
+- **Failed Lookups** — titles that couldn't be resolved; manage ignored entries
+
 ## Debug Panel
 
-A live diagnostics page is available at `/debug`:
+A lightweight diagnostics page is available at `/debug`:
 
 - Force-resolve any IMDB ID and trace the full lookup path step by step
-- View recent stream requests and their resolution outcomes
 - Useful for reporting missing anime or incorrect title matches
 
 ---
@@ -214,6 +223,7 @@ This project is licensed under the [MIT License](LICENSE). You are free to use, 
 | Определение геоблока | Понятное сообщение вместо зависшей загрузки |
 | Быстрый холодный старт | Полный индекс AniLibria загружается в фоне при запуске |
 | Кэш сессии | Каждый тайтл определяется один раз; повтор через 2 часа при ошибке |
+| Панель управления | Защищённый паролем `/dashboard` — Обзор, Аналитика, Логи, Ошибки поиска |
 
 ---
 
@@ -290,12 +300,20 @@ npm start
 
 ---
 
+## Панель управления
+
+Защищённая паролем панель администратора доступна по адресу `/dashboard`. Пароль выводится в лог сервера при запуске.
+
+- **Обзор** — топ найденных тайтлов, статистика ресурсов сервера
+- **Аналитика** — графики запросов и трафика по часам / дням / месяцам
+- **Логи** — история запросов с фильтрацией и экспортом в CSV
+- **Ошибки поиска** — тайтлы, которые не удалось определить; управление игнорируемыми записями
+
 ## Диагностика
 
-Страница `/debug` предоставляет:
+Лёгкая страница диагностики доступна по адресу `/debug`:
 
 - Принудительное определение любого IMDB ID с трассировкой всех шагов
-- Список последних запросов стримов и их результатов
 - Помогает выявить проблемы с отсутствующими тайтлами или неверными совпадениями
 
 ---

@@ -68,6 +68,21 @@ async function start() {
     next();
   });
 
+  // Bandwidth tracking — capture outbound response sizes
+  app.use((req, res, next) => {
+    const origEnd = res.end;
+    res.end = function(chunk, encoding) {
+      origEnd.call(this, chunk, encoding);
+      const contentLength = parseInt(res.getHeader('content-length'), 10);
+      const chunkSize = (chunk && (typeof chunk === 'string' || Buffer.isBuffer(chunk)))
+        ? Buffer.byteLength(chunk)
+        : 0;
+      const bytes = contentLength || chunkSize;
+      if (bytes > 0) stats.recordBandwidth(bytes);
+    };
+    next();
+  });
+
   // Serve local logo
   app.get('/logo.jpg', (req, res) => {
     res.sendFile(path.resolve(__dirname, '../assets/logo.jpg'));

@@ -28,6 +28,9 @@ function defaultState() {
     },
     hourlyBuckets: {},       // "YYYY-MM-DDTHH" → count
     failedLookups: {},       // imdbId → { title, count, lastSeen }
+    ignoredLookups: {},      // imdbId → { reason, ignoredAt }
+    totalBandwidthBytes: 0,
+    bandwidthBuckets: {},    // "YYYY-MM-DDTHH" → bytes
   };
 }
 
@@ -48,9 +51,12 @@ function init() {
       const parsed = JSON.parse(raw);
       if (parsed && parsed.counters) {
         state = {
-          counters:      { ...defaultState().counters, ...parsed.counters },
-          hourlyBuckets: parsed.hourlyBuckets || {},
-          failedLookups: parsed.failedLookups || {},
+          counters:           { ...defaultState().counters, ...parsed.counters },
+          hourlyBuckets:      parsed.hourlyBuckets || {},
+          failedLookups:      parsed.failedLookups || {},
+          ignoredLookups:     parsed.ignoredLookups || {},
+          totalBandwidthBytes: parsed.totalBandwidthBytes || 0,
+          bandwidthBuckets:   parsed.bandwidthBuckets || {},
         };
       }
     }
@@ -76,6 +82,9 @@ function pruneBuckets() {
     .toISOString().slice(0, 13);
   for (const key of Object.keys(state.hourlyBuckets)) {
     if (key < cutoff) delete state.hourlyBuckets[key];
+  }
+  for (const key of Object.keys(state.bandwidthBuckets)) {
+    if (key < cutoff) delete state.bandwidthBuckets[key];
   }
 }
 
@@ -280,6 +289,59 @@ function getSystemStats() {
   };
 }
 
+// ─── Bandwidth tracking ─────────────────────────────────────────────────────
+
+/**
+ * Record outbound bandwidth (bytes).
+ * @param {number} bytes
+ */
+function recordBandwidth(bytes) {
+  if (!bytes || bytes <= 0) return;
+  state.totalBandwidthBytes += bytes;
+  const key = bucketKey(Date.now());
+  state.bandwidthBuckets[key] = (state.bandwidthBuckets[key] || 0) + bytes;
+  scheduleDebouncedFlush();
+}
+
+/** Get bandwidth buckets for charts. */
+function getBandwidthBuckets() {
+  pruneBuckets();
+  return { ...state.bandwidthBuckets };
+}
+
+/** Get total bandwidth served (bytes). */
+function getTotalBandwidth() {
+  return state.totalBandwidthBytes;
+}
+
+// ─── Ignored lookups ────────────────────────────────────────────────────────
+
+/**
+ * Ignore a failed lookup with a reason.
+ * @param {string} imdbId
+ * @param {string} reason
+ */
+function ignoreLookup(imdbId, reason) {
+  if (!imdbId) return;
+  state.ignoredLookups[imdbId] = { reason: reason || '', ignoredAt: Date.now() };
+  scheduleDebouncedFlush();
+}
+
+/**
+ * Un-ignore a previously ignored lookup.
+ * @param {string} imdbId
+ */
+function unignoreLookup(imdbId) {
+  if (!imdbId) return;
+  delete state.ignoredLookups[imdbId];
+  scheduleDebouncedFlush();
+}
+
+/** Get the ignored lookups map. */
+function getIgnoredLookups() {
+  return { ...state.ignoredLookups };
+}
+
 // ─── Disk persistence ────────────────────────────────────────────────────────
 
 function scheduleDebouncedFlush() {
@@ -310,5 +372,11 @@ module.exports = {
   getTopAnime,
   getHourlyBuckets,
   getSystemStats,
+  recordBandwidth,
+  getBandwidthBuckets,
+  getTotalBandwidth,
+  ignoreLookup,
+  unignoreLookup,
+  getIgnoredLookups,
   flush,
 };

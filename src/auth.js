@@ -62,9 +62,16 @@ function requireAuth(req, res, next) {
   res.redirect(`/dashboard/login?next=${dest}`);
 }
 
+/** Like requireAuth but returns 401 JSON instead of redirecting (for API endpoints). */
+function requireAuthApi(req, res, next) {
+  if (isValidSession(req)) return next();
+  res.status(401).json({ error: 'unauthorized' });
+}
+
 module.exports = {
   DASHBOARD_PASSWORD,
   requireAuth,
+  requireAuthApi,
   setSessionCookie,
   clearSessionCookie,
   isValidSession,

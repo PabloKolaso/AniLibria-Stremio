@@ -10,6 +10,9 @@
 const resolver  = require('../bridge/resolver');
 const anilibria = require('../api/anilibria');
 const { GeoBlockedError } = require('../api/anilibria');
+const imdbApi = require('../api/imdb');
+const logger = require('../logger');
+const stats  = require('../stats');
 
 const IMDB_RE = /^tt\d{7,10}$/;
 
@@ -99,18 +102,26 @@ function buildStreams(release, episode, imdbId) {
  * @returns {{ streams: object[] }}
  */
 async function streamHandler({ type, id }) {
+  const startTime = Date.now();
   const { imdbId, season, episode } = parseId(id);
 
   if (!IMDB_RE.test(imdbId)) return { streams: [] };
 
   console.log(`[streams] Request: type=${type} imdb=${imdbId} s=${season} e=${episode}`);
 
-  // Step 1: resolve IMDB ID to Anilibria release ID
-  let anilibriaId;
+  // Step 1: resolve IMDB ID to Anilibria release ID (with metadata)
+  let resolution;
   try {
-    anilibriaId = await resolver.resolveImdbToAnilibria(imdbId);
+    resolution = await resolver.resolveImdbToAnilibriaDetailed(imdbId);
   } catch (err) {
     console.error(`[streams] Resolution error for ${imdbId}:`, err.message);
+    logger.log({
+      imdbId, stremioId: id, type,
+      outcome: 'error', title: null, isAnime: null, method: null,
+      responseTimeMs: Date.now() - startTime,
+      streamCount: 0, error: err.message,
+    });
+    stats.recordRequest({ outcome: 'error', isAnime: null });
     return {
       streams: [{
         name: 'AniLibria\n\u26A0 Error',
@@ -120,8 +131,30 @@ async function streamHandler({ type, id }) {
     };
   }
 
+  const anilibriaId = resolution.id;
+
   if (!anilibriaId) {
     console.log(`[streams] No Anilibria match for ${imdbId}`);
+    // inFribb=true means we have AniList data → definitely anime, just not on Anilibria
+    const isAnime = resolution.inFribb ? true : null;
+    logger.log({
+      imdbId, stremioId: id, type,
+      outcome: 'not_found', title: resolution.title, isAnime, method: null,
+      responseTimeMs: Date.now() - startTime,
+      streamCount: 0, error: null,
+    });
+    stats.recordRequest({ outcome: 'not_found', isAnime });
+    const failedTitle = resolution.title || resolution.titleVariants?.[0] || null;
+    stats.recordFailedLookup(imdbId, failedTitle, isAnime);
+    // For non-Fribb IDs (isAnime unknown), async-enrich from IMDB (no latency impact)
+    if (isAnime === null) {
+      imdbApi.fetchTitleInfo(imdbId).then(info => {
+        if (info) {
+          stats.updateFailedLookup(imdbId, { title: info.title, isAnime: info.isAnime });
+          logger.updateLastLog(imdbId, { title: info.title, isAnime: info.isAnime });
+        }
+      }).catch(() => {});
+    }
     return { streams: [] };
   }
 
@@ -132,6 +165,13 @@ async function streamHandler({ type, id }) {
   } catch (err) {
     if (err instanceof GeoBlockedError) {
       console.warn(`[streams] Release ${anilibriaId} is geo-blocked for ${imdbId}`);
+      logger.log({
+        imdbId, stremioId: id, type,
+        outcome: 'error', title: resolution.title, isAnime: true, method: resolution.method,
+        responseTimeMs: Date.now() - startTime,
+        streamCount: 0, error: 'Geo-blocked',
+      });
+      stats.recordRequest({ outcome: 'error', isAnime: true });
       return {
         streams: [{
           name: 'AniLibria\nBlocked',
@@ -141,6 +181,13 @@ async function streamHandler({ type, id }) {
       };
     }
     console.error(`[streams] Failed to fetch release ${anilibriaId}:`, err.message);
+    logger.log({
+      imdbId, stremioId: id, type,
+      outcome: 'error', title: resolution.title, isAnime: true, method: resolution.method,
+      responseTimeMs: Date.now() - startTime,
+      streamCount: 0, error: err.message,
+    });
+    stats.recordRequest({ outcome: 'error', isAnime: true });
     return {
       streams: [{
         name: 'AniLibria\n\u26A0 Error',
@@ -153,26 +200,42 @@ async function streamHandler({ type, id }) {
   const episodes = release?.episodes;
   if (!episodes || episodes.length === 0) {
     console.log(`[streams] Release ${anilibriaId} has no episodes`);
+    logger.log({
+      imdbId, stremioId: id, type,
+      outcome: 'success', title: resolution.title, isAnime: true, method: resolution.method,
+      responseTimeMs: Date.now() - startTime,
+      streamCount: 0, error: null,
+    });
+    stats.recordRequest({ outcome: 'success', isAnime: true });
     return { streams: [] };
   }
 
   // Step 3: for movies (no season/episode), use first (only) episode
+  let resultStreams;
   if (type === 'movie' || episode === null) {
     const ep = episodes[0];
-    return { streams: buildStreams(release, ep, imdbId) };
+    resultStreams = buildStreams(release, ep, imdbId);
+  } else {
+    // Step 4: find the specific episode
+    const ep = findEpisode(episodes, season, episode);
+    if (!ep) {
+      console.log(`[streams] Episode s${season}e${episode} not found in release ${anilibriaId} (${episodes.length} eps)`);
+      resultStreams = [];
+    } else {
+      resultStreams = buildStreams(release, ep, imdbId);
+      console.log(`[streams] Returning ${resultStreams.length} stream(s) for ${imdbId} s${season}e${episode}`);
+    }
   }
 
-  // Step 4: find the specific episode
-  const ep = findEpisode(episodes, season, episode);
-  if (!ep) {
-    console.log(`[streams] Episode s${season}e${episode} not found in release ${anilibriaId} (${episodes.length} eps)`);
-    return { streams: [] };
-  }
+  logger.log({
+    imdbId, stremioId: id, type,
+    outcome: 'success', title: resolution.title, isAnime: true, method: resolution.method,
+    responseTimeMs: Date.now() - startTime,
+    streamCount: resultStreams.length, error: null,
+  });
+  stats.recordRequest({ outcome: 'success', isAnime: true });
 
-  const streams = buildStreams(release, ep, imdbId);
-  console.log(`[streams] Returning ${streams.length} stream(s) for ${imdbId} s${season}e${episode}`);
-
-  return { streams };
+  return { streams: resultStreams };
 }
 
 module.exports = { streamHandler };

@@ -50,48 +50,10 @@ const router = Router();
 
 /**
  * GET /debug
- * HTML page showing recent server logs, auto-refreshes every 4 seconds.
- * Includes a form to test-resolve an IMDB ID.
+ * Redirects to the dashboard logs tab.
  */
 router.get('/debug', (req, res) => {
-  const lines = getLogs().map(colorLine).join('\n');
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.send(`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="refresh" content="4">
-  <title>Addon Debug</title>
-  <style>
-    body { background:#111; color:#ddd; font-family:monospace; padding:16px; margin:0 }
-    h1 { color:#fff; margin:0 0 12px }
-    form { margin-bottom:16px; display:flex; gap:8px; align-items:center }
-    input { background:#222; border:1px solid #555; color:#fff; padding:6px 10px;
-            font-family:monospace; font-size:14px; width:220px; border-radius:4px }
-    button { background:#3a7; border:none; color:#fff; padding:7px 16px;
-             font-family:monospace; font-size:14px; cursor:pointer; border-radius:4px }
-    button:hover { background:#4b8 }
-    pre { background:#1a1a1a; border:1px solid #333; padding:12px; overflow-x:auto;
-          font-size:12px; line-height:1.5; white-space:pre-wrap; word-break:break-all }
-    .note { color:#888; font-size:12px; margin-bottom:8px }
-  </style>
-</head>
-<body>
-  <h1>Stremio AniLibria — Debug</h1>
-
-  <form action="" method="GET" onsubmit="
-    var id = document.getElementById('imdb').value.trim();
-    if(id) { window.location='/debug/resolve/'+id; return false; }
-  ">
-    <label style="color:#aaa">Test IMDB ID:</label>
-    <input id="imdb" type="text" placeholder="tt13916776" />
-    <button type="submit">Resolve</button>
-  </form>
-
-  <div class="note">Showing last ${logBuffer.length} of ${MAX_LOGS} log lines. Auto-refreshes every 4s.</div>
-  <pre>${lines || '<em style="color:#666">No logs yet...</em>'}</pre>
-</body>
-</html>`);
+  res.redirect('/dashboard?tab=logs');
 });
 
 /**

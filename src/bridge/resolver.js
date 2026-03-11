@@ -285,16 +285,19 @@ async function findInIndex(titleVariants) {
  * @param {string} imdbId - e.g. "tt0388629"
  * @returns {number|null}
  */
-async function resolveImdbToAnilibria(imdbId) {
-  const cached = resolvedMap.get(imdbId);
-  if (cached !== undefined) return cached;
-
+/**
+ * Internal resolution logic returning full metadata.
+ * @param {string} imdbId
+ * @returns {{ id: number|null, title: string|null, method: string|null, titleVariants: string[] }}
+ */
+async function _resolve(imdbId) {
   let anilibriaId = null;
+  let method = null;
+  let titleVariants = [];
 
   try {
     // Step 1: get associated IDs from Fribb mapping
     const ids = await mappingCache.getByImdb(imdbId);
-    let titleVariants = [];
 
     if (ids?.anilist_id || ids?.mal_id) {
       // Step 2: fetch canonical titles from AniList
@@ -321,15 +324,18 @@ async function resolveImdbToAnilibria(imdbId) {
     if (titleVariants.length > 0) {
       // Step 3: try alias-based direct lookup (most accurate)
       anilibriaId = await tryAliasList(titleVariants);
+      if (anilibriaId) method = 'alias';
 
       // Step 3.5: try Anilibria's own search API (catches alias mismatches)
       if (!anilibriaId) {
         anilibriaId = await tryAnilibriaSearch(titleVariants);
+        if (anilibriaId) method = 'search';
       }
 
       // Step 4: fall back to fuzzy index search
       if (!anilibriaId) {
         anilibriaId = await findInIndex(titleVariants);
+        if (anilibriaId) method = 'fuse';
       }
     }
 
@@ -341,12 +347,52 @@ async function resolveImdbToAnilibria(imdbId) {
     throw err;  // let the stream handler show an error to the user
   }
 
-  if (anilibriaId) {
-    resolvedMap.set(imdbId, anilibriaId);        // permanent for this session
-  } else {
-    resolvedMap.set(imdbId, null, 7200);         // retry after 2 hours
+  const title = titleVariants[0] || null;
+  const inFribb = titleVariants.length > 0;
+  return { id: anilibriaId, title, method, titleVariants, inFribb };
+}
+
+/**
+ * Resolve an IMDB ID to an Anilibria release ID.
+ * Backwards-compatible: returns number|null.
+ */
+async function resolveImdbToAnilibria(imdbId) {
+  const cached = resolvedMap.get(imdbId);
+  if (cached !== undefined) {
+    // cached is either a result object or null
+    return cached ? cached.id : null;
   }
-  return anilibriaId;
+
+  const result = await _resolve(imdbId);
+
+  if (result.id) {
+    resolvedMap.set(imdbId, result);              // permanent for this session
+  } else {
+    resolvedMap.set(imdbId, null, 7200);          // retry after 2 hours
+  }
+  return result.id;
+}
+
+/**
+ * Resolve an IMDB ID with full metadata (title, method, titleVariants).
+ * @param {string} imdbId
+ * @returns {{ id: number|null, title: string|null, method: string|null, titleVariants: string[] }}
+ */
+async function resolveImdbToAnilibriaDetailed(imdbId) {
+  const cached = resolvedMap.get(imdbId);
+  if (cached !== undefined) {
+    if (cached) return { ...cached, method: cached.method || 'cache' };
+    return { id: null, title: null, method: null, titleVariants: [] };
+  }
+
+  const result = await _resolve(imdbId);
+
+  if (result.id) {
+    resolvedMap.set(imdbId, result);
+  } else {
+    resolvedMap.set(imdbId, null, 7200);
+  }
+  return result;
 }
 
 /**
@@ -387,4 +433,4 @@ function isIndexReady() {
   return indexSize > 0;
 }
 
-module.exports = { resolveImdbToAnilibria, resolveByTitles, clearCache, warmup, isIndexReady };
+module.exports = { resolveImdbToAnilibria, resolveImdbToAnilibriaDetailed, resolveByTitles, clearCache, warmup, isIndexReady };

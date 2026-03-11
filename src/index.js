@@ -16,6 +16,10 @@ const manifest          = require('./manifest');
 const mappingCache      = require('./mapping/cache');
 const { streamHandler } = require('./handlers/streams');
 const { warmup, isIndexReady } = require('./bridge/resolver');
+const logger            = require('./logger');
+const stats             = require('./stats');
+const dashboardRouter   = require('./dashboard');
+const { DASHBOARD_PASSWORD } = require('./auth');
 
 const PORT = process.env.PORT || 7000;
 
@@ -39,6 +43,9 @@ async function start() {
   const builder = new addonBuilder(manifest);
   builder.defineStreamHandler(streamHandler);
   console.log('=== Stremio AniLibria Addon ===');
+  console.log('─────────────────────────────────────────');
+  console.log(` Dashboard password: ${DASHBOARD_PASSWORD}`);
+  console.log('─────────────────────────────────────────');
 
   // Load the Fribb IMDB mapping (required for all lookups)
   try {
@@ -76,12 +83,17 @@ async function start() {
     });
   });
 
+  // Dashboard must be mounted before SDK router so /dashboard isn't intercepted
+  app.use('/', dashboardRouter);
   app.use('/', getRouter(addonInterface));
   app.use('/', debugRouter);
 
   const server = app.listen(PORT);
+  // Start logger cleanup interval (prune entries older than 3 days, every hour)
+  logger.startCleanupInterval();
+
   console.log(`\nAddon running at: ${host}/manifest.json`);
-  console.log(`Debug page:       ${host}/debug`);
+  console.log(`Dashboard:        ${host}/dashboard`);
   console.log(`Health check:     ${host}/health`);
   console.log('Install in Stremio by opening the manifest URL above.\n');
 
@@ -91,7 +103,7 @@ async function start() {
     const PING_INTERVAL = 12 * 60 * 1000; // 12 minutes
     pingTimer = setInterval(() => {
       axios.get(`${process.env.RENDER_EXTERNAL_URL}/health`)
-        .then(() => console.log('[keepalive] Ping OK'))
+        .then(() => console.log(`[keepalive] Ping OK — dashboard password: ${DASHBOARD_PASSWORD}`))
         .catch(err => console.warn('[keepalive] Ping failed:', err.message));
     }, PING_INTERVAL);
     console.log('[keepalive] Self-ping enabled (every 12 min)');
@@ -101,6 +113,9 @@ async function start() {
   process.on('SIGTERM', () => {
     console.log('[shutdown] SIGTERM received, closing server...');
     if (pingTimer) clearInterval(pingTimer);
+    logger.stopCleanupInterval();
+    logger.flush();
+    stats.flush();
     server.close(() => {
       console.log('[shutdown] Server closed.');
       process.exit(0);

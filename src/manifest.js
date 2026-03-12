@@ -4,7 +4,7 @@ const manifest = {
   id: 'community.anilibria.stremio',
   version,
   name: 'AniLibria',
-  description: 'Russian anime dub streams from AniLibria. Shows stream options for anime series and movies.',
+  description: 'Russian anime dub streams from AniLibria. Shows stream options for anime series and movies. This addon logs anonymous usage data to help improve performance and your experience.',
   resources: ['stream'],
   types: ['series', 'movie'],
   // Only trigger for IMDB-prefixed IDs (tt...)

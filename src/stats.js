@@ -25,6 +25,7 @@ function defaultState() {
       totalErrors: 0,
       animeRequests: 0,
       animeSuccess: 0,
+      totalSessions: 0,
     },
     hourlyBuckets: {},       // "YYYY-MM-DDTHH" → count
     failedLookups: {},       // imdbId → { title, count, lastSeen }
@@ -118,7 +119,11 @@ function recordRequest(entry) {
   const key = bucketKey(now);
   state.hourlyBuckets[key] = (state.hourlyBuckets[key] || 0) + 1;
 
-  // Session tracking
+  // Session tracking: detect new session start (gap > 5 min or first ever request)
+  pruneTimestamps();
+  if (recentTimestamps.length === 0 || now - recentTimestamps[recentTimestamps.length - 1] > 300_000) {
+    state.counters.totalSessions++;
+  }
   recentTimestamps.push(now);
 
   scheduleDebouncedFlush();
@@ -199,6 +204,7 @@ function getStats() {
     weekRequests:  weekCount,
     monthRequests: monthCount,
     sessionsToday: sessions,
+    liveSessions:  getLiveSessions(),
     successRate:   parseFloat(successRate),
   };
 }
@@ -215,6 +221,15 @@ function countSessions(timestamps, gap = 60_000) {
     if (sorted[i] - sorted[i - 1] > gap) sessions++;
   }
   return sessions;
+}
+
+/**
+ * Count sessions active in the last 5 minutes.
+ */
+function getLiveSessions() {
+  const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+  const recent = recentTimestamps.filter(ts => ts >= fiveMinAgo);
+  return countSessions(recent, 60_000);
 }
 
 /**
@@ -368,6 +383,7 @@ module.exports = {
   recordFailedLookup,
   updateFailedLookup,
   getStats,
+  getLiveSessions,
   getFailedLookups,
   getTopAnime,
   getHourlyBuckets,

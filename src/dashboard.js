@@ -191,9 +191,14 @@ function renderOverview() {
         <div class="sub">requests</div>
       </div>
       <div class="card">
-        <div class="label">Sessions Today</div>
-        <div class="value" data-stat="sessionsToday">${s.sessionsToday}</div>
-        <div class="sub">estimated</div>
+        <div class="label">Live Now</div>
+        <div class="value" data-stat="liveSessions">${s.liveSessions}</div>
+        <div class="sub">active sessions</div>
+      </div>
+      <div class="card">
+        <div class="label">Total Sessions</div>
+        <div class="value" data-stat="totalSessions">${s.counters.totalSessions}</div>
+        <div class="sub">all time</div>
       </div>
       <div class="card">
         <div class="label">Anime Found</div>
@@ -266,7 +271,8 @@ function renderOverview() {
               todayRequests: d.todayRequests,
               weekRequests: d.weekRequests,
               monthRequests: d.monthRequests,
-              sessionsToday: d.sessionsToday,
+              liveSessions: d.liveSessions,
+              totalSessions: d.counters.totalSessions,
               animeSuccess: d.counters.animeSuccess,
               successRate: d.successRate + '%',
               uptime: _fmtUptime(d.system.uptime),
@@ -608,12 +614,16 @@ function renderLogs(query) {
 
 // ─── Tab 4: Failed Lookups ───────────────────────────────────────────────────
 
-function renderFailedLookups() {
+function renderFailedLookups(query = {}) {
   const allFailed = stats.getFailedLookups();
   const ignored = stats.getIgnoredLookups();
 
-  const active = allFailed.filter(e => !ignored[e.imdbId]);
+  let active = allFailed.filter(e => !ignored[e.imdbId]);
   const ignoredList = allFailed.filter(e => ignored[e.imdbId]);
+
+  // Apply anime filter
+  if (query.anime === 'true')  active = active.filter(e => e.isAnime === true);
+  if (query.anime === 'false') active = active.filter(e => e.isAnime === false);
 
   function animeBadge(e) {
     return e.isAnime === true
@@ -634,8 +644,9 @@ function renderFailedLookups() {
         <td style="text-align:center">${animeBadge(e)}</td>
         <td style="text-align:center">${e.count}</td>
         <td style="white-space:nowrap">${formatDate(e.lastSeen)}</td>
-        <td>
+        <td style="white-space:nowrap">
           <button class="ignore-btn" data-action="show-ignore">Ignore</button>
+          ${e.isAnime === false ? '<button class="quick-ignore-btn" data-action="quick-ignore">Ignore (Not Anime)</button>' : ''}
           <div class="ignore-form" style="display:none">
             <input type="text" class="ignore-reason" placeholder="Reason for ignoring..." style="width:160px">
             <button class="ignore-confirm" data-action="do-ignore">Confirm</button>
@@ -675,6 +686,12 @@ function renderFailedLookups() {
       </div>
     </details>` : '';
 
+  const animeOptions = [
+    { value: 'all',   label: 'All' },
+    { value: 'true',  label: 'Anime' },
+    { value: 'false', label: 'Not Anime' },
+  ].map(o => `<option value="${o.value}"${(query.anime || 'all') === o.value ? ' selected' : ''}>${o.label}</option>`).join('');
+
   return `
     <style>
       .ignore-btn { background:#333; border:1px solid #555; color:#888; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px; transition:all 0.2s }
@@ -687,10 +704,17 @@ function renderFailedLookups() {
       .ignore-cancel:hover { color:#ddd }
       .unignore-btn { background:#1a3a2a; border:1px solid #2a5a3a; color:#3a7; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px }
       .unignore-btn:hover { background:#2a4a3a }
+      .quick-ignore-btn { background:#2a2a2a; border:1px solid #444; color:#888; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px; margin-left:4px; transition:all 0.2s }
+      .quick-ignore-btn:hover { color:#ddd; border-color:#666 }
     </style>
     <div style="color:#666;font-size:12px;margin-bottom:8px">
       Titles that users requested but weren't found in AniLibria. Sorted by most requested.
     </div>
+    <form class="filters" method="GET" action="/dashboard" style="margin-bottom:12px">
+      <input type="hidden" name="tab" value="failed">
+      <select name="anime">${animeOptions}</select>
+      <button type="submit">Filter</button>
+    </form>
     <div style="overflow-x:auto">
       <table>
         <thead>
@@ -735,6 +759,16 @@ function renderFailedLookups() {
             credentials: 'same-origin'
           }).then(function(r) {
             if (r.ok) location.reload();
+          });
+
+        } else if (action === 'quick-ignore') {
+          fetch('/dashboard/api/failed/' + encodeURIComponent(id) + '/ignore', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reason: 'Not Anime' })
+          }).then(function(r) {
+            if (r.ok) row.style.display = 'none';
           });
         }
       });
@@ -791,6 +825,7 @@ router.get('/dashboard/api/stats', requireAuthApi, (req, res) => {
     weekRequests: s.weekRequests,
     monthRequests: s.monthRequests,
     sessionsToday: s.sessionsToday,
+    liveSessions: s.liveSessions,
     successRate: s.successRate,
     totalBandwidthBytes: stats.getTotalBandwidth(),
     system: safeSystem,
@@ -864,7 +899,7 @@ router.get('/dashboard', requireAuth, (req, res) => {
       body = renderLogs(req.query);
       break;
     case 'failed':
-      body = renderFailedLookups();
+      body = renderFailedLookups(req.query);
       break;
     case 'overview':
     default:

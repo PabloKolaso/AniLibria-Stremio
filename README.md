@@ -10,6 +10,7 @@
 [![Stremio Addon](https://img.shields.io/badge/stremio-addon-7B5EA7)](https://stremio.com)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Deploy: Render](https://img.shields.io/badge/deploy-Render-46E3B7?logo=render&logoColor=white)](https://render.com)
+[![Stremio Addons](https://img.shields.io/badge/stremio--addons.net-install-7B5EA7)](https://stremio-addons.net/addons/anilibria)
 
 **[English](#english) · [Русский](#русский)**
 
@@ -77,6 +78,9 @@ The alias lookup is instant and exact. The search API and fuzzy index serve as p
 ```
 https://anilibria-stremio.onrender.com/manifest.json
 ```
+
+Or visit the addon directory and click **Install**:
+**[stremio-addons.net/addons/anilibria](https://stremio-addons.net/addons/anilibria)**
 
 Or paste it directly into **Stremio → Addons → search bar**.
 
@@ -260,6 +264,9 @@ Stremio  ──▶  IMDB ID  (напр. tt0388629)
 ```
 https://anilibria-stremio.onrender.com/manifest.json
 ```
+
+Или найдите аддон в каталоге и нажмите **Установить**:
+**[stremio-addons.net/addons/anilibria](https://stremio-addons.net/addons/anilibria)**
 
 ---
 

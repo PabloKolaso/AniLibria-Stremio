@@ -12,6 +12,7 @@ const path    = require('path');
 
 const axios = require('axios');
 
+const compression        = require('compression');
 const manifest          = require('./manifest');
 const mappingCache      = require('./mapping/cache');
 const { streamHandler } = require('./handlers/streams');
@@ -60,6 +61,7 @@ async function start() {
   const addonInterface = builder.getInterface();
   const app = express();
   app.use(cors());
+  app.use(compression());
 
   // Security headers
   app.use((req, res, next) => {

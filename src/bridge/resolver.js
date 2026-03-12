@@ -41,7 +41,7 @@ let titleIndex = null;
 let indexBuilding = null;
 let indexSize = 0;
 let indexBuiltAt = 0;
-const INDEX_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
+const INDEX_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 /**
  * Build (or return cached) Fuse.js search index over Anilibria catalog.

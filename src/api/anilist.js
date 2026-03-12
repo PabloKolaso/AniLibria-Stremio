@@ -26,10 +26,6 @@ query ($search: String, $type: MediaType) {
         native
       }
       synonyms
-      format
-      episodes
-      season
-      seasonYear
     }
   }
 }`;
@@ -45,9 +41,6 @@ query ($id: Int) {
       native
     }
     synonyms
-    episodes
-    season
-    seasonYear
   }
 }`;
 

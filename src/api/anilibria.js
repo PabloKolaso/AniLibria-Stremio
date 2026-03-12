@@ -22,8 +22,8 @@ class GeoBlockedError extends Error {
 
 const BASE = 'https://anilibria.top/api/v1';
 
-// Cache release details for 10 minutes to avoid hammering the API
-const releaseCache = new NodeCache({ stdTTL: 600 });
+// Cache release details for 1 hour (episodes rarely change)
+const releaseCache = new NodeCache({ stdTTL: 3600 });
 // Cache search results for 1 hour
 const searchCache  = new NodeCache({ stdTTL: 3600 });
 

@@ -82,7 +82,7 @@ https://anilibria-stremio.onrender.com/manifest.json
 Or visit the addon directory and click **Install**:
 **[stremio-addons.net/addons/anilibria](https://stremio-addons.net/addons/anilibria)**
 
-Or paste it directly into **Stremio → Addons → search bar**.
+Or click **+ Add addon** in Stremio → Addons and paste the URL.
 
 ---
 
@@ -259,7 +259,7 @@ Stremio  ──▶  IMDB ID  (напр. tt0388629)
 
 ## Подключить в Stremio
 
-Аддон размещён на Render — ничего устанавливать не нужно. Откройте ссылку на манифест в браузере или вставьте её в **Stremio → Addons → строка поиска**:
+Аддон размещён на Render — ничего устанавливать не нужно. Откройте ссылку на манифест в браузере и Stremio предложит установить аддон:
 
 ```
 https://anilibria-stremio.onrender.com/manifest.json
@@ -267,6 +267,8 @@ https://anilibria-stremio.onrender.com/manifest.json
 
 Или найдите аддон в каталоге и нажмите **Установить**:
 **[stremio-addons.net/addons/anilibria](https://stremio-addons.net/addons/anilibria)**
+
+Или нажмите **+ Add addon** в Stremio → Addons и вставьте URL.
 
 ---
 

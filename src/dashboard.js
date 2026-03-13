@@ -224,7 +224,7 @@ function renderOverview() {
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px">
       <div class="card">
         <div class="section-title">Top 5 Anime</div>
-        ${topHtml}
+        <div id="topAnimeList">${topHtml}</div>
       </div>
       <div class="card">
         <div class="section-title">System Resources</div>
@@ -301,6 +301,28 @@ function renderOverview() {
           })
           .catch(function() {});
       }, 30000);
+
+      // Top 5 Anime — refresh every 60s
+      function _escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+      setInterval(function() {
+        fetch('/dashboard/api/overview', { credentials: 'same-origin' })
+          .then(function(r) { return r.ok ? r.json() : null; })
+          .then(function(d) {
+            if (!d) return;
+            var el = document.getElementById('topAnimeList');
+            if (!el) return;
+            if (!d.topAnime || d.topAnime.length === 0) {
+              el.innerHTML = '<em style="color:#666">No data yet</em>';
+            } else {
+              el.innerHTML = '<ul class="top-list">' + d.topAnime.map(function(a, i) {
+                return '<li><span>' + (i + 1) + '. ' + _escHtml(a.title) + '</span> <span class="top-count">' + a.count + ' req</span></li>';
+              }).join('') + '</ul>';
+            }
+          })
+          .catch(function() {});
+      }, 60000);
     </script>`;
 }
 
@@ -520,6 +542,61 @@ function renderAnalytics() {
 
       chart = buildChart('mainChart', 'today', false);
       bwChart = buildChart('bwChart', 'today', true);
+
+      // Live data refresh — every 60s
+      function _buildAnalyticsData(buckets, bwBuckets, animeBuckets) {
+        var now = new Date();
+        var tL = [], tD = [], tBw = [], tAn = [];
+        for (var i = 23; i >= 0; i--) {
+          var d = new Date(now.getTime() - i * 3600000);
+          var key = d.toISOString().slice(0, 13);
+          tL.push(String(d.getUTCHours()).padStart(2, '0') + ':00');
+          tD.push(buckets[key] || 0); tBw.push(bwBuckets[key] || 0); tAn.push(animeBuckets[key] || 0);
+        }
+        var wL = [], wD = [], wBw = [], wAn = [];
+        for (var i = 6; i >= 0; i--) {
+          var d = new Date(now.getTime() - i * 86400000);
+          var dayKey = d.toISOString().slice(0, 10);
+          wL.push(dayKey.slice(5));
+          var t = 0, b = 0, a = 0;
+          for (var h = 0; h < 24; h++) { var hk = dayKey + 'T' + String(h).padStart(2, '0'); t += buckets[hk]||0; b += bwBuckets[hk]||0; a += animeBuckets[hk]||0; }
+          wD.push(t); wBw.push(b); wAn.push(a);
+        }
+        var mL = [], mD = [], mBw = [], mAn = [];
+        for (var i = 29; i >= 0; i--) {
+          var d = new Date(now.getTime() - i * 86400000);
+          var dayKey = d.toISOString().slice(0, 10);
+          mL.push(dayKey.slice(5));
+          var t = 0, b = 0, a = 0;
+          for (var h = 0; h < 24; h++) { var hk = dayKey + 'T' + String(h).padStart(2, '0'); t += buckets[hk]||0; b += bwBuckets[hk]||0; a += animeBuckets[hk]||0; }
+          mD.push(t); mBw.push(b); mAn.push(a);
+        }
+        return {
+          today: { labels: tL, data: tD, bwData: tBw, animeData: tAn },
+          week:  { labels: wL, data: wD, bwData: wBw, animeData: wAn },
+          month: { labels: mL, data: mD, bwData: mBw, animeData: mAn }
+        };
+      }
+
+      setInterval(function() {
+        fetch('/dashboard/api/analytics', { credentials: 'same-origin' })
+          .then(function(r) { return r.ok ? r.json() : null; })
+          .then(function(d) {
+            if (!d) return;
+            var nd = _buildAnalyticsData(d.buckets, d.bwBuckets, d.animeBuckets);
+            ['today', 'week', 'month'].forEach(function(p) {
+              DATA[p].labels    = nd[p].labels;
+              DATA[p].data      = nd[p].data;
+              DATA[p].bwData    = nd[p].bwData;
+              DATA[p].animeData = nd[p].animeData;
+            });
+            if (chart)   chart.destroy();
+            if (bwChart) bwChart.destroy();
+            chart   = buildChart('mainChart', currentPeriod, false);
+            bwChart = buildChart('bwChart',   currentPeriod, true);
+          })
+          .catch(function() {});
+      }, 60000);
     </script>`;
 }
 
@@ -600,15 +677,64 @@ function renderLogs(query) {
       <button type="submit">Filter</button>
       <a href="${csvUrl}" class="filters" style="text-decoration:none"><button type="button" class="btn-secondary">Export CSV</button></a>
     </form>
-    <div style="color:#666;font-size:12px;margin-bottom:8px">Showing ${logs.length} entries (max 200, newest first)</div>
+    <div id="logsCount" style="color:#666;font-size:12px;margin-bottom:8px">Showing ${logs.length} entries (max 200, newest first)</div>
     <div style="overflow-x:auto">
       <table>
         <thead>
           <tr><th>Time</th><th>IMDB ID</th><th>Title</th><th>Episode</th><th>Anime?</th><th>Outcome</th><th>Method</th><th>Time</th><th>Streams</th></tr>
         </thead>
-        <tbody>${tableRows}</tbody>
+        <tbody id="logsTbody">${tableRows}</tbody>
       </table>
-    </div>`;
+    </div>
+    <script>
+      (function() {
+        function _esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+        function _fmtDate(ts) { return new Date(ts).toISOString().replace('T',' ').slice(0,19); }
+        function _buildLogRow(e) {
+          var bc = e.outcome === 'success' ? 'badge-success' : e.outcome === 'not_found' ? 'badge-fail' : 'badge-error';
+          var ab = e.isAnime === true ? '<span class="badge badge-anime">Anime</span>'
+                 : e.isAnime === false ? '<span class="badge badge-not-anime">Not Anime</span>'
+                 : '<span style="color:#555">?</span>';
+          var parts = (e.stremioId || '').split(':');
+          var ep = parts.length >= 3
+            ? 'S' + String(parseInt(parts[1],10)).padStart(2,'0') + 'E' + String(parseInt(parts[2],10)).padStart(2,'0')
+            : '-';
+          var imdb = e.imdbId
+            ? '<a class="imdb-link" href="https://www.imdb.com/title/' + _esc(e.imdbId) + '/" target="_blank" rel="noopener">' + _esc(e.imdbId) + '</a>'
+            : '-';
+          return '<tr>'
+            + '<td data-label="Time" style="white-space:nowrap">' + _fmtDate(e.ts) + '</td>'
+            + '<td data-label="IMDB ID">' + imdb + '</td>'
+            + '<td data-label="Title">' + _esc(e.title || '-') + '</td>'
+            + '<td data-label="Episode">' + ep + '</td>'
+            + '<td data-label="Anime?">' + ab + '</td>'
+            + '<td data-label="Outcome"><span class="badge ' + bc + '">' + _esc(e.outcome) + '</span></td>'
+            + '<td data-label="Method">' + (e.method ? '<span class="badge badge-method">' + _esc(e.method) + '</span>' : '-') + '</td>'
+            + '<td data-label="Response">' + e.responseTimeMs + 'ms</td>'
+            + '<td data-label="Streams">' + e.streamCount + '</td>'
+            + '</tr>';
+        }
+        var params = new URLSearchParams(window.location.search);
+        params.delete('tab');
+        setInterval(function() {
+          fetch('/dashboard/api/logs?' + params.toString(), { credentials: 'same-origin' })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(rows) {
+              if (!rows) return;
+              var tbody = document.getElementById('logsTbody');
+              var count = document.getElementById('logsCount');
+              if (!tbody) return;
+              if (rows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#666;padding:24px">No logs found</td></tr>';
+              } else {
+                tbody.innerHTML = rows.map(_buildLogRow).join('');
+              }
+              if (count) count.textContent = 'Showing ' + rows.length + ' entries (max 200, newest first)';
+            })
+            .catch(function() {});
+        }, 15000);
+      })();
+    </script>`;
 }
 
 // ─── Tab 4: Failed Lookups ───────────────────────────────────────────────────
@@ -820,6 +946,58 @@ function renderFailedLookups(query = {}) {
           });
         }
       });
+
+      // Live data refresh — every 30s
+      (function() {
+        function _esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+        function _fmtDate(ts) { return new Date(ts).toISOString().replace('T',' ').slice(0,19); }
+        function _animeBadge(e) {
+          return e.isAnime === true  ? '<span class="badge badge-anime">Anime</span>'
+               : e.isAnime === false ? '<span class="badge badge-not-anime">Not Anime</span>'
+               : '<span style="color:#555">?</span>';
+        }
+        function _buildFailedRow(e) {
+          var qi = e.isAnime === false
+            ? '<button class="quick-ignore-btn" data-action="quick-ignore">Ignore (Not Anime)</button>'
+            : '';
+          return '<tr data-imdbid="' + _esc(e.imdbId) + '">'
+            + '<td>' + (e.title ? _esc(e.title) : '<span style="color:#555">-</span>') + '</td>'
+            + '<td><a class="imdb-link" href="https://www.imdb.com/title/' + _esc(e.imdbId) + '/" target="_blank" rel="noopener">' + _esc(e.imdbId) + '</a></td>'
+            + '<td style="text-align:center">' + _animeBadge(e) + '</td>'
+            + '<td style="text-align:center">' + e.count + '</td>'
+            + '<td style="white-space:nowrap">' + _fmtDate(e.lastSeen) + '</td>'
+            + '<td style="white-space:nowrap">'
+            +   '<button class="ignore-btn" data-action="show-ignore">Ignore</button>'
+            +   '<button class="not-dubbed-btn" data-action="do-not-dubbed">Not Dubbed Yet</button>'
+            +   qi
+            +   '<div class="ignore-form" style="display:none">'
+            +     '<input type="text" class="ignore-reason" placeholder="Reason for ignoring..." style="width:160px">'
+            +     '<button class="ignore-confirm" data-action="do-ignore">Confirm</button>'
+            +     '<button class="ignore-cancel" data-action="hide-ignore">Cancel</button>'
+            +   '</div>'
+            + '</td>'
+            + '</tr>';
+        }
+        var animeParam = new URLSearchParams(window.location.search).get('anime') || 'all';
+        var activeTbody = document.querySelector('table tbody');
+        setInterval(function() {
+          if (document.querySelector('.ignore-form[style*="flex"]')) return; // user mid-action
+          fetch('/dashboard/api/failed-lookups', { credentials: 'same-origin' })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(d) {
+              if (!d || !activeTbody) return;
+              var active = d.allFailed.filter(function(e) { return !d.ignored[e.imdbId] && !d.notDubbed[e.imdbId]; });
+              if (animeParam === 'true')  active = active.filter(function(e) { return e.isAnime === true; });
+              if (animeParam === 'false') active = active.filter(function(e) { return e.isAnime === false; });
+              if (active.length === 0) {
+                activeTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#666;padding:24px">No failed lookups recorded</td></tr>';
+              } else {
+                activeTbody.innerHTML = active.map(_buildFailedRow).join('');
+              }
+            })
+            .catch(function() {});
+        }, 30000);
+      })();
     </script>`;
 }
 
@@ -961,6 +1139,49 @@ router.delete('/dashboard/api/failed/:imdbId/not-dubbed', (req, res) => {
   if (!IMDB_RE.test(req.params.imdbId)) return res.status(400).json({ error: 'invalid imdbId' });
   stats.unmarkNotDubbed(req.params.imdbId);
   res.json({ ok: true });
+});
+
+/** GET /dashboard/api/overview — top anime for live polling */
+router.get('/dashboard/api/overview', (req, res) => {
+  const allLogs = logger.getAllLogs();
+  res.json({ topAnime: stats.getTopAnime(allLogs, 5) });
+});
+
+/** GET /dashboard/api/analytics — raw hourly buckets for live chart refresh */
+router.get('/dashboard/api/analytics', (req, res) => {
+  const buckets   = stats.getHourlyBuckets();
+  const bwBuckets = stats.getBandwidthBuckets();
+  const animeBuckets = {};
+  for (const e of logger.getAllLogs()) {
+    if (e.isAnime === true) {
+      const key = new Date(e.ts).toISOString().slice(0, 13);
+      animeBuckets[key] = (animeBuckets[key] || 0) + 1;
+    }
+  }
+  res.json({ buckets, bwBuckets, animeBuckets });
+});
+
+/** GET /dashboard/api/logs — filtered log entries for live table refresh */
+router.get('/dashboard/api/logs', (req, res) => {
+  const animeFilter = req.query.anime === 'true' ? true : req.query.anime === 'false' ? false : undefined;
+  const filters = {
+    from:    req.query.from ? new Date(req.query.from).getTime() : undefined,
+    to:      req.query.to   ? new Date(req.query.to).getTime() + 86400000 : undefined,
+    outcome: req.query.outcome || undefined,
+    isAnime: animeFilter,
+    search:  req.query.search || undefined,
+    limit:   200,
+  };
+  res.json(logger.getLogs(filters));
+});
+
+/** GET /dashboard/api/failed-lookups — failed lookup data for live table refresh */
+router.get('/dashboard/api/failed-lookups', (req, res) => {
+  res.json({
+    allFailed: stats.getFailedLookups(),
+    ignored:   stats.getIgnoredLookups(),
+    notDubbed: stats.getNotDubbedLookups(),
+  });
 });
 
 // ─── Routes ──────────────────────────────────────────────────────────────────

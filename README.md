@@ -76,7 +76,7 @@ The alias lookup is instant and exact. The search API and fuzzy index serve as p
 **Hosted on Koyeb** — no setup needed. Open the manifest URL in any browser and Stremio will prompt you to install:
 
 ```
-https://thirsty-fredra-anilibria-addon-fba1f8e4.koyeb.app/manifest.json
+https://anilibria-stremio.online/manifest.json
 ```
 
 Or visit the addon directory and click **Install**:
@@ -262,7 +262,7 @@ Stremio  ──▶  IMDB ID  (напр. tt0388629)
 Аддон размещён на Koyeb — ничего устанавливать не нужно. Откройте ссылку на манифест в браузере и Stremio предложит установить аддон:
 
 ```
-https://thirsty-fredra-anilibria-addon-fba1f8e4.koyeb.app/manifest.json
+https://anilibria-stremio.online/manifest.json
 ```
 
 Или найдите аддон в каталоге и нажмите **Установить**:

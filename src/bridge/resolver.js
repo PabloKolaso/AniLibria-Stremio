@@ -11,9 +11,13 @@
  * looked up once per server lifetime.
  */
 
+const fs   = require('fs');
+const path = require('path');
 const Fuse = require('fuse.js');
 const NodeCache = require('node-cache');
 const axios = require('axios');
+
+const CACHE_FILE = path.resolve(__dirname, '../../data/resolver-cache.json');
 
 // ─── Title normalization helpers ─────────────────────────────────────────────
 
@@ -35,6 +39,51 @@ const anilist      = require('../api/anilist');
 
 // Cache: imdbId -> anilibria release id  (permanent for this session)
 const resolvedMap = new NodeCache({ stdTTL: 86400, checkperiod: 600 });
+
+// ─── Disk persistence for resolvedMap ────────────────────────────────────────
+
+function loadPersistedCache() {
+  try {
+    if (!fs.existsSync(CACHE_FILE)) return;
+    const data = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf8'));
+    const now = Date.now();
+    let loaded = 0;
+    for (const [key, entry] of Object.entries(data)) {
+      if (!entry) continue;
+      const { value, expiresAt } = entry;
+      if (expiresAt && expiresAt < now) continue; // expired — skip
+      const ttl = expiresAt ? Math.max(60, Math.round((expiresAt - now) / 1000)) : 86400;
+      resolvedMap.set(key, value !== undefined ? value : null, ttl);
+      loaded++;
+    }
+    if (loaded > 0) console.log(`[resolver] Loaded ${loaded} cached resolutions from disk.`);
+  } catch (err) {
+    console.warn('[resolver] Failed to load persisted cache:', err.message);
+  }
+}
+
+function flushToDisk() {
+  try {
+    const keys = resolvedMap.keys();
+    const out = {};
+    for (const key of keys) {
+      const value     = resolvedMap.get(key);
+      const expiresAt = resolvedMap.getTtl(key); // ms epoch timestamp
+      out[key] = { value: value !== undefined ? value : null, expiresAt: expiresAt || 0 };
+    }
+    fs.writeFileSync(CACHE_FILE, JSON.stringify(out));
+  } catch (err) {
+    console.warn('[resolver] Failed to flush cache to disk:', err.message);
+  }
+}
+
+let _flushTimer = null;
+function scheduleFlush() {
+  if (_flushTimer) clearTimeout(_flushTimer);
+  _flushTimer = setTimeout(() => { flushToDisk(); _flushTimer = null; }, 5000);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 // Anilibria full title index, built lazily on first use
 let titleIndex = null;
@@ -366,10 +415,11 @@ async function resolveImdbToAnilibria(imdbId) {
   const result = await _resolve(imdbId);
 
   if (result.id) {
-    resolvedMap.set(imdbId, result);              // permanent for this session
+    resolvedMap.set(imdbId, result);
   } else {
-    resolvedMap.set(imdbId, null, 7200);          // retry after 2 hours
+    resolvedMap.set(imdbId, null, 7200);
   }
+  scheduleFlush();
   return result.id;
 }
 
@@ -392,6 +442,7 @@ async function resolveImdbToAnilibriaDetailed(imdbId) {
   } else {
     resolvedMap.set(imdbId, null, 7200);
   }
+  scheduleFlush();
   return result;
 }
 
@@ -410,6 +461,7 @@ function warmup() {
  */
 function clearCache(imdbId) {
   resolvedMap.del(imdbId);
+  scheduleFlush();
 }
 
 /**
@@ -433,4 +485,4 @@ function isIndexReady() {
   return indexSize > 0;
 }
 
-module.exports = { resolveImdbToAnilibria, resolveImdbToAnilibriaDetailed, resolveByTitles, clearCache, warmup, isIndexReady };
+module.exports = { resolveImdbToAnilibria, resolveImdbToAnilibriaDetailed, resolveByTitles, clearCache, warmup, isIndexReady, loadPersistedCache, flushToDisk };

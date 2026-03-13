@@ -30,6 +30,7 @@ function defaultState() {
     hourlyBuckets: {},       // "YYYY-MM-DDTHH" → count
     failedLookups: {},       // imdbId → { title, count, lastSeen }
     ignoredLookups: {},      // imdbId → { reason, ignoredAt }
+    notDubbedLookups: {},    // imdbId → { markedAt }
     totalBandwidthBytes: 0,
     bandwidthBuckets: {},    // "YYYY-MM-DDTHH" → bytes
   };
@@ -56,6 +57,7 @@ function init() {
           hourlyBuckets:      parsed.hourlyBuckets || {},
           failedLookups:      parsed.failedLookups || {},
           ignoredLookups:     parsed.ignoredLookups || {},
+          notDubbedLookups:   parsed.notDubbedLookups || {},
           totalBandwidthBytes: parsed.totalBandwidthBytes || 0,
           bandwidthBuckets:   parsed.bandwidthBuckets || {},
         };
@@ -357,6 +359,38 @@ function getIgnoredLookups() {
   return { ...state.ignoredLookups };
 }
 
+// ─── Not-dubbed lookups ──────────────────────────────────────────────────────
+
+/**
+ * Mark a failed lookup as "not dubbed yet on Anilibria".
+ * @param {string} imdbId
+ */
+function markNotDubbed(imdbId) {
+  if (!imdbId) return;
+  state.notDubbedLookups[imdbId] = { markedAt: Date.now() };
+  scheduleDebouncedFlush();
+}
+
+/**
+ * Remove the "not dubbed" mark from a lookup.
+ * @param {string} imdbId
+ */
+function unmarkNotDubbed(imdbId) {
+  if (!imdbId) return;
+  delete state.notDubbedLookups[imdbId];
+  scheduleDebouncedFlush();
+}
+
+/** Returns true if the given IMDB ID is marked as not dubbed. */
+function isNotDubbed(imdbId) {
+  return !!state.notDubbedLookups[imdbId];
+}
+
+/** Get the not-dubbed lookups map. */
+function getNotDubbedLookups() {
+  return { ...state.notDubbedLookups };
+}
+
 // ─── Disk persistence ────────────────────────────────────────────────────────
 
 function scheduleDebouncedFlush() {
@@ -394,5 +428,9 @@ module.exports = {
   ignoreLookup,
   unignoreLookup,
   getIgnoredLookups,
+  markNotDubbed,
+  unmarkNotDubbed,
+  isNotDubbed,
+  getNotDubbedLookups,
   flush,
 };

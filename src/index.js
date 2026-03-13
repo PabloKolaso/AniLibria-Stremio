@@ -16,7 +16,7 @@ const compression        = require('compression');
 const manifest          = require('./manifest');
 const mappingCache      = require('./mapping/cache');
 const { streamHandler } = require('./handlers/streams');
-const { warmup, isIndexReady } = require('./bridge/resolver');
+const { warmup, isIndexReady, loadPersistedCache, flushToDisk } = require('./bridge/resolver');
 const logger            = require('./logger');
 const stats             = require('./stats');
 const dashboardRouter   = require('./dashboard');
@@ -52,6 +52,9 @@ async function start() {
     console.warn('[boot] Retrying mapping load in 30 seconds...');
     setTimeout(() => mappingCache.load().catch(console.error), 30_000);
   }
+
+  // Restore resolver cache from previous run
+  loadPersistedCache();
 
   // Start the HTTP server
   const addonInterface = builder.getInterface();
@@ -129,6 +132,7 @@ async function start() {
     logger.stopCleanupInterval();
     logger.flush();
     stats.flush();
+    flushToDisk();
     server.close(() => {
       console.log('[shutdown] Server closed.');
       process.exit(0);

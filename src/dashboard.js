@@ -615,10 +615,12 @@ function renderLogs(query) {
 
 function renderFailedLookups(query = {}) {
   const allFailed = stats.getFailedLookups();
-  const ignored = stats.getIgnoredLookups();
+  const ignored   = stats.getIgnoredLookups();
+  const notDubbed = stats.getNotDubbedLookups();
 
-  let active = allFailed.filter(e => !ignored[e.imdbId]);
-  const ignoredList = allFailed.filter(e => ignored[e.imdbId]);
+  let active          = allFailed.filter(e => !ignored[e.imdbId] && !notDubbed[e.imdbId]);
+  const ignoredList   = allFailed.filter(e => ignored[e.imdbId]);
+  const notDubbedList = allFailed.filter(e => notDubbed[e.imdbId]);
 
   // Apply anime filter
   if (query.anime === 'true')  active = active.filter(e => e.isAnime === true);
@@ -645,6 +647,7 @@ function renderFailedLookups(query = {}) {
         <td style="white-space:nowrap">${formatDate(e.lastSeen)}</td>
         <td style="white-space:nowrap">
           <button class="ignore-btn" data-action="show-ignore">Ignore</button>
+          <button class="not-dubbed-btn" data-action="do-not-dubbed">Not Dubbed Yet</button>
           ${e.isAnime === false ? '<button class="quick-ignore-btn" data-action="quick-ignore">Ignore (Not Anime)</button>' : ''}
           <div class="ignore-form" style="display:none">
             <input type="text" class="ignore-reason" placeholder="Reason for ignoring..." style="width:160px">
@@ -671,6 +674,33 @@ function renderFailedLookups(query = {}) {
       </tr>`;
     }).join('');
   }
+
+  let notDubbedRows = '';
+  if (notDubbedList.length > 0) {
+    notDubbedRows = notDubbedList.map(e => {
+      const info = notDubbed[e.imdbId];
+      return `<tr data-imdbid="${esc(e.imdbId)}">
+        <td>${e.title ? esc(e.title) : '<span style="color:#555">-</span>'}</td>
+        <td><a class="imdb-link" href="https://www.imdb.com/title/${esc(e.imdbId)}/" target="_blank" rel="noopener">${esc(e.imdbId)}</a></td>
+        <td style="text-align:center">${e.count}</td>
+        <td style="white-space:nowrap">${formatDate(info.markedAt)}</td>
+        <td><button class="unignore-btn" data-action="do-unmark-dubbed">Un-mark</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  const notDubbedSection = notDubbedList.length > 0 ? `
+    <details style="margin-top:20px">
+      <summary style="cursor:pointer;color:#a73;font-size:13px;margin-bottom:8px">Not Dubbed Yet (${notDubbedList.length})</summary>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr><th>Title</th><th>IMDB ID</th><th>Times Requested</th><th>Marked At</th><th></th></tr>
+          </thead>
+          <tbody>${notDubbedRows}</tbody>
+        </table>
+      </div>
+    </details>` : '';
 
   const ignoredSection = ignoredList.length > 0 ? `
     <details style="margin-top:20px">
@@ -705,6 +735,8 @@ function renderFailedLookups(query = {}) {
       .unignore-btn:hover { background:#2a4a3a }
       .quick-ignore-btn { background:#2a2a2a; border:1px solid #444; color:#888; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px; margin-left:4px; transition:all 0.2s }
       .quick-ignore-btn:hover { color:#ddd; border-color:#666 }
+      .not-dubbed-btn { background:#2a1e0a; border:1px solid #6a4a1a; color:#a73; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px; margin-left:4px; transition:all 0.2s }
+      .not-dubbed-btn:hover { background:#3a2a10; border-color:#8a6a2a }
     </style>
     <div style="color:#666;font-size:12px;margin-bottom:8px">
       Titles that users requested but weren't found in AniLibria. Sorted by most requested.
@@ -722,6 +754,7 @@ function renderFailedLookups(query = {}) {
         <tbody>${activeRows}</tbody>
       </table>
     </div>
+    ${notDubbedSection}
     ${ignoredSection}
     <script>
       document.addEventListener('click', function(e) {
@@ -768,6 +801,22 @@ function renderFailedLookups(query = {}) {
             body: JSON.stringify({ reason: 'Not Anime' })
           }).then(function(r) {
             if (r.ok) row.style.display = 'none';
+          });
+
+        } else if (action === 'do-not-dubbed') {
+          fetch('/dashboard/api/failed/' + encodeURIComponent(id) + '/not-dubbed', {
+            method: 'POST',
+            credentials: 'same-origin'
+          }).then(function(r) {
+            if (r.ok) row.style.display = 'none';
+          });
+
+        } else if (action === 'do-unmark-dubbed') {
+          fetch('/dashboard/api/failed/' + encodeURIComponent(id) + '/not-dubbed', {
+            method: 'DELETE',
+            credentials: 'same-origin'
+          }).then(function(r) {
+            if (r.ok) location.reload();
           });
         }
       });
@@ -897,6 +946,20 @@ router.post('/dashboard/api/failed/:imdbId/ignore', (req, res) => {
 router.delete('/dashboard/api/failed/:imdbId/ignore', (req, res) => {
   if (!IMDB_RE.test(req.params.imdbId)) return res.status(400).json({ error: 'invalid imdbId' });
   stats.unignoreLookup(req.params.imdbId);
+  res.json({ ok: true });
+});
+
+/** POST /dashboard/api/failed/:imdbId/not-dubbed — Mark as not dubbed yet */
+router.post('/dashboard/api/failed/:imdbId/not-dubbed', (req, res) => {
+  if (!IMDB_RE.test(req.params.imdbId)) return res.status(400).json({ error: 'invalid imdbId' });
+  stats.markNotDubbed(req.params.imdbId);
+  res.json({ ok: true });
+});
+
+/** DELETE /dashboard/api/failed/:imdbId/not-dubbed — Remove not-dubbed mark */
+router.delete('/dashboard/api/failed/:imdbId/not-dubbed', (req, res) => {
+  if (!IMDB_RE.test(req.params.imdbId)) return res.status(400).json({ error: 'invalid imdbId' });
+  stats.unmarkNotDubbed(req.params.imdbId);
   res.json({ ok: true });
 });
 

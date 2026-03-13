@@ -8,6 +8,7 @@
 const { Router } = require('express');
 const logger = require('./logger');
 const stats  = require('./stats');
+const { getLogs: getConsoleLogs } = require('./debug');
 
 const router = Router();
 
@@ -55,6 +56,7 @@ function renderShell(activeTab, bodyHtml) {
     { id: 'analytics', label: 'Analytics' },
     { id: 'logs',      label: 'Logs' },
     { id: 'failed',    label: 'Failed Lookups' },
+    { id: 'terminal',  label: 'Terminal' },
   ];
 
   const tabLinks = tabs.map(t =>
@@ -807,6 +809,60 @@ function renderLoginPage(error) {
 </html>`;
 }
 
+// ─── Tab 5: Terminal ──────────────────────────────────────────────────────────
+
+function renderTerminal() {
+  const lines = getConsoleLogs();
+
+  function colorLine(line) {
+    const e = esc(line);
+    if (line.includes('[ERROR]')) return `<span style="color:#ff5555">${e}</span>`;
+    if (line.includes('[WARN]'))  return `<span style="color:#ffaa00">${e}</span>`;
+    return `<span style="color:#aaa">${e}</span>`;
+  }
+
+  const html = lines.map(colorLine).join('\n');
+
+  return `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <span style="color:#888;font-size:12px" id="termCount">${lines.length} lines buffered (max 300)</span>
+      <button onclick="clearTerm()" style="background:#333;border:1px solid #555;color:#888;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:12px">Clear</button>
+      <span style="color:#666;font-size:12px">Auto-refresh: 5s</span>
+    </div>
+    <pre id="termPre" style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:16px;font-size:12px;font-family:'Consolas','Menlo',monospace;overflow:auto;max-height:70vh;white-space:pre-wrap;word-break:break-all;line-height:1.5">${html}</pre>
+    <script>
+      var termPre = document.getElementById('termPre');
+      var termCount = document.getElementById('termCount');
+      termPre.scrollTop = termPre.scrollHeight;
+
+      function escHtml(s) {
+        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      }
+      function colorLine(line) {
+        var e = escHtml(line);
+        if (line.indexOf('[ERROR]') !== -1) return '<span style="color:#ff5555">' + e + '</span>';
+        if (line.indexOf('[WARN]')  !== -1) return '<span style="color:#ffaa00">' + e + '</span>';
+        return '<span style="color:#aaa">' + e + '</span>';
+      }
+
+      var cleared = false;
+      function clearTerm() { cleared = true; termPre.innerHTML = ''; termCount.textContent = '0 lines buffered (max 300)'; }
+
+      setInterval(function() {
+        if (cleared) return;
+        fetch('/debug/logs')
+          .then(function(r) { return r.ok ? r.json() : null; })
+          .then(function(lines) {
+            if (!lines) return;
+            termPre.innerHTML = lines.map(colorLine).join('\\n');
+            termCount.textContent = lines.length + ' lines buffered (max 300)';
+            termPre.scrollTop = termPre.scrollHeight;
+          })
+          .catch(function() {});
+      }, 5000);
+    </script>`;
+}
+
 // ─── API Routes ─────────────────────────────────────────────────────────────
 
 /** GET /dashboard/api/stats — JSON stats for real-time polling */
@@ -863,6 +919,9 @@ router.get('/dashboard', (req, res) => {
       break;
     case 'failed':
       body = renderFailedLookups(req.query);
+      break;
+    case 'terminal':
+      body = renderTerminal();
       break;
     case 'overview':
     default:

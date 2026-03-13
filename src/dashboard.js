@@ -5,11 +5,9 @@
  * Server-rendered HTML with Chart.js from CDN for analytics charts.
  */
 
-const crypto     = require('crypto');
 const { Router } = require('express');
 const logger = require('./logger');
 const stats  = require('./stats');
-const { requireAuth, requireAuthApi, setSessionCookie, clearSessionCookie, isValidSession, DASHBOARD_PASSWORD } = require('./auth');
 
 const router = Router();
 
@@ -149,7 +147,6 @@ function renderShell(activeTab, bodyHtml) {
   <div class="header">
     <h1>AniLibria Dashboard</h1>
     <div class="tabs">${tabLinks}</div>
-    <a href="/dashboard/logout" class="logout-btn">Logout</a>
   </div>
   <div class="content">${bodyHtml}</div>
 </body>
@@ -813,7 +810,7 @@ function renderLoginPage(error) {
 // ─── API Routes ─────────────────────────────────────────────────────────────
 
 /** GET /dashboard/api/stats — JSON stats for real-time polling */
-router.get('/dashboard/api/stats', requireAuthApi, (req, res) => {
+router.get('/dashboard/api/stats', (req, res) => {
   const s = stats.getStats();
   const sys = stats.getSystemStats();
   // Omit nodeVersion, platform, freeMem — not needed by the polling script
@@ -833,7 +830,7 @@ router.get('/dashboard/api/stats', requireAuthApi, (req, res) => {
 });
 
 /** POST /dashboard/api/failed/:imdbId/ignore — Ignore a failed lookup */
-router.post('/dashboard/api/failed/:imdbId/ignore', requireAuthApi, (req, res) => {
+router.post('/dashboard/api/failed/:imdbId/ignore', (req, res) => {
   if (!IMDB_RE.test(req.params.imdbId)) return res.status(400).json({ error: 'invalid imdbId' });
   const reason = ((req.body && req.body.reason) || '').slice(0, 500);
   stats.ignoreLookup(req.params.imdbId, reason);
@@ -841,7 +838,7 @@ router.post('/dashboard/api/failed/:imdbId/ignore', requireAuthApi, (req, res) =
 });
 
 /** DELETE /dashboard/api/failed/:imdbId/ignore — Un-ignore a failed lookup */
-router.delete('/dashboard/api/failed/:imdbId/ignore', requireAuthApi, (req, res) => {
+router.delete('/dashboard/api/failed/:imdbId/ignore', (req, res) => {
   if (!IMDB_RE.test(req.params.imdbId)) return res.status(400).json({ error: 'invalid imdbId' });
   stats.unignoreLookup(req.params.imdbId);
   res.json({ ok: true });
@@ -849,45 +846,11 @@ router.delete('/dashboard/api/failed/:imdbId/ignore', requireAuthApi, (req, res)
 
 // ─── Routes ──────────────────────────────────────────────────────────────────
 
-/** GET /dashboard/login */
-router.get('/dashboard/login', (req, res) => {
-  if (isValidSession(req)) return res.redirect('/dashboard');
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.send(renderLoginPage(null));
-});
-
-/** POST /dashboard/login */
-router.post('/dashboard/login', (req, res) => {
-  const provided = (req.body && req.body.password) || '';
-  // Constant-time comparison — pad to same length to avoid length leak
-  const a = Buffer.alloc(64, 0);
-  const b = Buffer.alloc(64, 0);
-  a.write(provided);
-  b.write(DASHBOARD_PASSWORD);
-  const match = crypto.timingSafeEqual(a, b) && provided === DASHBOARD_PASSWORD;
-
-  if (!match) {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    return res.status(401).send(renderLoginPage('Incorrect password. Try again.'));
-  }
-
-  const secure = (process.env.RENDER_EXTERNAL_URL || '').startsWith('https://');
-  setSessionCookie(res, secure);
-  const next = req.query.next && /^\/[^/]/.test(req.query.next) ? req.query.next : '/dashboard';
-  res.redirect(next);
-});
-
-/** GET /dashboard/logout */
-router.get('/dashboard/logout', (_req, res) => {
-  clearSessionCookie(res);
-  res.redirect('/dashboard/login');
-});
-
 /**
  * GET /dashboard
  * Main dashboard page with tab routing via ?tab= query param.
  */
-router.get('/dashboard', requireAuth, (req, res) => {
+router.get('/dashboard', (req, res) => {
   const tab = req.query.tab || 'overview';
   let body;
 
@@ -915,7 +878,7 @@ router.get('/dashboard', requireAuth, (req, res) => {
  * GET /dashboard/export/csv
  * Export filtered logs as CSV download.
  */
-router.get('/dashboard/export/csv', requireAuth, (req, res) => {
+router.get('/dashboard/export/csv', (req, res) => {
   const filters = {
     from:    req.query.from ? new Date(req.query.from).getTime() : undefined,
     to:      req.query.to   ? new Date(req.query.to).getTime() + 86400000 : undefined,

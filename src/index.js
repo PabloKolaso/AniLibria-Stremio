@@ -20,7 +20,6 @@ const { warmup, isIndexReady } = require('./bridge/resolver');
 const logger            = require('./logger');
 const stats             = require('./stats');
 const dashboardRouter   = require('./dashboard');
-const { DASHBOARD_PASSWORD } = require('./auth');
 
 const PORT = process.env.PORT || 7000;
 
@@ -37,16 +36,13 @@ process.on('unhandledRejection', (reason) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function start() {
-  const host = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  const host = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
   manifest.logo = `${host}/logo.jpg`;
 
   // Build the addon
   const builder = new addonBuilder(manifest);
   builder.defineStreamHandler(streamHandler);
   console.log('=== Stremio AniLibria Addon ===');
-  console.log('─────────────────────────────────────────');
-  console.log(` Dashboard password: ${DASHBOARD_PASSWORD}`);
-  console.log('─────────────────────────────────────────');
 
   // Load the Fribb IMDB mapping (required for all lookups)
   try {
@@ -116,11 +112,11 @@ async function start() {
 
   // Self-ping keep-alive to prevent Render free tier spin-down (15 min idle)
   let pingTimer = null;
-  if (process.env.RENDER_EXTERNAL_URL) {
+  if (process.env.PUBLIC_URL) {
     const PING_INTERVAL = 12 * 60 * 1000; // 12 minutes
     pingTimer = setInterval(() => {
-      axios.get(`${process.env.RENDER_EXTERNAL_URL}/health`)
-        .then(() => console.log(`[keepalive] Ping OK — dashboard password: ${DASHBOARD_PASSWORD}`))
+      axios.get(`${process.env.PUBLIC_URL}/health`)
+        .then(() => console.log('[keepalive] Ping OK'))
         .catch(err => console.warn('[keepalive] Ping failed:', err.message));
     }, PING_INTERVAL);
     console.log('[keepalive] Self-ping enabled (every 12 min)');

@@ -9,7 +9,7 @@
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Stremio Addon](https://img.shields.io/badge/stremio-addon-7B5EA7)](https://stremio.com)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Deploy: Render](https://img.shields.io/badge/deploy-Render-46E3B7?logo=render&logoColor=white)](https://render.com)
+[![Deploy: Koyeb](https://img.shields.io/badge/deploy-Koyeb-121212?logo=koyeb&logoColor=white)](https://koyeb.com)
 [![Stremio Addons](https://img.shields.io/badge/stremio--addons.net-install-7B5EA7)](https://stremio-addons.net/addons/anilibria)
 
 **[English](#english) · [Русский](#русский)**
@@ -37,7 +37,7 @@ Watch Russian-dubbed anime in Stremio without leaving the app or managing a sepa
 | Geo-block detection | Shows a readable message instead of a dead spinner |
 | Fast cold starts | Full AniLibria index pre-warmed on server boot |
 | Session caching | Each title resolved once; failed lookups retry after 2 hours |
-| Admin dashboard | Password-protected `/dashboard` — Overview, Analytics, Logs, Failed Lookups |
+| Admin dashboard | `/dashboard` — Overview, Analytics, Logs, Failed Lookups |
 
 ---
 
@@ -73,10 +73,10 @@ The alias lookup is instant and exact. The search API and fuzzy index serve as p
 
 ## Install
 
-**Hosted on Render** — no setup needed. Open the manifest URL in any browser and Stremio will prompt you to install:
+**Hosted on Koyeb** — no setup needed. Open the manifest URL in any browser and Stremio will prompt you to install:
 
 ```
-https://anilibria-stremio.onrender.com/manifest.json
+https://thirsty-fredra-anilibria-addon-fba1f8e4.koyeb.app/manifest.json
 ```
 
 Or visit the addon directory and click **Install**:
@@ -112,20 +112,20 @@ npm start
 | Variable | Default | Purpose |
 |---|---|---|
 | `PORT` | `7000` | HTTP listen port |
-| `RENDER_EXTERNAL_URL` | — | Public base URL (auto-set on Render) |
+| `PUBLIC_URL` | — | Public base URL (e.g. `https://your-app.koyeb.app`) |
 
-### One-Click Deploy to Render
+### Deploy to Koyeb (free tier)
 
 1. Fork this repository
-2. Create a new **Web Service** on [render.com](https://render.com) pointing to your fork
-3. Set start command: `node src/index.js`
-4. Render sets `RENDER_EXTERNAL_URL` automatically — no extra config needed
+2. Create a new **Web Service** on [koyeb.com](https://koyeb.com) pointing to your fork
+3. Koyeb auto-detects Node.js — build: `npm install`, run: `npm start`
+4. Add env var: `PUBLIC_URL` = `https://your-app-name.koyeb.app`
 
 ---
 
 ## Dashboard
 
-A password-protected admin panel is available at `/dashboard`. The password is printed to the server log on startup.
+An admin panel is available at `/dashboard` (no login required).
 
 - **Overview** — top resolved anime, system resource stats
 - **Analytics** — hourly / daily / monthly request and bandwidth charts
@@ -181,7 +181,7 @@ src/
 - **Russian dub only** — AniLibria does not offer original audio or subtitles
 - Anime not present in AniLibria's library return 0 streams (expected behavior)
 - Some titles may be geo-restricted by AniLibria independent of this addon
-- Hosted on the **free tier** of Render — the server may spin down after inactivity; the first request after a cold start may be slow
+- Hosted on the **free tier** of Koyeb — always running, no cold starts
 
 ---
 
@@ -227,7 +227,7 @@ This project is licensed under the [MIT License](LICENSE). You are free to use, 
 | Определение геоблока | Понятное сообщение вместо зависшей загрузки |
 | Быстрый холодный старт | Полный индекс AniLibria загружается в фоне при запуске |
 | Кэш сессии | Каждый тайтл определяется один раз; повтор через 2 часа при ошибке |
-| Панель управления | Защищённый паролем `/dashboard` — Обзор, Аналитика, Логи, Ошибки поиска |
+| Панель управления | `/dashboard` — Обзор, Аналитика, Логи, Ошибки поиска |
 
 ---
 
@@ -259,10 +259,10 @@ Stremio  ──▶  IMDB ID  (напр. tt0388629)
 
 ## Подключить в Stremio
 
-Аддон размещён на Render — ничего устанавливать не нужно. Откройте ссылку на манифест в браузере и Stremio предложит установить аддон:
+Аддон размещён на Koyeb — ничего устанавливать не нужно. Откройте ссылку на манифест в браузере и Stremio предложит установить аддон:
 
 ```
-https://anilibria-stremio.onrender.com/manifest.json
+https://thirsty-fredra-anilibria-addon-fba1f8e4.koyeb.app/manifest.json
 ```
 
 Или найдите аддон в каталоге и нажмите **Установить**:
@@ -298,20 +298,20 @@ npm start
 | Переменная | По умолчанию | Назначение |
 |---|---|---|
 | `PORT` | `7000` | Порт HTTP-сервера |
-| `RENDER_EXTERNAL_URL` | — | Публичный URL (задаётся автоматически на Render) |
+| `PUBLIC_URL` | — | Публичный URL (напр. `https://your-app.koyeb.app`) |
 
-### Деплой на Render (бесплатный тариф)
+### Деплой на Koyeb (бесплатный тариф)
 
 1. Форкнуть репозиторий
-2. Создать новый **Web Service** на [render.com](https://render.com), указав форк
-3. Команда запуска: `node src/index.js`
-4. `RENDER_EXTERNAL_URL` задаётся Render автоматически
+2. Создать новый **Web Service** на [koyeb.com](https://koyeb.com), указав форк
+3. Koyeb автоматически определяет Node.js — сборка: `npm install`, запуск: `npm start`
+4. Добавить переменную окружения: `PUBLIC_URL` = `https://your-app-name.koyeb.app`
 
 ---
 
 ## Панель управления
 
-Защищённая паролем панель администратора доступна по адресу `/dashboard`. Пароль выводится в лог сервера при запуске.
+Панель администратора доступна по адресу `/dashboard` (вход без пароля).
 
 - **Обзор** — топ найденных тайтлов, статистика ресурсов сервера
 - **Аналитика** — графики запросов и трафика по часам / дням / месяцам
@@ -362,7 +362,7 @@ src/
 - **Только русская озвучка** — AniLibria не предоставляет оригинальный звук или субтитры
 - Аниме, не вышедшее на AniLibria, возвращает 0 стримов (ожидаемое поведение)
 - Некоторые тайтлы могут быть геоблокированы на стороне AniLibria
-- Сервер на **бесплатном тарифе** Render засыпает при простое; первый запрос после паузы может быть медленным
+- Сервер на **бесплатном тарифе** Koyeb — всегда работает, без засыпания
 
 ---
 

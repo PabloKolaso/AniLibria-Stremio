@@ -37,7 +37,7 @@ process.on('unhandledRejection', (reason) => {
 
 async function start() {
   const host = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
-  manifest.logo = `${host}/logo.jpg`;
+  manifest.logo = 'https://fandub.wiki/images/thumb/0/06/AniLibria_%D0%9B%D0%BE%D0%B3%D0%BE%D1%82%D0%B8%D0%BF_%D0%BA%D0%BE%D0%BB%D0%BB%D0%B5%D0%BA%D1%82%D0%B8%D0%B2%D0%B0.jpg/200px-AniLibria_%D0%9B%D0%BE%D0%B3%D0%BE%D1%82%D0%B8%D0%BF_%D0%BA%D0%BE%D0%BB%D0%BB%D0%B5%D0%BA%D1%82%D0%B8%D0%B2%D0%B0.jpg';
 
   // Build the addon
   const builder = new addonBuilder(manifest);

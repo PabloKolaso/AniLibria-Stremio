@@ -14,6 +14,12 @@
 
 **[English](#english) · [Русский](#русский)**
 
+<br>
+
+[![Install in Stremio](https://img.shields.io/badge/%E2%96%B6%20Install%20in%20Stremio-CC3333?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik04IDV2MTRsMTEtN3oiLz48L3N2Zz4=)](https://anilibria-stremio.online)
+&nbsp;
+[![Install Page](https://img.shields.io/badge/Install%20Page-anilibria--stremio.online-7B5EA7?style=for-the-badge)](https://anilibria-stremio.online)
+
 </div>
 
 ---

@@ -5,8 +5,10 @@
  * any other module logs anything.
  */
 
-const { Router } = require('express');
+const express = require('express');
+const { Router } = express;
 const resolver = require('./bridge/resolver');
+const stats = require('./stats');
 
 // ─── Log capture ─────────────────────────────────────────────────────────────
 
@@ -93,6 +95,29 @@ router.get('/debug/resolve/:imdbId', async (req, res) => {
  */
 router.get('/debug/logs', (req, res) => {
   res.json(getLogs());
+});
+
+/**
+ * GET /debug/export
+ * Downloads all manual overrides (ignored + not-dubbed) as a JSON file.
+ */
+router.get('/debug/export', (req, res) => {
+  const overrides = stats.getOverrides();
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Content-Disposition', 'attachment; filename="overrides.json"');
+  res.send(JSON.stringify(overrides, null, 2));
+});
+
+/**
+ * POST /debug/import
+ * Accepts a JSON body with ignoredLookups and/or notDubbedLookups and merges them.
+ */
+router.post('/debug/import', express.json(), (req, res) => {
+  if (!req.body || typeof req.body !== 'object') {
+    return res.status(400).json({ ok: false, error: 'Invalid JSON body' });
+  }
+  const counts = stats.importOverrides(req.body);
+  res.json({ ok: true, imported: counts });
 });
 
 module.exports = { router, getLogs };

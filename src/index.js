@@ -20,6 +20,7 @@ const { warmup, isIndexReady, loadPersistedCache, flushToDisk } = require('./bri
 const logger            = require('./logger');
 const stats             = require('./stats');
 const dashboardRouter   = require('./dashboard');
+const renderInstallPage = require('./install-page');
 
 const PORT = process.env.PORT || 7000;
 
@@ -99,6 +100,12 @@ async function start() {
     });
   });
 
+  // Public install page at root
+  app.get('/', (req, res) => {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(renderInstallPage());
+  });
+
   // Dashboard must be mounted before SDK router so /dashboard isn't intercepted
   app.use('/', dashboardRouter);
   app.use('/', getRouter(addonInterface));
@@ -123,6 +130,16 @@ async function start() {
         .catch(err => console.warn('[keepalive] Ping failed:', err.message));
     }, PING_INTERVAL);
     console.log('[keepalive] Self-ping enabled (every 12 min)');
+  }
+
+  // Register with Stremio Community Addons catalog
+  if (process.env.PUBLIC_URL) {
+    axios.post('https://api.strem.io/api/addonPublish', {
+      transportUrl: 'https://anilibria-stremio.online/manifest.json',
+      transportName: 'http',
+    })
+    .then(r => console.log('[publish] Registered with Stremio Community:', JSON.stringify(r.data)))
+    .catch(e => console.warn('[publish] Failed to register with Stremio:', e.message));
   }
 
   // Graceful shutdown

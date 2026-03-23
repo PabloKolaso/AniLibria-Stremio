@@ -67,6 +67,20 @@ function init() {
     console.warn('[stats] Failed to load stats from disk:', err.message);
     state = defaultState();
   }
+
+  // Auto-load overrides from project root if file exists
+  try {
+    const OVERRIDES_FILE = path.resolve(__dirname, '../overrides.json');
+    if (fs.existsSync(OVERRIDES_FILE)) {
+      const oRaw = fs.readFileSync(OVERRIDES_FILE, 'utf8');
+      const overrides = JSON.parse(oRaw);
+      if (overrides.ignoredLookups) Object.assign(state.ignoredLookups, overrides.ignoredLookups);
+      if (overrides.notDubbedLookups) Object.assign(state.notDubbedLookups, overrides.notDubbedLookups);
+      console.log('[stats] Loaded overrides from overrides.json');
+    }
+  } catch (err) {
+    console.warn('[stats] Failed to load overrides.json:', err.message);
+  }
 }
 
 init();
@@ -391,6 +405,37 @@ function getNotDubbedLookups() {
   return { ...state.notDubbedLookups };
 }
 
+// ─── Override export / import ────────────────────────────────────────────────
+
+function getOverrides() {
+  return {
+    ignoredLookups: { ...state.ignoredLookups },
+    notDubbedLookups: { ...state.notDubbedLookups },
+  };
+}
+
+function importOverrides(data) {
+  let ignoredCount = 0, notDubbedCount = 0;
+  if (data.ignoredLookups && typeof data.ignoredLookups === 'object') {
+    for (const [id, val] of Object.entries(data.ignoredLookups)) {
+      if (/^tt\d+$/.test(id)) {
+        state.ignoredLookups[id] = val;
+        ignoredCount++;
+      }
+    }
+  }
+  if (data.notDubbedLookups && typeof data.notDubbedLookups === 'object') {
+    for (const [id, val] of Object.entries(data.notDubbedLookups)) {
+      if (/^tt\d+$/.test(id)) {
+        state.notDubbedLookups[id] = val;
+        notDubbedCount++;
+      }
+    }
+  }
+  scheduleDebouncedFlush();
+  return { ignored: ignoredCount, notDubbed: notDubbedCount };
+}
+
 // ─── Disk persistence ────────────────────────────────────────────────────────
 
 function scheduleDebouncedFlush() {
@@ -432,5 +477,7 @@ module.exports = {
   unmarkNotDubbed,
   isNotDubbed,
   getNotDubbedLookups,
+  getOverrides,
+  importOverrides,
   flush,
 };

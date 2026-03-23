@@ -863,9 +863,29 @@ function renderFailedLookups(query = {}) {
       .quick-ignore-btn:hover { color:#ddd; border-color:#666 }
       .not-dubbed-btn { background:#2a1e0a; border:1px solid #6a4a1a; color:#a73; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px; margin-left:4px; transition:all 0.2s }
       .not-dubbed-btn:hover { background:#3a2a10; border-color:#8a6a2a }
+      .override-toolbar { display:flex; gap:8px; margin-bottom:12px }
+      .override-toolbar button { background:#1a2a3a; border:1px solid #2a4a6a; color:#5a9ad5; padding:6px 14px; border-radius:4px; cursor:pointer; font-size:12px; transition:all 0.2s }
+      .override-toolbar button:hover { background:#2a3a4a; border-color:#4a6a8a }
     </style>
     <div style="color:#666;font-size:12px;margin-bottom:8px">
       Titles that users requested but weren't found in AniLibria. Sorted by most requested.
+    </div>
+    <div class="override-toolbar">
+      <button onclick="window.location='/debug/export'">Export Overrides</button>
+      <button onclick="document.getElementById('import-file').click()">Import Overrides</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="(function(input){
+        if(!input.files[0])return;
+        var reader=new FileReader();
+        reader.onload=function(){
+          try{var data=JSON.parse(reader.result)}catch(e){return alert('Invalid JSON file')}
+          fetch('/debug/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+            .then(function(r){return r.json()})
+            .then(function(d){if(d.ok){alert('Imported '+d.imported.ignored+' ignored + '+d.imported.notDubbed+' not-dubbed entries');location.reload()}else{alert('Import failed: '+(d.error||'unknown'))}})
+            .catch(function(e){alert('Import error: '+e.message)});
+        };
+        reader.readAsText(input.files[0]);
+        input.value='';
+      })(this)">
     </div>
     <form class="filters" method="GET" action="/dashboard" style="margin-bottom:12px">
       <input type="hidden" name="tab" value="failed">

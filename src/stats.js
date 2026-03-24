@@ -158,7 +158,7 @@ function recordFailedLookup(imdbId, title, isAnime = null) {
     existing.count++;
     existing.lastSeen = Date.now();
     if (title) existing.title = title;
-    if (isAnime !== null && existing.isAnime === null) existing.isAnime = isAnime;
+    if (isAnime !== null && (existing.isAnime === null || isAnime === true)) existing.isAnime = isAnime;
   } else {
     state.failedLookups[imdbId] = {
       title: title || null,

@@ -451,8 +451,10 @@ async function resolveImdbToAnilibriaDetailed(imdbId) {
   const cached = resolvedMap.get(imdbId);
   if (cached !== undefined) {
     cacheStats.hits++;
-    if (cached) return { ...cached, method: cached.method || 'cache' };
-    return { id: null, title: null, method: null, titleVariants: [] };
+    const ids = await mappingCache.getByImdb(imdbId);
+    const inFribb = !!(ids?.mal_id || ids?.anilist_id);
+    if (cached) return { ...cached, method: cached.method || 'cache', inFribb };
+    return { id: null, title: null, method: null, titleVariants: [], inFribb };
   }
   cacheStats.misses++;
 

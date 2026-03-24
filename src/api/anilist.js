@@ -75,7 +75,13 @@ async function getById(anilistId) {
   const key = `id:${anilistId}`;
   if (cache.has(key)) return cache.get(key);
 
-  const data = await gql(BY_ID_QUERY, { id: anilistId });
+  let data;
+  try {
+    data = await gql(BY_ID_QUERY, { id: anilistId });
+  } catch (err) {
+    console.warn(`[anilist] getById(${anilistId}) failed: ${err.message}`);
+    return null;
+  }
   const media = data?.Media || null;
   if (media) cache.set(key, media);
   return media;

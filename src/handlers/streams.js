@@ -10,7 +10,7 @@
 const resolver  = require('../bridge/resolver');
 const anilibria = require('../api/anilibria');
 const { GeoBlockedError } = require('../api/anilibria');
-const imdbApi = require('../api/imdb');
+const cinemeta = require('../api/cinemeta');
 const logger = require('../logger');
 const stats  = require('../stats');
 
@@ -146,9 +146,9 @@ async function streamHandler({ type, id }) {
     stats.recordRequest({ outcome: 'not_found', isAnime });
     const failedTitle = resolution.title || resolution.titleVariants?.[0] || null;
     stats.recordFailedLookup(imdbId, failedTitle, isAnime);
-    // For non-Fribb IDs (isAnime unknown), async-enrich from IMDB (no latency impact)
-    if (isAnime === null) {
-      imdbApi.fetchTitleInfo(imdbId).then(info => {
+    // Async-enrich from Cinemeta when title is missing (no latency impact)
+    if (!failedTitle) {
+      cinemeta.fetchTitleInfo(imdbId, type).then(info => {
         if (info) {
           stats.updateFailedLookup(imdbId, { title: info.title, isAnime: info.isAnime });
           logger.updateLastLog(imdbId, { title: info.title, isAnime: info.isAnime });

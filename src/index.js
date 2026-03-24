@@ -159,6 +159,17 @@ async function start() {
 
   // Pre-warm the Anilibria title index in the background
   warmup();
+
+  // Backfill missing titles for failed lookups via Cinemeta (rate-limited)
+  setTimeout(() => {
+    const cinemeta = require('./api/cinemeta');
+    cinemeta.backfillMissingTitles(
+      stats.getFailedLookups(),
+      (imdbId, info) => stats.updateFailedLookup(imdbId, info),
+    ).then(count => {
+      if (count > 0) console.log(`[cinemeta] Backfilled ${count} missing titles`);
+    }).catch(err => console.warn('[cinemeta] Backfill error:', err.message));
+  }, 10_000);
 }
 
 start().catch(err => {

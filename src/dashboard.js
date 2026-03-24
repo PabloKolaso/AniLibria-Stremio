@@ -873,6 +873,13 @@ function renderFailedLookups(query = {}) {
     <div class="override-toolbar">
       <button onclick="window.location='/debug/export'">Export Overrides</button>
       <button onclick="document.getElementById('import-file').click()">Import Overrides</button>
+      <button id="enrich-btn" onclick="(function(btn){
+        btn.disabled=true;btn.textContent='Fetching...';
+        fetch('/dashboard/api/enrich-titles',{method:'POST',credentials:'same-origin'})
+          .then(function(r){return r.json()})
+          .then(function(d){btn.textContent='Enriched '+d.enriched+' titles';setTimeout(function(){btn.disabled=false;btn.textContent='Fetch Missing Titles'},3000)})
+          .catch(function(e){btn.textContent='Error';setTimeout(function(){btn.disabled=false;btn.textContent='Fetch Missing Titles'},3000)});
+      })(this)">Fetch Missing Titles</button>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="(function(input){
         if(!input.files[0])return;
         var reader=new FileReader();
@@ -1193,6 +1200,26 @@ router.get('/dashboard/api/logs', (req, res) => {
     limit:   200,
   };
   res.json(logger.getLogs(filters));
+});
+
+/** POST /dashboard/api/enrich-titles — trigger Cinemeta backfill for missing titles */
+let enrichCooldown = 0;
+router.post('/dashboard/api/enrich-titles', (req, res) => {
+  const now = Date.now();
+  if (now < enrichCooldown) {
+    return res.json({ enriched: 0, message: 'Cooldown active, try again later' });
+  }
+  enrichCooldown = now + 60_000; // 60s cooldown
+  const cinemeta = require('./api/cinemeta');
+  cinemeta.backfillMissingTitles(
+    stats.getFailedLookups(),
+    (imdbId, info) => stats.updateFailedLookup(imdbId, info),
+    { cap: 50, delayMs: 300 },
+  ).then(count => {
+    res.json({ enriched: count });
+  }).catch(err => {
+    res.status(500).json({ enriched: 0, error: err.message });
+  });
 });
 
 /** GET /dashboard/api/failed-lookups — failed lookup data for live table refresh */

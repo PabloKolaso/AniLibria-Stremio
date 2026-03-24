@@ -155,7 +155,7 @@ async function streamHandler({ type, id }) {
         }
       }).catch(() => {});
     }
-    return { streams: [] };
+    return { streams: [], cacheMaxAge: 3600 };
   }
 
   // Step 2: fetch full release (includes episodes array)

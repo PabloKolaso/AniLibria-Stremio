@@ -9,6 +9,7 @@ const { Router } = require('express');
 const logger = require('./logger');
 const stats  = require('./stats');
 const { getLogs: getConsoleLogs } = require('./debug');
+const { getCacheStats } = require('./bridge/resolver');
 
 const router = Router();
 
@@ -163,6 +164,7 @@ function renderOverview() {
   const allLogs = logger.getAllLogs();
   const topAnime = stats.getTopAnime(allLogs, 5);
 
+  const cache = getCacheStats();
   const ramPercent = sys.totalMem > 0 ? ((sys.rssBytes / sys.totalMem) * 100).toFixed(1) : 0;
 
   let topHtml = '<em style="color:#666">No data yet</em>';
@@ -218,6 +220,11 @@ function renderOverview() {
         <div class="label">Bandwidth</div>
         <div class="value" data-stat="bandwidth">${formatBytes(stats.getTotalBandwidth())}</div>
         <div class="sub">total served</div>
+      </div>
+      <div class="card">
+        <div class="label">Cache Hit Rate</div>
+        <div class="value" data-stat="cacheHitRate">${cache.hitRate}%</div>
+        <div class="sub" data-stat-sub="cacheHitSub">${cache.hits} hits / ${cache.misses} misses &bull; ${cache.cacheSize} cached</div>
       </div>
     </div>
 
@@ -276,6 +283,7 @@ function renderOverview() {
               successRate: d.successRate + '%',
               uptime: _fmtUptime(d.system.uptime),
               bandwidth: _fmtBytes(d.totalBandwidthBytes || 0),
+              cacheHitRate: (d.resolverCache ? d.resolverCache.hitRate : 0) + '%',
             };
             for (var k in map) {
               var el = document.querySelector('[data-stat="' + k + '"]');
@@ -283,6 +291,10 @@ function renderOverview() {
             }
             var sub = document.querySelector('[data-stat-sub="successRateSub"]');
             if (sub) sub.textContent = d.counters.animeSuccess + ' / ' + d.counters.animeRequests + ' anime';
+            if (d.resolverCache) {
+              var cacheSub = document.querySelector('[data-stat-sub="cacheHitSub"]');
+              if (cacheSub) cacheSub.textContent = d.resolverCache.hits + ' hits / ' + d.resolverCache.misses + ' misses \u2022 ' + d.resolverCache.cacheSize + ' cached';
+            }
             // System resources
             var ramPct = d.system.totalMem > 0 ? ((d.system.rssBytes / d.system.totalMem) * 100).toFixed(1) : 0;
             var heapPct = d.system.heapTotal > 0 ? ((d.system.heapUsed / d.system.heapTotal) * 100).toFixed(1) : 0;
@@ -1136,6 +1148,7 @@ router.get('/dashboard/api/stats', (req, res) => {
     successRate: s.successRate,
     totalBandwidthBytes: stats.getTotalBandwidth(),
     system: safeSystem,
+    resolverCache: getCacheStats(),
   });
 });
 

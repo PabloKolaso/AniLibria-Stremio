@@ -40,6 +40,14 @@ const anilist      = require('../api/anilist');
 // Cache: imdbId -> anilibria release id  (permanent for this session)
 const resolvedMap = new NodeCache({ stdTTL: 86400, checkperiod: 600 });
 
+// ─── Cache hit/miss counters ────────────────────────────────────────────────
+const cacheStats = {
+  hits: 0,
+  misses: 0,
+  methods: { alias: 0, search: 0, fuse: 0 },
+  failures: 0,
+};
+
 // ─── Disk persistence for resolvedMap ────────────────────────────────────────
 
 function loadPersistedCache() {
@@ -408,11 +416,18 @@ async function _resolve(imdbId) {
 async function resolveImdbToAnilibria(imdbId) {
   const cached = resolvedMap.get(imdbId);
   if (cached !== undefined) {
-    // cached is either a result object or null
+    cacheStats.hits++;
     return cached ? cached.id : null;
   }
+  cacheStats.misses++;
 
   const result = await _resolve(imdbId);
+
+  if (result.id && result.method) {
+    cacheStats.methods[result.method] = (cacheStats.methods[result.method] || 0) + 1;
+  } else if (!result.id) {
+    cacheStats.failures++;
+  }
 
   if (result.id) {
     resolvedMap.set(imdbId, result);
@@ -431,11 +446,19 @@ async function resolveImdbToAnilibria(imdbId) {
 async function resolveImdbToAnilibriaDetailed(imdbId) {
   const cached = resolvedMap.get(imdbId);
   if (cached !== undefined) {
+    cacheStats.hits++;
     if (cached) return { ...cached, method: cached.method || 'cache' };
     return { id: null, title: null, method: null, titleVariants: [] };
   }
+  cacheStats.misses++;
 
   const result = await _resolve(imdbId);
+
+  if (result.id && result.method) {
+    cacheStats.methods[result.method] = (cacheStats.methods[result.method] || 0) + 1;
+  } else if (!result.id) {
+    cacheStats.failures++;
+  }
 
   if (result.id) {
     resolvedMap.set(imdbId, result);
@@ -485,4 +508,24 @@ function isIndexReady() {
   return indexSize > 0;
 }
 
-module.exports = { resolveImdbToAnilibria, resolveImdbToAnilibriaDetailed, resolveByTitles, clearCache, warmup, isIndexReady, loadPersistedCache, flushToDisk };
+/** Check if an IMDB ID is already in the resolver cache. */
+function hasCached(imdbId) {
+  return resolvedMap.has(imdbId);
+}
+
+/**
+ * Get resolver cache hit/miss statistics.
+ */
+function getCacheStats() {
+  const total = cacheStats.hits + cacheStats.misses;
+  return {
+    hits: cacheStats.hits,
+    misses: cacheStats.misses,
+    hitRate: total > 0 ? parseFloat(((cacheStats.hits / total) * 100).toFixed(1)) : 0,
+    methods: { ...cacheStats.methods },
+    failures: cacheStats.failures,
+    cacheSize: resolvedMap.keys().length,
+  };
+}
+
+module.exports = { resolveImdbToAnilibria, resolveImdbToAnilibriaDetailed, resolveByTitles, clearCache, warmup, isIndexReady, hasCached, getCacheStats, loadPersistedCache, flushToDisk };

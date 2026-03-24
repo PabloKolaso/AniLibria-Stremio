@@ -100,4 +100,21 @@ function cacheRelease(id, data) {
   releaseCache.set(id, data);
 }
 
-module.exports = { searchReleases, getRelease, allReleases, cacheRelease, GeoBlockedError };
+/**
+ * Get franchise data for a given release ID.
+ * Uses the /anime/franchises/release/{releaseId} endpoint.
+ * @param {number|string} releaseId - Numeric Anilibria release ID
+ * @returns {Promise<Object|null>} Franchise object with franchise_releases[] or null
+ */
+async function getFranchiseByRelease(releaseId) {
+  try {
+    const { data } = await client.get(`/anime/franchises/release/${releaseId}`);
+    return data || null;
+  } catch (err) {
+    if (err.response?.status === 404) return null;
+    console.warn(`[anilibria] Franchise lookup failed for release ${releaseId}:`, err.message);
+    return null;
+  }
+}
+
+module.exports = { searchReleases, getRelease, allReleases, cacheRelease, getFranchiseByRelease, GeoBlockedError };

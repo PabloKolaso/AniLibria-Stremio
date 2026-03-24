@@ -217,7 +217,27 @@ async function streamHandler({ type, id }) {
     resultStreams = buildStreams(release, ep, imdbId);
   } else {
     // Step 4: find the specific episode
-    const ep = findEpisode(episodes, season, episode);
+    let ep = findEpisode(episodes, season, episode);
+
+    // Step 4.5: Franchise fallback — if episode not found and season > 1,
+    // find the correct season's release via franchise data
+    if (!ep && season > 1) {
+      const franchise = require('../bridge/franchise');
+      const seasonResult = await franchise.findSeasonRelease(anilibriaId, season);
+      if (seasonResult) {
+        console.log(`[streams] Franchise: s${season} → release ${seasonResult.releaseId} (${seasonResult.alias})`);
+        try {
+          const seasonRelease = await anilibria.getRelease(seasonResult.releaseId);
+          if (seasonRelease?.episodes?.length > 0) {
+            release = seasonRelease;
+            ep = findEpisode(seasonRelease.episodes, season, episode);
+          }
+        } catch (err) {
+          console.warn(`[streams] Franchise fetch failed for release ${seasonResult.releaseId}:`, err.message);
+        }
+      }
+    }
+
     if (!ep) {
       console.log(`[streams] Episode s${season}e${episode} not found in release ${anilibriaId} (${episodes.length} eps)`);
       resultStreams = [];

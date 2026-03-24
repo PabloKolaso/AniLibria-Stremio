@@ -160,6 +160,16 @@ async function start() {
   // Pre-warm the Anilibria title index in the background
   warmup();
 
+  // Prewarm top anime from MAL (background, after Fuse index is ready)
+  setTimeout(async () => {
+    try {
+      const { prewarmTopAnime } = require('./prewarm');
+      await prewarmTopAnime({ count: 200 });
+    } catch (err) {
+      console.warn('[prewarm] Error:', err.message);
+    }
+  }, 30_000);
+
   // Backfill missing titles for failed lookups via Cinemeta (rate-limited)
   setTimeout(() => {
     const cinemeta = require('./api/cinemeta');

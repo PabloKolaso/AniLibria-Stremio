@@ -351,10 +351,15 @@ async function _resolve(imdbId) {
   let anilibriaId = null;
   let method = null;
   let titleVariants = [];
+  let isKnownAnime = false;
 
   try {
     // Step 1: get associated IDs from Fribb mapping
     const ids = await mappingCache.getByImdb(imdbId);
+
+    // MAL and AniList are anime-only databases; AniDB also indexes western cartoons.
+    // Only trust MAL/AniList as definitive anime proof.
+    if (ids?.mal_id || ids?.anilist_id) isKnownAnime = true;
 
     if (ids?.anilist_id || ids?.mal_id) {
       // Step 2: fetch canonical titles from AniList
@@ -405,8 +410,7 @@ async function _resolve(imdbId) {
   }
 
   const title = titleVariants[0] || null;
-  const inFribb = titleVariants.length > 0;
-  return { id: anilibriaId, title, method, titleVariants, inFribb };
+  return { id: anilibriaId, title, method, titleVariants, inFribb: isKnownAnime };
 }
 
 /**

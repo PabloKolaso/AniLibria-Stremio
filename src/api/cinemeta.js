@@ -28,7 +28,7 @@ async function fetchTitleInfo(imdbId, typeHint) {
       });
       if (data?.meta?.name) {
         const genres = (data.meta.genres || []).map(g => g.toLowerCase());
-        const isAnime = genres.includes('anime') || genres.includes('animation');
+        const isAnime = genres.includes('anime');
         return { title: data.meta.name, isAnime };
       }
     } catch (err) {

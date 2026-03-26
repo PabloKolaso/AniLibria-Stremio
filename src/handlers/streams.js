@@ -151,8 +151,8 @@ async function streamHandler({ type, id }) {
     if (!failedTitle) {
       cinemeta.fetchTitleInfo(imdbId, type).then(info => {
         if (info?.title) {
-          stats.updateFailedLookup(imdbId, { title: info.title });
-          logger.updateLastLog(imdbId, { title: info.title });
+          stats.updateFailedLookup(imdbId, { title: info.title, isAnime: info.isAnime });
+          logger.updateLastLog(imdbId, { title: info.title, isAnime: info.isAnime });
         }
       }).catch(() => {});
     }

@@ -48,6 +48,12 @@ const cacheStats = {
   failures: 0,
 };
 
+// ─── Silent mode (suppresses per-item logs during batch prewarm) ─────────────
+let _silent = false;
+const log  = (...a) => { if (!_silent) console.log(...a); };
+const warn = (...a) => { if (!_silent) console.warn(...a); };
+function setSilentMode(val) { _silent = val; }
+
 // ─── Disk persistence for resolvedMap ────────────────────────────────────────
 
 function loadPersistedCache() {
@@ -214,7 +220,7 @@ async function tryAliasList(titles) {
         headers: { 'User-Agent': 'stremio-anilibria-addon/1.0' },
       });
       if (data?.id) {
-        console.log(`[resolver] Alias lookup "${alias}" → release ${data.id} (${data.name?.english || data.name?.main})`);
+        log(`[resolver] Alias lookup "${alias}" → release ${data.id} (${data.name?.english || data.name?.main})`);
         anilibria.cacheRelease(data.id, data);
         return data.id;
       }
@@ -259,19 +265,19 @@ async function tryAnilibriaSearch(titles) {
 
       if (candidateWords.length === 0) continue;
       if (candidateWords[0] !== queryWords[0]) {
-        console.log(`[resolver] API search "${title}" discarded: "${candidateName}" (first: "${queryWords[0]}" ≠ "${candidateWords[0]}")`);
+        log(`[resolver] API search "${title}" discarded: "${candidateName}" (first: "${queryWords[0]}" ≠ "${candidateWords[0]}")`);
         continue;
       }
 
       if (candidateWords.length >= 2 && queryWords.length >= 2) {
         const w1 = candidateWords[1], w2 = queryWords[1];
         if (!w1.startsWith(w2.slice(0, 4)) && !w2.startsWith(w1.slice(0, 4))) {
-          console.log(`[resolver] API search "${title}" discarded: "${candidateName}" (second: "${w2}" ≠ "${w1}")`);
+          log(`[resolver] API search "${title}" discarded: "${candidateName}" (second: "${w2}" ≠ "${w1}")`);
           continue;
         }
       }
 
-      console.log(`[resolver] API search "${title}" → release ${candidate.id} (${candidate.name?.english || candidate.name?.main})`);
+      log(`[resolver] API search "${title}" → release ${candidate.id} (${candidate.name?.english || candidate.name?.main})`);
       return candidate.id;
     }
   }
@@ -321,10 +327,10 @@ async function findInIndex(titleVariants) {
     });
 
     if (wordMatch) {
-      console.log(`[resolver] Fuse match "${best.en || best.ru}" (score ${bestScore.toFixed(3)})`);
+      log(`[resolver] Fuse match "${best.en || best.ru}" (score ${bestScore.toFixed(3)})`);
       return best.id;
     }
-    console.log(`[resolver] Fuse match discarded: ${JSON.stringify(queryWordSets)} ≠ ${JSON.stringify(matchedWords)} (title: "${best.en}")`);
+    log(`[resolver] Fuse match discarded: ${JSON.stringify(queryWordSets)} ≠ ${JSON.stringify(matchedWords)} (title: "${best.en}")`);
   }
 
   return null;
@@ -381,7 +387,7 @@ async function _resolve(imdbId) {
       }
     }
 
-    console.log(`[resolver] Trying titles for ${imdbId}:`, titleVariants.slice(0, 3));
+    log(`[resolver] Trying titles for ${imdbId}:`, titleVariants.slice(0, 3));
 
     if (titleVariants.length > 0) {
       // Step 3: try alias-based direct lookup (most accurate)
@@ -402,7 +408,7 @@ async function _resolve(imdbId) {
     }
 
     if (!anilibriaId) {
-      console.warn(`[resolver] No Anilibria match for ${imdbId} (titles: ${titleVariants.slice(0, 2).join(', ')})`);
+      warn(`[resolver] No Anilibria match for ${imdbId} (titles: ${titleVariants.slice(0, 2).join(', ')})`);
     }
   } catch (err) {
     console.error(`[resolver] Error resolving ${imdbId}:`, err.message);
@@ -534,4 +540,4 @@ function getCacheStats() {
   };
 }
 
-module.exports = { resolveImdbToAnilibria, resolveImdbToAnilibriaDetailed, resolveByTitles, clearCache, warmup, isIndexReady, hasCached, getCacheStats, loadPersistedCache, flushToDisk };
+module.exports = { resolveImdbToAnilibria, resolveImdbToAnilibriaDetailed, resolveByTitles, clearCache, warmup, isIndexReady, hasCached, getCacheStats, loadPersistedCache, flushToDisk, setSilentMode };

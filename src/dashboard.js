@@ -71,85 +71,171 @@ function renderShell(activeTab, bodyHtml) {
   <meta charset="utf-8">
   <title>AniLibria Dashboard</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0 }
-    body { background: #111; color: #ddd; font-family: -apple-system, 'Segoe UI', sans-serif; padding: 0 }
-    .header { background: #1a1a1a; border-bottom: 1px solid #333; padding: 16px 24px; display: flex; align-items: center; gap: 24px }
-    .header h1 { color: #fff; font-size: 18px; white-space: nowrap }
-    .logout-btn { margin-left: auto; color: #666; text-decoration: none; font-size: 13px; padding: 6px 12px; border: 1px solid #333; border-radius: 5px; transition: all 0.2s }
-    .logout-btn:hover { color: #ddd; border-color: #555 }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+    body { background: #080810; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 0; min-height: 100vh }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(120, 40, 140, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(180, 30, 30, 0.10) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(40, 20, 80, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Header — glassmorphic */
+    .header { background: rgba(14, 14, 26, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(26, 26, 46, 0.8); padding: 14px 24px; display: flex; align-items: center; gap: 24px; position: sticky; top: 0; z-index: 100 }
+    .header h1 { color: #fff; font-size: 17px; white-space: nowrap; display: flex; align-items: center; gap: 10px; font-weight: 700 }
+    .header-logo { width: 28px; height: 28px; border-radius: 7px; border: 1px solid #1a1a2e }
     .tabs { display: flex; gap: 4px }
-    .tab { color: #888; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; transition: all 0.2s }
-    .tab:hover { color: #ddd; background: #222 }
-    .tab.active { color: #fff; background: #333 }
-    .content { padding: 24px; max-width: 1200px; margin: 0 auto }
+    .tab { color: #666; text-decoration: none; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; transition: all 0.25s ease }
+    .tab:hover { color: #ccc; background: rgba(255, 255, 255, 0.05) }
+    .tab.active { color: #fff; background: linear-gradient(135deg, #cc3333 0%, #991a1a 100%); box-shadow: 0 2px 12px rgba(204, 51, 51, 0.3) }
+    .logout-btn { margin-left: auto; color: #555; text-decoration: none; font-size: 12px; padding: 6px 14px; border: 1px solid #1a1a2e; border-radius: 8px; transition: all 0.25s }
+    .logout-btn:hover { color: #ccc; border-color: #333; background: rgba(255,255,255,0.03) }
+    .content { padding: 24px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; animation: fadeIn 0.2s ease }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px) } to { opacity: 1; transform: translateY(0) } }
 
     /* Cards */
     .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px }
-    .card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 16px }
-    .card .label { color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px }
-    .card .value { color: #fff; font-size: 28px; font-weight: 600 }
-    .card .sub { color: #666; font-size: 12px; margin-top: 4px }
+    .card { background: #0e0e1a; border: 1px solid #1a1a2e; border-radius: 14px; padding: 20px; position: relative; overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(to right, #cc3333, #7b3fa0); opacity: 0.6 }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(204, 51, 51, 0.1); border-color: #252535 }
+    .card .label { color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px; font-weight: 600 }
+    .card .value { color: #fff; font-size: 30px; font-weight: 700; letter-spacing: -0.5px }
+    .card .sub { color: #444; font-size: 11px; margin-top: 6px }
 
     /* Progress bars */
-    .bar-wrap { background: #222; border-radius: 4px; height: 8px; margin-top: 8px; overflow: hidden }
-    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s }
-    .bar-green { background: #3a7 }
-    .bar-blue { background: #47a }
-    .bar-orange { background: #a73 }
+    .bar-wrap { background: #111125; border-radius: 6px; height: 6px; margin-top: 8px; overflow: hidden }
+    .bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease }
+    .bar-green { background: linear-gradient(90deg, #2a8a5a, #3dcc7a) }
+    .bar-blue { background: linear-gradient(90deg, #3a5aaa, #5a8add) }
+    .bar-orange { background: linear-gradient(90deg, #aa6633, #ddaa55) }
 
     /* Tables */
-    table { width: 100%; border-collapse: collapse; font-size: 13px }
-    th { text-align: left; color: #888; font-weight: 500; padding: 8px 12px; border-bottom: 1px solid #333; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px }
-    td { padding: 8px 12px; border-bottom: 1px solid #222; vertical-align: top }
-    tr:hover td { background: #1a1a1a }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500 }
-    .badge-success { background: #1a3a2a; color: #3a7 }
-    .badge-fail { background: #3a1a1a; color: #a55 }
-    .badge-error { background: #3a2a1a; color: #a73 }
-    .badge-method { background: #1a2a3a; color: #47a }
-    .badge-anime { background: #1a3a2a; color: #3a7 }
-    .badge-not-anime { background: #2a2a2a; color: #666 }
-    a.imdb-link { color: #47a; text-decoration: none }
-    a.imdb-link:hover { text-decoration: underline }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px }
+    th { text-align: left; color: #555; font-weight: 600; padding: 10px 14px; border-bottom: 1px solid #1a1a2e; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; background: rgba(14, 14, 26, 0.5) }
+    th:first-child { border-radius: 8px 0 0 0 }
+    th:last-child { border-radius: 0 8px 0 0 }
+    td { padding: 10px 14px; border-bottom: 1px solid rgba(26, 26, 46, 0.5); vertical-align: top }
+    tr:hover td { background: rgba(204, 51, 51, 0.03) }
+    tbody tr:nth-child(even) td { background: rgba(14, 14, 26, 0.3) }
+    tbody tr:nth-child(even):hover td { background: rgba(204, 51, 51, 0.05) }
+    .table-wrap { background: #0e0e1a; border: 1px solid #1a1a2e; border-radius: 12px; overflow: hidden }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px }
+    .badge-success { background: linear-gradient(135deg, #0f2a1a, #1a3a2a); color: #3dcc7a; border: 1px solid #1a3a2a }
+    .badge-fail { background: linear-gradient(135deg, #2a0f0f, #3a1a1a); color: #cc5555; border: 1px solid #3a1a1a }
+    .badge-error { background: linear-gradient(135deg, #2a1a0a, #3a2a1a); color: #cc8833; border: 1px solid #3a2a1a }
+    .badge-method { background: linear-gradient(135deg, #0f1a2a, #1a2a3a); color: #5588cc; border: 1px solid #1a2a3a }
+    .badge-anime { background: linear-gradient(135deg, #0f2a1a, #1a3a2a); color: #3dcc7a; border: 1px solid #1a3a2a }
+    .badge-not-anime { background: linear-gradient(135deg, #15151f, #1e1e2a); color: #555; border: 1px solid #1e1e2a }
+    a.imdb-link { color: #5588cc; text-decoration: none; transition: color 0.2s }
+    a.imdb-link:hover { color: #77aaee; text-decoration: underline }
 
     /* Filters */
-    .filters { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center }
-    .filters input, .filters select { background: #222; border: 1px solid #444; color: #ddd; padding: 6px 10px; border-radius: 4px; font-size: 13px }
-    .filters button { background: #3a7; border: none; color: #fff; padding: 7px 16px; border-radius: 4px; cursor: pointer; font-size: 13px }
-    .filters button:hover { background: #4b8 }
-    .filters .btn-secondary { background: #444 }
-    .filters .btn-secondary:hover { background: #555 }
+    .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center }
+    .filters input, .filters select { background: #0f0f18; border: 1px solid #22223a; color: #ccc; padding: 8px 12px; border-radius: 8px; font-size: 13px; transition: border-color 0.2s }
+    .filters input:focus, .filters select:focus { outline: none; border-color: #444 }
+    .filters button { background: linear-gradient(135deg, #cc3333 0%, #991a1a 100%); border: none; color: #fff; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: transform 0.15s, box-shadow 0.15s }
+    .filters button:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(204, 51, 51, 0.3) }
+    .filters .btn-secondary { background: #0f0f18; border: 1px solid #22223a; color: #888 }
+    .filters .btn-secondary:hover { color: #ccc; border-color: #444; background: #16162a; box-shadow: none; transform: none }
 
     /* Charts */
     .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px }
-    .chart-box { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 16px }
-    .chart-box h3 { color: #aaa; font-size: 13px; margin-bottom: 12px; font-weight: 500 }
+    .chart-box { background: #0e0e1a; border: 1px solid #1a1a2e; border-radius: 14px; padding: 20px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) }
+    .chart-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(to right, #cc3333, #7b3fa0); opacity: 0.4 }
+    .chart-box h3 { color: #888; font-size: 13px; margin-bottom: 12px; font-weight: 600; letter-spacing: 0.3px }
     canvas { max-height: 250px }
 
     /* Top anime */
     .top-list { list-style: none }
-    .top-list li { padding: 8px 0; border-bottom: 1px solid #222; display: flex; justify-content: space-between }
+    .top-list li { padding: 10px 4px; border-bottom: 1px solid rgba(26, 26, 46, 0.4); display: flex; justify-content: space-between; transition: all 0.15s; border-radius: 4px }
+    .top-list li:hover { background: rgba(204, 51, 51, 0.03); padding-left: 8px }
     .top-list li:last-child { border: none }
-    .top-count { color: #3a7; font-weight: 600 }
+    .top-count { color: #cc3333; font-weight: 700 }
 
     /* Section titles */
-    .section-title { color: #aaa; font-size: 14px; font-weight: 500; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #222 }
+    .section-title { color: #888; font-size: 13px; font-weight: 600; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(26, 26, 46, 0.6); letter-spacing: 0.3px }
+
+    /* Terminal */
+    .terminal-wrap { background: #08080f; border: 1px solid #1a1a2e; border-radius: 12px; overflow: hidden }
+    .terminal-titlebar { background: #0e0e1a; border-bottom: 1px solid #1a1a2e; padding: 10px 16px; display: flex; align-items: center; gap: 8px }
+    .terminal-dot { width: 10px; height: 10px; border-radius: 50% }
+    .terminal-dot.red { background: #cc3333 }
+    .terminal-dot.yellow { background: #ccaa33 }
+    .terminal-dot.green { background: #33cc77 }
+    .terminal-title { color: #555; font-size: 12px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; margin-left: 8px }
+    .terminal-body { padding: 16px; font-size: 12px; font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Menlo', monospace; overflow: auto; max-height: 70vh; white-space: pre-wrap; word-break: break-all; line-height: 1.6; color: #aaa; position: relative }
+    .terminal-body::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); pointer-events: none }
+    .term-btn { background: #0f0f18; border: 1px solid #22223a; color: #666; padding: 5px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s }
+    .term-btn:hover { color: #ccc; border-color: #444; background: #16162a }
+
+    /* KPI hero cards */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px }
+    .kpi-card { background: #0e0e1a; border: 1px solid #1a1a2e; border-radius: 14px; padding: 22px 22px 18px; position: relative; overflow: hidden; transition: all 0.2s }
+    .kpi-card:hover { border-color: #252535; transform: translateY(-1px) }
+    .kpi-icon { font-size: 1.2rem; margin-bottom: 10px; line-height: 1; opacity: 0.8 }
+    .kpi-value { color: #fff; font-size: 2.4rem; font-weight: 800; letter-spacing: -1.5px; line-height: 1 }
+    .kpi-label { color: #555; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.3px; margin-bottom: 8px }
+    .kpi-sub { color: #444; font-size: 12px; margin-top: 8px }
+    .kpi-accent { position: absolute; bottom: 0; left: 0; right: 0; height: 2px }
+
+    /* Live sessions pulse dot */
+    .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; background: #333; vertical-align: middle }
+    .live-dot.active { background: #3dcc7a; animation: live-pulse 2s ease-in-out infinite }
+    @keyframes live-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(61,204,122,0.5) } 50% { box-shadow: 0 0 0 6px rgba(61,204,122,0) } }
+
+    /* Info panels */
+    .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px }
+    .info-panel { background: #0e0e1a; border: 1px solid #1a1a2e; border-radius: 14px; padding: 18px 20px }
+    .info-panel-title { color: #555; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.3px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px }
+    .info-panel-title::after { content: ''; flex: 1; height: 1px; background: rgba(26,26,46,0.8) }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(26,26,46,0.4) }
+    .info-row:last-child { border: none; padding-bottom: 0 }
+    .info-row-label { color: #555; font-size: 12px }
+    .info-row-value { color: #ddd; font-size: 13px; font-weight: 600 }
+    .info-row-value.accent-green { color: #3dcc7a }
+    .info-row-value.accent-amber { color: #ccaa33 }
+    .info-row-value.accent-red { color: #cc5555 }
+
+    /* Mini inline bar for cache rate */
+    .mini-bar-wrap { background: #111125; border-radius: 3px; height: 4px; width: 56px; display: inline-block; vertical-align: middle; overflow: hidden; margin-left: 8px }
+    .mini-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #cc3333, #7b3fa0) }
+
+    /* Bottom 60/40 grid */
+    .bottom-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 16px }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px }
+    ::-webkit-scrollbar-track { background: #080810 }
+    ::-webkit-scrollbar-thumb { background: #1a1a2e; border-radius: 4px }
+    ::-webkit-scrollbar-thumb:hover { background: #2a2a3e }
+    ::selection { background: rgba(204, 51, 51, 0.3); color: #fff }
+
+    @media (max-width: 900px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr) }
+      .info-grid { grid-template-columns: 1fr }
+      .bottom-grid { grid-template-columns: 1fr }
+    }
 
     @media (max-width: 768px) {
       .chart-grid { grid-template-columns: 1fr }
       .cards { grid-template-columns: repeat(2, 1fr) }
       .header { flex-direction: column; gap: 12px }
       table thead { display: none }
-      table tbody tr { display: block; margin-bottom: 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 12px }
+      table tbody tr { display: block; margin-bottom: 12px; background: #0e0e1a; border: 1px solid #1a1a2e; border-radius: 12px; padding: 12px }
       table tbody tr:hover td { background: transparent }
       table tbody td { display: block; padding: 4px 0; border: none; font-size: 13px }
-      table tbody td::before { content: attr(data-label); color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px }
+      table tbody td::before { content: attr(data-label); color: #555; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px }
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>AniLibria Dashboard</h1>
+    <h1><img src="/logo.jpg" alt="" class="header-logo">AniLibria Dashboard</h1>
     <div class="tabs">${tabLinks}</div>
   </div>
   <div class="content">${bodyHtml}</div>
@@ -169,103 +255,148 @@ function renderOverview() {
   const cache = getCacheStats();
   const ramPercent = sys.totalMem > 0 ? ((sys.rssBytes / sys.totalMem) * 100).toFixed(1) : 0;
 
-  let topHtml = '<em style="color:#666">No data yet</em>';
+  const successRateNum = parseFloat(s.successRate) || 0;
+  const successAccent = successRateNum >= 90 ? 'accent-green' : successRateNum >= 70 ? 'accent-amber' : 'accent-red';
+  const liveDotClass = s.liveSessions > 0 ? 'live-dot active' : 'live-dot';
+  const heapPct = sys.heapTotal > 0 ? ((sys.heapUsed / sys.heapTotal) * 100).toFixed(1) : 0;
+
+  let topHtml = '<div style="color:#555;font-size:13px;padding:16px 0">No requests recorded yet</div>';
   if (topAnime.length > 0) {
     topHtml = '<ul class="top-list">' + topAnime.map((a, i) =>
-      `<li><span>${i + 1}. ${esc(a.title)}</span> <span class="top-count">${a.count} req</span></li>`
+      `<li><span style="display:flex;align-items:center;gap:10px"><span style="color:#333;font-size:11px;font-weight:700;min-width:18px">#${i + 1}</span><span style="color:#ccc">${esc(a.title)}</span></span><span class="top-count">${a.count} req</span></li>`
     ).join('') + '</ul>';
   }
 
   return `
-    <div class="cards">
-      <div class="card">
-        <div class="label">Today</div>
-        <div class="value" data-stat="todayRequests">${s.todayRequests}</div>
-        <div class="sub">requests</div>
+    <!-- Row 1: Hero KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Requests Today</div>
+        <div class="kpi-value" data-stat="todayRequests">${s.todayRequests}</div>
+        <div class="kpi-sub" data-stat-sub="todayRequestsSub">this week: <span data-stat="weekRequests">${s.weekRequests}</span></div>
+        <div class="kpi-accent" style="background:linear-gradient(90deg,#3dcc7a,#2a8a5a)"></div>
       </div>
-      <div class="card">
-        <div class="label">This Week</div>
-        <div class="value" data-stat="weekRequests">${s.weekRequests}</div>
-        <div class="sub">requests</div>
+      <div class="kpi-card">
+        <div class="kpi-label">Users This Month</div>
+        <div class="kpi-value" data-stat="usersMonth">${uc.month}</div>
+        <div class="kpi-sub">today: <span data-stat="usersToday">${uc.today}</span> &nbsp;&bull;&nbsp; week: <span data-stat="usersWeek">${uc.week}</span></div>
+        <div class="kpi-accent" style="background:linear-gradient(90deg,#5a8add,#3a5aaa)"></div>
       </div>
-      <div class="card">
-        <div class="label">This Month</div>
-        <div class="value" data-stat="monthRequests">${s.monthRequests}</div>
-        <div class="sub">requests</div>
+      <div class="kpi-card">
+        <div class="kpi-label">Success Rate</div>
+        <div class="kpi-value ${successAccent}" data-stat="successRate">${s.successRate}%</div>
+        <div class="kpi-sub" data-stat-sub="successRateSub">${s.counters.animeSuccess} / ${s.counters.animeRequests} anime lookups</div>
+        <div class="kpi-accent" style="background:linear-gradient(90deg,#cc3333,#7b3fa0)"></div>
       </div>
-      <div class="card">
-        <div class="label">Users Today</div>
-        <div class="value" data-stat="usersToday">${uc.today}</div>
-        <div class="sub">unique users</div>
-      </div>
-      <div class="card">
-        <div class="label">Users This Week</div>
-        <div class="value" data-stat="usersWeek">${uc.week}</div>
-        <div class="sub">unique users</div>
-      </div>
-      <div class="card">
-        <div class="label">Users This Month</div>
-        <div class="value" data-stat="usersMonth">${uc.month}</div>
-        <div class="sub">unique users</div>
-      </div>
-      <div class="card">
-        <div class="label">Live Now</div>
-        <div class="value" data-stat="liveSessions">${s.liveSessions}</div>
-        <div class="sub">active sessions</div>
-      </div>
-      <div class="card">
-        <div class="label">Total Sessions</div>
-        <div class="value" data-stat="totalSessions">${s.counters.totalSessions}</div>
-        <div class="sub">all time</div>
-      </div>
-      <div class="card">
-        <div class="label">Anime Found</div>
-        <div class="value" data-stat="animeSuccess">${s.counters.animeSuccess}</div>
-        <div class="sub">successful lookups</div>
-      </div>
-      <div class="card">
-        <div class="label">Success Rate</div>
-        <div class="value" data-stat="successRate">${s.successRate}%</div>
-        <div class="sub" data-stat-sub="successRateSub">${s.counters.animeSuccess} / ${s.counters.animeRequests} anime</div>
-      </div>
-      <div class="card">
-        <div class="label">Uptime</div>
-        <div class="value" data-stat="uptime">${formatUptime(sys.uptime)}</div>
-        <div class="sub">${sys.nodeVersion} on ${sys.platform}</div>
-      </div>
-      <div class="card">
-        <div class="label">Bandwidth</div>
-        <div class="value" data-stat="bandwidth">${formatBytes(stats.getTotalBandwidth())}</div>
-        <div class="sub">total served</div>
-      </div>
-      <div class="card">
-        <div class="label">Cache Hit Rate</div>
-        <div class="value" data-stat="cacheHitRate">${cache.hitRate}%</div>
-        <div class="sub" data-stat-sub="cacheHitSub">${cache.hits} hits / ${cache.misses} misses &bull; ${cache.cacheSize} cached</div>
+      <div class="kpi-card">
+        <div class="kpi-label">Live Sessions</div>
+        <div class="kpi-value" style="display:flex;align-items:center;gap:10px">
+          <span class="${liveDotClass}" id="liveDot"></span>
+          <span data-stat="liveSessions">${s.liveSessions}</span>
+        </div>
+        <div class="kpi-sub">total: <span data-stat="totalSessions">${s.counters.totalSessions}</span> all time</div>
+        <div class="kpi-accent" style="background:linear-gradient(90deg,#cc8833,#7b3f0a)"></div>
       </div>
     </div>
 
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px">
+    <!-- Row 2: Info Panels -->
+    <div class="info-grid">
+      <div class="info-panel">
+        <div class="info-panel-title">Traffic</div>
+        <div class="info-row">
+          <span class="info-row-label">Today</span>
+          <span class="info-row-value" data-stat="todayRequests">${s.todayRequests}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">This Week</span>
+          <span class="info-row-value" data-stat="weekRequests">${s.weekRequests}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">This Month</span>
+          <span class="info-row-value" data-stat="monthRequests">${s.monthRequests}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">Anime Found</span>
+          <span class="info-row-value accent-green" data-stat="animeSuccess">${s.counters.animeSuccess}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">Bandwidth</span>
+          <span class="info-row-value" data-stat="bandwidth">${formatBytes(stats.getTotalBandwidth())}</span>
+        </div>
+      </div>
+      <div class="info-panel">
+        <div class="info-panel-title">Users</div>
+        <div class="info-row">
+          <span class="info-row-label">Today</span>
+          <span class="info-row-value" data-stat="usersToday">${uc.today}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">This Week</span>
+          <span class="info-row-value" data-stat="usersWeek">${uc.week}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">This Month</span>
+          <span class="info-row-value" data-stat="usersMonth">${uc.month}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">Total Sessions</span>
+          <span class="info-row-value" data-stat="totalSessions">${s.counters.totalSessions}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">Active Now</span>
+          <span class="info-row-value" data-stat="liveSessions">${s.liveSessions}</span>
+        </div>
+      </div>
+      <div class="info-panel">
+        <div class="info-panel-title">Performance</div>
+        <div class="info-row">
+          <span class="info-row-label">Cache Hit Rate</span>
+          <span class="info-row-value">
+            <span data-stat="cacheHitRate">${cache.hitRate}%</span>
+            <span class="mini-bar-wrap"><span class="mini-bar-fill" id="cacheBar" style="width:${Math.min(cache.hitRate, 100)}%"></span></span>
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">Cache</span>
+          <span class="info-row-value" style="font-size:12px" data-stat-sub="cacheHitSub">${cache.hits} hits / ${cache.misses} misses</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">Cached Titles</span>
+          <span class="info-row-value" data-stat-sub="cacheSizeVal">${cache.cacheSize}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">Uptime</span>
+          <span class="info-row-value" data-stat="uptime">${formatUptime(sys.uptime)}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">Platform</span>
+          <span class="info-row-value" style="font-size:12px;color:#555">${sys.nodeVersion} / ${sys.platform}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Top Anime + System Resources -->
+    <div class="bottom-grid">
       <div class="card">
         <div class="section-title">Top 5 Anime</div>
         <div id="topAnimeList">${topHtml}</div>
       </div>
       <div class="card">
         <div class="section-title">System Resources</div>
-        <div style="margin-bottom:12px">
-          <div style="display:flex; justify-content:space-between; font-size:12px; color:#888; margin-bottom:4px">
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#555;margin-bottom:6px">
             <span>RAM</span><span data-stat="ramLabel">${formatBytes(sys.rssBytes)} / ${formatBytes(sys.totalMem)} (${ramPercent}%)</span>
           </div>
           <div class="bar-wrap"><div class="bar-fill bar-green" data-stat-bar="ram" style="width:${Math.min(ramPercent, 100)}%"></div></div>
         </div>
-        <div style="margin-bottom:12px">
-          <div style="display:flex; justify-content:space-between; font-size:12px; color:#888; margin-bottom:4px">
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#555;margin-bottom:6px">
             <span>Heap</span><span data-stat="heapLabel">${formatBytes(sys.heapUsed)} / ${formatBytes(sys.heapTotal)}</span>
           </div>
-          <div class="bar-wrap"><div class="bar-fill bar-blue" data-stat-bar="heap" style="width:${sys.heapTotal > 0 ? ((sys.heapUsed / sys.heapTotal) * 100).toFixed(1) : 0}%"></div></div>
+          <div class="bar-wrap"><div class="bar-fill bar-blue" data-stat-bar="heap" style="width:${heapPct}%"></div></div>
         </div>
         <div>
-          <div style="display:flex; justify-content:space-between; font-size:12px; color:#888; margin-bottom:4px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#555;margin-bottom:6px">
             <span>CPU</span><span data-stat="cpuLabel">${sys.cpuUsage}%</span>
           </div>
           <div class="bar-wrap"><div class="bar-fill bar-orange" data-stat-bar="cpu" style="width:${Math.min(sys.cpuUsage, 100)}%"></div></div>
@@ -306,14 +437,28 @@ function renderOverview() {
               cacheHitRate: (d.resolverCache ? d.resolverCache.hitRate : 0) + '%',
             };
             for (var k in map) {
-              var el = document.querySelector('[data-stat="' + k + '"]');
-              if (el) el.textContent = map[k];
+              var els = document.querySelectorAll('[data-stat="' + k + '"]');
+              els.forEach(function(el) { el.textContent = map[k]; });
             }
+            // Success rate color
+            var srEl = document.querySelector('[data-stat="successRate"]');
+            if (srEl) {
+              var rate = parseFloat(d.successRate) || 0;
+              srEl.className = rate >= 90 ? 'kpi-value accent-green' : rate >= 70 ? 'kpi-value accent-amber' : 'kpi-value accent-red';
+            }
+            // Live dot
+            var dot = document.getElementById('liveDot');
+            if (dot) dot.className = d.liveSessions > 0 ? 'live-dot active' : 'live-dot';
+            // Sub labels
             var sub = document.querySelector('[data-stat-sub="successRateSub"]');
-            if (sub) sub.textContent = d.counters.animeSuccess + ' / ' + d.counters.animeRequests + ' anime';
+            if (sub) sub.textContent = d.counters.animeSuccess + ' / ' + d.counters.animeRequests + ' anime lookups';
             if (d.resolverCache) {
               var cacheSub = document.querySelector('[data-stat-sub="cacheHitSub"]');
-              if (cacheSub) cacheSub.textContent = d.resolverCache.hits + ' hits / ' + d.resolverCache.misses + ' misses \u2022 ' + d.resolverCache.cacheSize + ' cached';
+              if (cacheSub) cacheSub.textContent = d.resolverCache.hits + ' hits / ' + d.resolverCache.misses + ' misses';
+              var cacheSize = document.querySelector('[data-stat-sub="cacheSizeVal"]');
+              if (cacheSize) cacheSize.textContent = d.resolverCache.cacheSize;
+              var cacheBar = document.getElementById('cacheBar');
+              if (cacheBar) cacheBar.style.width = Math.min(d.resolverCache.hitRate, 100) + '%';
             }
             // System resources
             var ramPct = d.system.totalMem > 0 ? ((d.system.rssBytes / d.system.totalMem) * 100).toFixed(1) : 0;
@@ -346,10 +491,10 @@ function renderOverview() {
             var el = document.getElementById('topAnimeList');
             if (!el) return;
             if (!d.topAnime || d.topAnime.length === 0) {
-              el.innerHTML = '<em style="color:#666">No data yet</em>';
+              el.innerHTML = '<div style="color:#555;font-size:13px;padding:16px 0">No requests recorded yet</div>';
             } else {
               el.innerHTML = '<ul class="top-list">' + d.topAnime.map(function(a, i) {
-                return '<li><span>' + (i + 1) + '. ' + _escHtml(a.title) + '</span> <span class="top-count">' + a.count + ' req</span></li>';
+                return '<li><span style="display:flex;align-items:center;gap:10px"><span style="color:#333;font-size:11px;font-weight:700;min-width:18px">#' + (i+1) + '</span><span style="color:#ccc">' + _escHtml(a.title) + '</span></span><span class="top-count">' + a.count + ' req</span></li>';
               }).join('') + '</ul>';
             }
           })
@@ -432,10 +577,10 @@ function renderAnalytics() {
 
   return `
     <style>
-      .period-btns { display:flex; gap:8px; margin-bottom:16px }
-      .period-btn { background:#222; border:1px solid #444; color:#888; padding:7px 20px; border-radius:6px; cursor:pointer; font-size:13px; transition:all 0.2s }
-      .period-btn:hover { color:#ddd; border-color:#666 }
-      .period-btn.active { background:#333; color:#fff; border-color:#555 }
+      .period-btns { display:flex; gap:6px; margin-bottom:16px }
+      .period-btn { background:#0f0f18; border:1px solid #22223a; color:#666; padding:8px 22px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:500; transition:all 0.25s }
+      .period-btn:hover { color:#ccc; border-color:#333; background:#16162a }
+      .period-btn.active { background:linear-gradient(135deg, #cc3333 0%, #991a1a 100%); color:#fff; border-color:transparent; box-shadow:0 2px 12px rgba(204, 51, 51, 0.3) }
     </style>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap">
       <div class="period-btns" style="margin-bottom:0">
@@ -443,8 +588,8 @@ function renderAnalytics() {
         <button class="period-btn" onclick="switchPeriod('week',this)">Week</button>
         <button class="period-btn" onclick="switchPeriod('month',this)">Month</button>
       </div>
-      <label style="display:flex;align-items:center;gap:6px;color:#888;font-size:13px;cursor:pointer;user-select:none">
-        <input type="checkbox" id="showAnime" style="accent-color:#3a7;width:14px;height:14px;cursor:pointer"> Show anime requests
+      <label style="display:flex;align-items:center;gap:6px;color:#666;font-size:13px;cursor:pointer;user-select:none">
+        <input type="checkbox" id="showAnime" style="accent-color:#cc3333;width:14px;height:14px;cursor:pointer"> Show anime requests
       </label>
     </div>
     <div class="chart-box" style="max-width:100%">
@@ -501,13 +646,13 @@ function renderAnalytics() {
       };
 
       const scaleOpts = {
-        x: { ticks: { color: '#666', maxRotation: 45 }, grid: { color: '#222' } },
-        y: { ticks: { color: '#666' }, grid: { color: '#222' }, beginAtZero: true }
+        x: { ticks: { color: '#555', maxRotation: 45 }, grid: { color: '#111125' } },
+        y: { ticks: { color: '#555' }, grid: { color: '#111125' }, beginAtZero: true }
       };
 
       const bwScaleOpts = {
-        x: { ticks: { color: '#666', maxRotation: 45 }, grid: { color: '#222' } },
-        y: { ticks: { color: '#666', callback: function(v) { return _fmtBytesChart(v); } }, grid: { color: '#222' }, beginAtZero: true }
+        x: { ticks: { color: '#555', maxRotation: 45 }, grid: { color: '#111125' } },
+        y: { ticks: { color: '#555', callback: function(v) { return _fmtBytesChart(v); } }, grid: { color: '#111125' }, beginAtZero: true }
       };
 
       let chart = null;
@@ -709,8 +854,8 @@ function renderLogs(query) {
       <button type="submit">Filter</button>
       <a href="${csvUrl}" class="filters" style="text-decoration:none"><button type="button" class="btn-secondary">Export CSV</button></a>
     </form>
-    <div id="logsCount" style="color:#666;font-size:12px;margin-bottom:8px">Showing ${logs.length} entries (max 200, newest first)</div>
-    <div style="overflow-x:auto">
+    <div id="logsCount" style="color:#555;font-size:12px;margin-bottom:8px">Showing ${logs.length} entries (max 200, newest first)</div>
+    <div class="table-wrap" style="overflow-x:auto">
       <table>
         <thead>
           <tr><th>Time</th><th>IMDB ID</th><th>Title</th><th>Episode</th><th>Anime?</th><th>Outcome</th><th>Method</th><th>Time</th><th>Streams</th></tr>
@@ -849,8 +994,8 @@ function renderFailedLookups(query = {}) {
 
   const notDubbedSection = notDubbedList.length > 0 ? `
     <details style="margin-top:20px">
-      <summary style="cursor:pointer;color:#a73;font-size:13px;margin-bottom:8px">Not Dubbed Yet (${notDubbedList.length})</summary>
-      <div style="overflow-x:auto">
+      <summary style="cursor:pointer;color:#cc8833;font-size:13px;margin-bottom:8px;font-weight:500">Not Dubbed Yet (${notDubbedList.length})</summary>
+      <div class="table-wrap" style="overflow-x:auto;margin-top:8px">
         <table>
           <thead>
             <tr><th>Title</th><th>IMDB ID</th><th>Times Requested</th><th>Marked At</th><th></th></tr>
@@ -862,8 +1007,8 @@ function renderFailedLookups(query = {}) {
 
   const ignoredSection = ignoredList.length > 0 ? `
     <details style="margin-top:20px">
-      <summary style="cursor:pointer;color:#888;font-size:13px;margin-bottom:8px">Ignored (${ignoredList.length})</summary>
-      <div style="overflow-x:auto">
+      <summary style="cursor:pointer;color:#666;font-size:13px;margin-bottom:8px;font-weight:500">Ignored (${ignoredList.length})</summary>
+      <div class="table-wrap" style="overflow-x:auto;margin-top:8px">
         <table>
           <thead>
             <tr><th>Title</th><th>IMDB ID</th><th>Anime?</th><th>Times Requested</th><th>Reason</th><th>Ignored At</th><th></th></tr>
@@ -881,25 +1026,26 @@ function renderFailedLookups(query = {}) {
 
   return `
     <style>
-      .ignore-btn { background:#333; border:1px solid #555; color:#888; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px; transition:all 0.2s }
-      .ignore-btn:hover { color:#ddd; border-color:#777 }
+      .ignore-btn { background:#0f0f18; border:1px solid #22223a; color:#666; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; transition:all 0.2s }
+      .ignore-btn:hover { color:#ccc; border-color:#444; background:#16162a }
       .ignore-form { display:flex; gap:6px; align-items:center; margin-top:4px }
-      .ignore-form input { background:#222; border:1px solid #444; color:#ddd; padding:4px 8px; border-radius:4px; font-size:12px }
-      .ignore-confirm { background:#a73; border:none; color:#fff; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px }
-      .ignore-confirm:hover { background:#b84 }
-      .ignore-cancel { background:#333; border:1px solid #555; color:#888; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px }
-      .ignore-cancel:hover { color:#ddd }
-      .unignore-btn { background:#1a3a2a; border:1px solid #2a5a3a; color:#3a7; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px }
-      .unignore-btn:hover { background:#2a4a3a }
-      .quick-ignore-btn { background:#2a2a2a; border:1px solid #444; color:#888; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px; margin-left:4px; transition:all 0.2s }
-      .quick-ignore-btn:hover { color:#ddd; border-color:#666 }
-      .not-dubbed-btn { background:#2a1e0a; border:1px solid #6a4a1a; color:#a73; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px; margin-left:4px; transition:all 0.2s }
-      .not-dubbed-btn:hover { background:#3a2a10; border-color:#8a6a2a }
+      .ignore-form input { background:#0f0f18; border:1px solid #22223a; color:#ddd; padding:5px 10px; border-radius:6px; font-size:12px }
+      .ignore-form input:focus { outline:none; border-color:#444 }
+      .ignore-confirm { background:linear-gradient(135deg, #cc8833, #aa6622); border:none; color:#fff; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600 }
+      .ignore-confirm:hover { box-shadow:0 2px 10px rgba(204,136,51,0.3) }
+      .ignore-cancel { background:#0f0f18; border:1px solid #22223a; color:#666; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px }
+      .ignore-cancel:hover { color:#ccc; border-color:#444 }
+      .unignore-btn { background:linear-gradient(135deg, #0f2a1a, #1a3a2a); border:1px solid #1a3a2a; color:#3dcc7a; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; transition:all 0.2s }
+      .unignore-btn:hover { background:#2a4a3a; box-shadow:0 2px 10px rgba(61,204,122,0.15) }
+      .quick-ignore-btn { background:#0f0f18; border:1px solid #22223a; color:#666; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; margin-left:4px; transition:all 0.2s }
+      .quick-ignore-btn:hover { color:#ccc; border-color:#444; background:#16162a }
+      .not-dubbed-btn { background:#1a1408; border:1px solid #3a2a10; color:#cc8833; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; margin-left:4px; transition:all 0.2s }
+      .not-dubbed-btn:hover { background:#2a2010; border-color:#5a4a20 }
       .override-toolbar { display:flex; gap:8px; margin-bottom:12px }
-      .override-toolbar button { background:#1a2a3a; border:1px solid #2a4a6a; color:#5a9ad5; padding:6px 14px; border-radius:4px; cursor:pointer; font-size:12px; transition:all 0.2s }
-      .override-toolbar button:hover { background:#2a3a4a; border-color:#4a6a8a }
+      .override-toolbar button { background:#0f0f18; border:1px solid #22223a; color:#5a8acc; padding:7px 16px; border-radius:8px; cursor:pointer; font-size:12px; transition:all 0.2s }
+      .override-toolbar button:hover { background:#16162a; border-color:#333; color:#88aadd }
     </style>
-    <div style="color:#666;font-size:12px;margin-bottom:8px">
+    <div style="color:#555;font-size:12px;margin-bottom:8px">
       Titles that users requested but weren't found in AniLibria. Sorted by most requested.
     </div>
     <div class="override-toolbar">
@@ -931,7 +1077,7 @@ function renderFailedLookups(query = {}) {
       <select name="anime">${animeOptions}</select>
       <button type="submit">Filter</button>
     </form>
-    <div style="overflow-x:auto">
+    <div class="table-wrap" style="overflow-x:auto">
       <table>
         <thead>
           <tr><th>Title</th><th>IMDB ID</th><th>Anime?</th><th>Times Requested</th><th>Last Requested</th><th></th></tr>
@@ -1069,20 +1215,33 @@ function renderLoginPage(error) {
   <meta charset="utf-8">
   <title>Dashboard Login</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0 }
-    body { background: #111; color: #ddd; font-family: -apple-system, 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh }
-    .box { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 36px 40px; width: 100%; max-width: 360px }
-    h1 { color: #fff; font-size: 18px; margin-bottom: 24px; text-align: center }
-    label { display: block; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px }
-    input[type=password] { width: 100%; background: #222; border: 1px solid #444; color: #ddd; padding: 10px 12px; border-radius: 6px; font-size: 14px; outline: none; transition: border-color 0.2s }
-    input[type=password]:focus { border-color: #3a7 }
-    button { width: 100%; margin-top: 18px; background: #3a7; border: none; color: #fff; padding: 11px; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 500; transition: background 0.2s }
-    button:hover { background: #4b8 }
-    .error { background: #3a1a1a; border: 1px solid #5a2a2a; color: #c66; border-radius: 6px; padding: 10px 14px; font-size: 13px; margin-bottom: 18px; text-align: center }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+    body { background: #080810; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(120, 40, 140, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(180, 30, 30, 0.10) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(40, 20, 80, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .box { background: #0e0e1a; border: 1px solid #1a1a2e; border-radius: 16px; padding: 40px 44px; width: 100%; max-width: 380px; position: relative; z-index: 1; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) }
+    .login-logo { display: block; margin: 0 auto 20px; width: 56px; height: 56px; border-radius: 14px; border: 1px solid #1a1a2e }
+    h1 { color: #fff; font-size: 18px; margin-bottom: 24px; text-align: center; font-weight: 700 }
+    label { display: block; color: #555; font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px; font-weight: 600 }
+    input[type=password] { width: 100%; background: #0a0a14; border: 1px solid #22223a; color: #ddd; padding: 11px 14px; border-radius: 9px; font-size: 14px; outline: none; transition: border-color 0.25s, box-shadow 0.25s }
+    input[type=password]:focus { border-color: #cc3333; box-shadow: 0 0 0 3px rgba(204, 51, 51, 0.1) }
+    button { width: 100%; margin-top: 20px; background: linear-gradient(135deg, #cc3333 0%, #991a1a 100%); border: none; color: #fff; padding: 12px; border-radius: 9px; font-size: 14px; cursor: pointer; font-weight: 600; transition: transform 0.15s, box-shadow 0.15s }
+    button:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(204, 51, 51, 0.4) }
+    .error { background: linear-gradient(135deg, #2a0f0f, #3a1a1a); border: 1px solid #5a2a2a; color: #cc6666; border-radius: 9px; padding: 10px 14px; font-size: 13px; margin-bottom: 18px; text-align: center }
   </style>
 </head>
 <body>
   <div class="box">
+    <img src="/logo.jpg" alt="AniLibria" class="login-logo">
     <h1>AniLibria Dashboard</h1>
     ${error ? `<div class="error">${esc(error)}</div>` : ''}
     <form method="POST" action="/dashboard/login">
@@ -1111,11 +1270,19 @@ function renderTerminal() {
 
   return `
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-      <span style="color:#888;font-size:12px" id="termCount">${lines.length} lines buffered (max 300)</span>
-      <button onclick="clearTerm()" style="background:#333;border:1px solid #555;color:#888;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:12px">Clear</button>
-      <span style="color:#666;font-size:12px">Auto-refresh: 5s</span>
+      <span style="color:#555;font-size:12px" id="termCount">${lines.length} lines buffered (max 300)</span>
+      <button class="term-btn" onclick="clearTerm()">Clear</button>
+      <span style="color:#444;font-size:11px">Auto-refresh: 5s</span>
     </div>
-    <pre id="termPre" style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:16px;font-size:12px;font-family:'Consolas','Menlo',monospace;overflow:auto;max-height:70vh;white-space:pre-wrap;word-break:break-all;line-height:1.5">${html}</pre>
+    <div class="terminal-wrap">
+      <div class="terminal-titlebar">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+        <span class="terminal-title">console output</span>
+      </div>
+      <pre id="termPre" class="terminal-body">${html}</pre>
+    </div>
     <script>
       var termPre = document.getElementById('termPre');
       var termCount = document.getElementById('termCount');

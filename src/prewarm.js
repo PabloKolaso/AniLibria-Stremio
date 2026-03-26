@@ -10,6 +10,15 @@ const jikan       = require('./api/jikan');
 const mappingCache = require('./mapping/cache');
 const resolver     = require('./bridge/resolver');
 
+/** Draw an inline progress bar using carriage return (overwrites same line). */
+function drawBar(done, total, ok, fail) {
+  const W      = 30;
+  const pct    = total ? Math.round(done / total * 100) : 0;
+  const filled = total ? Math.round(done / total * W) : 0;
+  const bar    = '#'.repeat(filled) + '.'.repeat(W - filled);
+  process.stdout.write(`\r[prewarm] [${bar}] ${done}/${total} (${pct}%)  \u2713${ok} \u2717${fail}   `);
+}
+
 /**
  * Prewarm the resolver cache with top anime from MAL.
  * Runs as a non-blocking background task — never throws.
@@ -56,28 +65,113 @@ async function prewarmTopAnime({ count = 200, concurrency = 1, batchDelay = 800 
     return;
   }
 
-  // Resolve in batches with concurrency control
-  let resolved = 0;
-  let failed = 0;
+  // ─── First pass ──────────────────────────────────────────────────────────────
+
+  let resolved   = 0;
+  let done       = 0;
+  const notFound = []; // { imdbId, title }
+  const errors   = []; // { imdbId, title, reason }
+
+  resolver.setSilentMode(true);
+  drawBar(0, imdbIds.length, 0, 0);
 
   for (let i = 0; i < imdbIds.length; i += concurrency) {
     const batch = imdbIds.slice(i, i + concurrency);
-    const results = await Promise.allSettled(
-      batch.map(id => resolver.resolveImdbToAnilibria(id))
+
+    await Promise.allSettled(
+      batch.map(async (imdbId) => {
+        let result;
+        try {
+          result = await resolver.resolveImdbToAnilibriaDetailed(imdbId);
+        } catch (err) {
+          errors.push({ imdbId, title: null, reason: err.message });
+          return;
+        }
+        if (result.id) {
+          resolved++;
+        } else {
+          notFound.push({ imdbId, title: result.titleVariants?.[0] || null });
+        }
+      })
     );
 
-    for (const r of results) {
-      if (r.status === 'fulfilled' && r.value) resolved++;
-      else failed++;
-    }
+    done += batch.length;
+    drawBar(done, imdbIds.length, resolved, notFound.length + errors.length);
 
-    // Delay between batches to stay under AniList rate limit (~90 req/min)
     if (i + concurrency < imdbIds.length) {
       await new Promise(r => setTimeout(r, batchDelay));
     }
   }
 
-  console.log(`[prewarm] Done: ${resolved} resolved, ${failed} failed, ${alreadyCached} were cached, ${noMapping} had no IMDB mapping`);
+  resolver.setSilentMode(false);
+
+  // ─── Retry pass (not-found only) ─────────────────────────────────────────────
+
+  if (notFound.length > 0) {
+    process.stdout.write('\n');
+    console.log(`[prewarm] Retrying ${notFound.length} not-found items once …`);
+
+    const toRetry   = notFound.splice(0); // drain the array
+    const retryBar  = toRetry.length;
+    let retryDone   = 0;
+
+    resolver.setSilentMode(true);
+    drawBar(retryDone, retryBar, 0, 0);
+
+    for (const item of toRetry) {
+      resolver.clearCache(item.imdbId); // remove negative cache so we do a real re-resolve
+
+      let result;
+      try {
+        result = await resolver.resolveImdbToAnilibriaDetailed(item.imdbId);
+      } catch (err) {
+        errors.push({ imdbId: item.imdbId, title: item.title, reason: err.message });
+        retryDone++;
+        drawBar(retryDone, retryBar, resolved, notFound.length + errors.length);
+        await new Promise(r => setTimeout(r, batchDelay));
+        continue;
+      }
+
+      if (result.id) {
+        resolved++;
+      } else {
+        // Still not found — give up
+        notFound.push({ imdbId: item.imdbId, title: item.title || result.titleVariants?.[0] || null });
+      }
+
+      retryDone++;
+      drawBar(retryDone, retryBar, resolved, notFound.length + errors.length);
+      await new Promise(r => setTimeout(r, batchDelay));
+    }
+
+    resolver.setSilentMode(false);
+  }
+
+  // ─── Final report ─────────────────────────────────────────────────────────────
+
+  process.stdout.write('\n');
+
+  const totalFail = notFound.length + errors.length;
+  console.log(
+    `[prewarm] Done: ${resolved} resolved, ${notFound.length} not found (skipped), ` +
+    `${errors.length} errors — ${alreadyCached} cached, ${noMapping} no mapping`
+  );
+
+  if (totalFail === 0) return;
+
+  if (notFound.length > 0) {
+    console.log(`\n[prewarm] Not found on Anilibria (${notFound.length}):`);
+    for (const { imdbId, title } of notFound) {
+      console.log(`  ${imdbId.padEnd(12)}  ${title || '(unknown title)'}`);
+    }
+  }
+
+  if (errors.length > 0) {
+    console.log(`\n[prewarm] Errors (${errors.length}):`);
+    for (const { imdbId, title, reason } of errors) {
+      console.log(`  ${imdbId.padEnd(12)}  ${title || '(unknown title)'}  →  ${reason}`);
+    }
+  }
 }
 
 module.exports = { prewarmTopAnime };

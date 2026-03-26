@@ -146,9 +146,9 @@ async function streamHandler({ type, id }) {
     stats.recordRequest({ outcome: 'not_found', isAnime });
     const failedTitle = resolution.title || resolution.titleVariants?.[0] || null;
     stats.recordFailedLookup(imdbId, failedTitle, isAnime);
-    // Async-enrich from Cinemeta only for confirmed anime (inFribb) that lack a title.
+    // Async-enrich title from Cinemeta for any failed lookup that lacks one.
     // We don't use Cinemeta's isAnime — Fribb MAL/AniList is the authoritative anime signal.
-    if (resolution.inFribb && !failedTitle) {
+    if (!failedTitle) {
       cinemeta.fetchTitleInfo(imdbId, type).then(info => {
         if (info?.title) {
           stats.updateFailedLookup(imdbId, { title: info.title });

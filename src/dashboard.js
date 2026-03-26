@@ -8,6 +8,7 @@
 const { Router } = require('express');
 const logger = require('./logger');
 const stats  = require('./stats');
+const users  = require('./users');
 const { getLogs: getConsoleLogs } = require('./debug');
 const { getCacheStats } = require('./bridge/resolver');
 
@@ -164,6 +165,7 @@ function renderOverview() {
   const allLogs = logger.getAllLogs();
   const topAnime = stats.getTopAnime(allLogs, 5);
 
+  const uc = users.getUserCounts();
   const cache = getCacheStats();
   const ramPercent = sys.totalMem > 0 ? ((sys.rssBytes / sys.totalMem) * 100).toFixed(1) : 0;
 
@@ -190,6 +192,21 @@ function renderOverview() {
         <div class="label">This Month</div>
         <div class="value" data-stat="monthRequests">${s.monthRequests}</div>
         <div class="sub">requests</div>
+      </div>
+      <div class="card">
+        <div class="label">Users Today</div>
+        <div class="value" data-stat="usersToday">${uc.today}</div>
+        <div class="sub">unique users</div>
+      </div>
+      <div class="card">
+        <div class="label">Users This Week</div>
+        <div class="value" data-stat="usersWeek">${uc.week}</div>
+        <div class="sub">unique users</div>
+      </div>
+      <div class="card">
+        <div class="label">Users This Month</div>
+        <div class="value" data-stat="usersMonth">${uc.month}</div>
+        <div class="sub">unique users</div>
       </div>
       <div class="card">
         <div class="label">Live Now</div>
@@ -277,6 +294,9 @@ function renderOverview() {
               todayRequests: d.todayRequests,
               weekRequests: d.weekRequests,
               monthRequests: d.monthRequests,
+              usersToday: d.users ? d.users.today : '-',
+              usersWeek: d.users ? d.users.week : '-',
+              usersMonth: d.users ? d.users.month : '-',
               liveSessions: d.liveSessions,
               totalSessions: d.counters.totalSessions,
               animeSuccess: d.counters.animeSuccess,
@@ -1135,6 +1155,7 @@ function renderTerminal() {
 router.get('/dashboard/api/stats', (req, res) => {
   const s = stats.getStats();
   const sys = stats.getSystemStats();
+  const uc = users.getUserCounts();
   // Omit nodeVersion, platform, freeMem — not needed by the polling script
   // and exposing runtime version enables targeted CVE attacks
   const { nodeVersion: _nv, platform: _pl, freeMem: _fm, ...safeSystem } = sys;
@@ -1147,6 +1168,7 @@ router.get('/dashboard/api/stats', (req, res) => {
     liveSessions: s.liveSessions,
     successRate: s.successRate,
     totalBandwidthBytes: stats.getTotalBandwidth(),
+    users: uc,
     system: safeSystem,
     resolverCache: getCacheStats(),
   });

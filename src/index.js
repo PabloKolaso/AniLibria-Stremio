@@ -19,6 +19,7 @@ const { streamHandler } = require('./handlers/streams');
 const { warmup, isIndexReady, loadPersistedCache, flushToDisk } = require('./bridge/resolver');
 const logger            = require('./logger');
 const stats             = require('./stats');
+const users             = require('./users');
 const dashboardRouter   = require('./dashboard');
 const renderInstallPage = require('./install-page');
 
@@ -60,6 +61,7 @@ async function start() {
   // Start the HTTP server
   const addonInterface = builder.getInterface();
   const app = express();
+  app.set('trust proxy', true);
   app.use(cors());
   app.use(compression());
 
@@ -82,6 +84,15 @@ async function start() {
       const bytes = contentLength || chunkSize;
       if (bytes > 0) stats.recordBandwidth(bytes);
     };
+    next();
+  });
+
+  // Unique user tracking — capture client IP on stream requests
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && req.path.startsWith('/stream/')) {
+      const ip = req.ip || 'unknown';
+      if (ip !== 'unknown') users.recordUser(ip);
+    }
     next();
   });
 
@@ -149,6 +160,7 @@ async function start() {
     logger.stopCleanupInterval();
     logger.flush();
     stats.flush();
+    users.flush();
     flushToDisk();
     server.close(() => {
       console.log('[shutdown] Server closed.');

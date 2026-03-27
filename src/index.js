@@ -22,6 +22,7 @@ const stats             = require('./stats');
 const users             = require('./users');
 const dashboardRouter   = require('./dashboard');
 const renderInstallPage = require('./install-page');
+const { isFirstRun: authIsFirstRun } = require('./auth');
 
 const PORT = process.env.PORT || 7000;
 
@@ -130,6 +131,15 @@ async function start() {
   console.log(`Dashboard:        ${host}/dashboard`);
   console.log(`Health check:     ${host}/health`);
   console.log('Install in Stremio by opening the manifest URL above.\n');
+
+  if (process.env.DASHBOARD_PASSWORD) {
+    console.log('Dashboard password: set via DASHBOARD_PASSWORD env var');
+  } else if (authIsFirstRun()) {
+    const ntfyNote = process.env.NTFY_TOPIC ? ` and sent to ntfy.sh/${process.env.NTFY_TOPIC}` : '';
+    console.log(`Dashboard password saved to: data/dashboard-password.txt${ntfyNote}`);
+  } else {
+    console.log('Dashboard password: loaded from data/auth.json');
+  }
 
   // Self-ping keep-alive to prevent Render free tier spin-down (15 min idle)
   let pingTimer = null;

@@ -11,6 +11,13 @@ const stats  = require('./stats');
 const users  = require('./users');
 const { getLogs: getConsoleLogs } = require('./debug');
 const { getCacheStats } = require('./bridge/resolver');
+const {
+  requireAuth,
+  requireAuthApi,
+  validatePassword,
+  setSessionCookie,
+  clearSessionCookie,
+} = require('./auth');
 
 const router = Router();
 
@@ -19,6 +26,34 @@ const IMDB_RE = /^tt\d{7,10}$/;
 // Parse form bodies for the login POST and JSON for API endpoints
 router.use(require('express').urlencoded({ extended: false }));
 router.use(require('express').json());
+
+// ─── Auth Routes ──────────────────────────────────────────────────────────────
+
+/** GET /dashboard/login — show the login form */
+router.get('/dashboard/login', (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(renderLoginPage());
+});
+
+/** POST /dashboard/login — validate password and set session cookie */
+router.post('/dashboard/login', (req, res) => {
+  const password = (req.body && req.body.password) || '';
+  if (validatePassword(password)) {
+    const secure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+    setSessionCookie(res, secure);
+    const next = req.query.next || '/dashboard';
+    const dest = next.startsWith('/dashboard') ? next : '/dashboard';
+    return res.redirect(dest);
+  }
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.status(401).send(renderLoginPage('Incorrect password'));
+});
+
+/** GET /dashboard/logout — clear session cookie and redirect to login */
+router.get('/dashboard/logout', (req, res) => {
+  clearSessionCookie(res);
+  res.redirect('/dashboard/login');
+});
 
 // ─── HTML Helpers ────────────────────────────────────────────────────────────
 
@@ -237,6 +272,7 @@ function renderShell(activeTab, bodyHtml) {
   <div class="header">
     <h1><img src="/logo.jpg" alt="" class="header-logo">AniLibria Dashboard</h1>
     <div class="tabs">${tabLinks}</div>
+    <a href="/dashboard/logout" class="logout-btn">Sign out</a>
   </div>
   <div class="content">${bodyHtml}</div>
 </body>
@@ -1319,7 +1355,7 @@ function renderTerminal() {
 // ─── API Routes ─────────────────────────────────────────────────────────────
 
 /** GET /dashboard/api/stats — JSON stats for real-time polling */
-router.get('/dashboard/api/stats', (req, res) => {
+router.get('/dashboard/api/stats', requireAuthApi, (req, res) => {
   const s = stats.getStats();
   const sys = stats.getSystemStats();
   const uc = users.getUserCounts();
@@ -1342,7 +1378,7 @@ router.get('/dashboard/api/stats', (req, res) => {
 });
 
 /** POST /dashboard/api/failed/:imdbId/ignore — Ignore a failed lookup */
-router.post('/dashboard/api/failed/:imdbId/ignore', (req, res) => {
+router.post('/dashboard/api/failed/:imdbId/ignore', requireAuthApi, (req, res) => {
   if (!IMDB_RE.test(req.params.imdbId)) return res.status(400).json({ error: 'invalid imdbId' });
   const reason = ((req.body && req.body.reason) || '').slice(0, 500);
   stats.ignoreLookup(req.params.imdbId, reason);
@@ -1350,34 +1386,34 @@ router.post('/dashboard/api/failed/:imdbId/ignore', (req, res) => {
 });
 
 /** DELETE /dashboard/api/failed/:imdbId/ignore — Un-ignore a failed lookup */
-router.delete('/dashboard/api/failed/:imdbId/ignore', (req, res) => {
+router.delete('/dashboard/api/failed/:imdbId/ignore', requireAuthApi, (req, res) => {
   if (!IMDB_RE.test(req.params.imdbId)) return res.status(400).json({ error: 'invalid imdbId' });
   stats.unignoreLookup(req.params.imdbId);
   res.json({ ok: true });
 });
 
 /** POST /dashboard/api/failed/:imdbId/not-dubbed — Mark as not dubbed yet */
-router.post('/dashboard/api/failed/:imdbId/not-dubbed', (req, res) => {
+router.post('/dashboard/api/failed/:imdbId/not-dubbed', requireAuthApi, (req, res) => {
   if (!IMDB_RE.test(req.params.imdbId)) return res.status(400).json({ error: 'invalid imdbId' });
   stats.markNotDubbed(req.params.imdbId);
   res.json({ ok: true });
 });
 
 /** DELETE /dashboard/api/failed/:imdbId/not-dubbed — Remove not-dubbed mark */
-router.delete('/dashboard/api/failed/:imdbId/not-dubbed', (req, res) => {
+router.delete('/dashboard/api/failed/:imdbId/not-dubbed', requireAuthApi, (req, res) => {
   if (!IMDB_RE.test(req.params.imdbId)) return res.status(400).json({ error: 'invalid imdbId' });
   stats.unmarkNotDubbed(req.params.imdbId);
   res.json({ ok: true });
 });
 
 /** GET /dashboard/api/overview — top anime for live polling */
-router.get('/dashboard/api/overview', (req, res) => {
+router.get('/dashboard/api/overview', requireAuthApi, (req, res) => {
   const allLogs = logger.getAllLogs();
   res.json({ topAnime: stats.getTopAnime(allLogs, 5) });
 });
 
 /** GET /dashboard/api/analytics — raw hourly buckets for live chart refresh */
-router.get('/dashboard/api/analytics', (req, res) => {
+router.get('/dashboard/api/analytics', requireAuthApi, (req, res) => {
   const buckets   = stats.getHourlyBuckets();
   const bwBuckets = stats.getBandwidthBuckets();
   const animeBuckets = {};
@@ -1391,7 +1427,7 @@ router.get('/dashboard/api/analytics', (req, res) => {
 });
 
 /** GET /dashboard/api/logs — filtered log entries for live table refresh */
-router.get('/dashboard/api/logs', (req, res) => {
+router.get('/dashboard/api/logs', requireAuthApi, (req, res) => {
   const animeFilter = req.query.anime === 'true' ? true : req.query.anime === 'false' ? false : undefined;
   const filters = {
     from:    req.query.from ? new Date(req.query.from).getTime() : undefined,
@@ -1406,7 +1442,7 @@ router.get('/dashboard/api/logs', (req, res) => {
 
 /** POST /dashboard/api/enrich-titles — trigger Cinemeta backfill for missing titles */
 let enrichCooldown = 0;
-router.post('/dashboard/api/enrich-titles', (req, res) => {
+router.post('/dashboard/api/enrich-titles', requireAuthApi, (req, res) => {
   const now = Date.now();
   if (now < enrichCooldown) {
     return res.json({ enriched: 0, message: 'Cooldown active, try again later' });
@@ -1425,7 +1461,7 @@ router.post('/dashboard/api/enrich-titles', (req, res) => {
 });
 
 /** GET /dashboard/api/failed-lookups — failed lookup data for live table refresh */
-router.get('/dashboard/api/failed-lookups', (req, res) => {
+router.get('/dashboard/api/failed-lookups', requireAuthApi, (req, res) => {
   res.json({
     allFailed: stats.getFailedLookups(),
     ignored:   stats.getIgnoredLookups(),
@@ -1439,7 +1475,7 @@ router.get('/dashboard/api/failed-lookups', (req, res) => {
  * GET /dashboard
  * Main dashboard page with tab routing via ?tab= query param.
  */
-router.get('/dashboard', (req, res) => {
+router.get('/dashboard', requireAuth, (req, res) => {
   const tab = req.query.tab || 'overview';
   let body;
 
@@ -1470,7 +1506,7 @@ router.get('/dashboard', (req, res) => {
  * GET /dashboard/export/csv
  * Export filtered logs as CSV download.
  */
-router.get('/dashboard/export/csv', (req, res) => {
+router.get('/dashboard/export/csv', requireAuth, (req, res) => {
   const filters = {
     from:    req.query.from ? new Date(req.query.from).getTime() : undefined,
     to:      req.query.to   ? new Date(req.query.to).getTime() + 86400000 : undefined,

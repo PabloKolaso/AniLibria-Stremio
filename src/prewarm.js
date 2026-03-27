@@ -24,11 +24,11 @@ function drawBar(done, total, ok, fail) {
  * Runs as a non-blocking background task — never throws.
  *
  * @param {Object} [options]
- * @param {number} [options.count=200]       - Number of top MAL titles to fetch
+ * @param {number} [options.count=250]       - Number of top MAL titles to fetch
  * @param {number} [options.concurrency=1]   - Parallel resolution tasks (keep low: AniList rate limit ~90 req/min)
  * @param {number} [options.batchDelay=800]  - Ms between batches (800ms → ~1.25 req/s, safely under AniList limit)
  */
-async function prewarmTopAnime({ count = 200, concurrency = 1, batchDelay = 800 } = {}) {
+async function prewarmTopAnime({ count = 250, concurrency = 1, batchDelay = 800 } = {}) {
   console.log(`[prewarm] Fetching top ${count} anime from MAL …`);
 
   let malIds;

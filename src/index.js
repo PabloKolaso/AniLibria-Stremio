@@ -176,7 +176,7 @@ async function start() {
   setTimeout(async () => {
     try {
       const { prewarmTopAnime } = require('./prewarm');
-      await prewarmTopAnime({ count: 200 });
+      await prewarmTopAnime({ count: 250 });
     } catch (err) {
       console.warn('[prewarm] Error:', err.message);
     }

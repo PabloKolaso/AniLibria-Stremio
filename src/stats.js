@@ -240,10 +240,10 @@ function countSessions(timestamps, gap = 60_000) {
 }
 
 /**
- * Count sessions active in the last 5 minutes.
+ * Count sessions active in the last 24 minutes (avg anime episode length).
  */
 function getLiveSessions() {
-  const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+  const fiveMinAgo = Date.now() - 24 * 60 * 1000;
   const recent = recentTimestamps.filter(ts => ts >= fiveMinAgo);
   return countSessions(recent, 60_000);
 }

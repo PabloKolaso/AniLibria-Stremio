@@ -28,6 +28,8 @@ function defaultState() {
       totalSessions: 0,
     },
     hourlyBuckets: {},       // "YYYY-MM-DDTHH" → count
+    animeBuckets: {},        // "YYYY-MM-DDTHH" → count (anime requests only, 90-day)
+    topAnimeCounts: {},      // imdbId → { title, count } (persistent, no expiry)
     failedLookups: {},       // imdbId → { title, count, lastSeen }
     ignoredLookups: {},      // imdbId → { reason, ignoredAt }
     notDubbedLookups: {},    // imdbId → { markedAt }
@@ -55,6 +57,8 @@ function init() {
         state = {
           counters:           { ...defaultState().counters, ...parsed.counters },
           hourlyBuckets:      parsed.hourlyBuckets || {},
+          animeBuckets:       parsed.animeBuckets || {},
+          topAnimeCounts:     parsed.topAnimeCounts || {},
           failedLookups:      parsed.failedLookups || {},
           ignoredLookups:     parsed.ignoredLookups || {},
           notDubbedLookups:   parsed.notDubbedLookups || {},
@@ -103,6 +107,9 @@ function pruneBuckets() {
   for (const key of Object.keys(state.bandwidthBuckets)) {
     if (key < cutoff) delete state.bandwidthBuckets[key];
   }
+  for (const key of Object.keys(state.animeBuckets)) {
+    if (key < cutoff) delete state.animeBuckets[key];
+  }
 }
 
 /** Prune in-memory timestamps older than 24h. */
@@ -134,6 +141,19 @@ function recordRequest(entry) {
   // Hourly bucket
   const key = bucketKey(now);
   state.hourlyBuckets[key] = (state.hourlyBuckets[key] || 0) + 1;
+
+  // Anime-specific hourly bucket
+  if (entry.isAnime === true) {
+    state.animeBuckets[key] = (state.animeBuckets[key] || 0) + 1;
+  }
+
+  // Persistent top anime accumulator
+  if (entry.outcome === 'success' && entry.isAnime === true && entry.imdbId) {
+    const k = entry.imdbId;
+    if (!state.topAnimeCounts[k]) state.topAnimeCounts[k] = { title: entry.title || null, count: 0 };
+    state.topAnimeCounts[k].count++;
+    if (entry.title) state.topAnimeCounts[k].title = entry.title;
+  }
 
   // Session tracking: detect new session start (gap > 5 min or first ever request)
   pruneTimestamps();
@@ -254,26 +274,21 @@ function getLiveSessions() {
  */
 function getFailedLookups() {
   return Object.entries(state.failedLookups)
+    .filter(([imdbId]) => !state.ignoredLookups[imdbId] && !state.notDubbedLookups[imdbId])
     .map(([imdbId, data]) => ({ imdbId, ...data }))
     .sort((a, b) => b.count - a.count);
 }
 
 /**
- * Get top N anime by success count from logs.
- * @param {Object[]} logs - All log entries
+ * Get top N anime by success count (persistent, never resets).
  * @param {number} [n=5]
  * @returns {Array<{title, imdbId, count}>}
  */
-function getTopAnime(logs, n = 5) {
-  const counts = {};
-  for (const entry of logs) {
-    if (entry.outcome === 'success' && entry.title) {
-      const key = entry.imdbId || entry.title;
-      if (!counts[key]) counts[key] = { title: entry.title, imdbId: entry.imdbId, count: 0 };
-      counts[key].count++;
-    }
-  }
-  return Object.values(counts).sort((a, b) => b.count - a.count).slice(0, n);
+function getTopAnime(n = 5) {
+  return Object.entries(state.topAnimeCounts)
+    .map(([imdbId, d]) => ({ imdbId, title: d.title, count: d.count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, n);
 }
 
 /**
@@ -283,6 +298,15 @@ function getTopAnime(logs, n = 5) {
 function getHourlyBuckets() {
   pruneBuckets();
   return { ...state.hourlyBuckets };
+}
+
+/**
+ * Get anime-only hourly buckets for charts (90-day persistent).
+ * @returns {Object} animeBuckets map
+ */
+function getAnimeBuckets() {
+  pruneBuckets();
+  return { ...state.animeBuckets };
 }
 
 /**
@@ -466,6 +490,7 @@ module.exports = {
   getFailedLookups,
   getTopAnime,
   getHourlyBuckets,
+  getAnimeBuckets,
   getSystemStats,
   recordBandwidth,
   getBandwidthBuckets,

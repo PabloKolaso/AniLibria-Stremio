@@ -207,7 +207,7 @@ async function streamHandler({ type, id }) {
       responseTimeMs: Date.now() - startTime,
       streamCount: 0, error: null,
     });
-    stats.recordRequest({ outcome: 'success', isAnime: true });
+    stats.recordRequest({ outcome: 'success', isAnime: true, imdbId, title: resolution.title });
     return { streams: [] };
   }
 
@@ -254,7 +254,7 @@ async function streamHandler({ type, id }) {
     responseTimeMs: Date.now() - startTime,
     streamCount: resultStreams.length, error: null,
   });
-  stats.recordRequest({ outcome: 'success', isAnime: true });
+  stats.recordRequest({ outcome: 'success', isAnime: true, imdbId, title: resolution.title });
 
   return { streams: resultStreams };
 }

@@ -130,6 +130,19 @@ function getUserCounts() {
 }
 
 /**
+ * Get unique user count per day as a plain object (for chart use).
+ * @returns {{ [day: string]: number }} e.g. { "2026-04-05": 12, ... }
+ */
+function getDailyUserCounts() {
+  pruneOldDays();
+  const result = {};
+  for (const [day, set] of dailyUsers.entries()) {
+    result[day] = set.size;
+  }
+  return result;
+}
+
+/**
  * Count unique users over the last N days (union of daily sets).
  */
 function countUnique(days, now) {
@@ -170,4 +183,4 @@ function flush() {
   }
 }
 
-module.exports = { recordUser, getUserCounts, flush };
+module.exports = { recordUser, getUserCounts, getDailyUserCounts, flush };

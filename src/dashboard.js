@@ -25,7 +25,7 @@ const IMDB_RE = /^tt\d{7,10}$/;
 
 // Parse form bodies for the login POST and JSON for API endpoints
 router.use(require('express').urlencoded({ extended: false }));
-router.use(require('express').json());
+router.use(require('express').json({ limit: '50mb' }));
 
 // ─── Auth Routes ──────────────────────────────────────────────────────────────
 
@@ -284,8 +284,7 @@ function renderShell(activeTab, bodyHtml) {
 function renderOverview() {
   const s = stats.getStats();
   const sys = stats.getSystemStats();
-  const allLogs = logger.getAllLogs();
-  const topAnime = stats.getTopAnime(allLogs, 5);
+  const topAnime = stats.getTopAnime(5);
 
   const uc = users.getUserCounts();
   const cache = getCacheStats();
@@ -544,16 +543,9 @@ function renderOverview() {
 function renderAnalytics() {
   const buckets = stats.getHourlyBuckets();
   const bwBuckets = stats.getBandwidthBuckets();
+  const animeBuckets = stats.getAnimeBuckets();
+  const userDailyCounts = users.getDailyUserCounts();
   const now = new Date();
-
-  // Anime-only hourly buckets derived from logs
-  const animeBuckets = {};
-  for (const e of logger.getAllLogs()) {
-    if (e.isAnime === true) {
-      const key = new Date(e.ts).toISOString().slice(0, 13);
-      animeBuckets[key] = (animeBuckets[key] || 0) + 1;
-    }
-  }
 
   // Today: last 24h hourly
   const todayLabels = [];
@@ -574,6 +566,7 @@ function renderAnalytics() {
   const weekData = [];
   const weekBwData = [];
   const weekAnimeData = [];
+  const weekUserData = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(now.getTime() - i * 86400000);
     const dayKey = d.toISOString().slice(0, 10);
@@ -588,6 +581,7 @@ function renderAnalytics() {
     weekData.push(total);
     weekBwData.push(bwTotal);
     weekAnimeData.push(animeTotal);
+    weekUserData.push(userDailyCounts[dayKey] || 0);
   }
 
   // Month: last 30 days daily
@@ -595,6 +589,7 @@ function renderAnalytics() {
   const monthData = [];
   const monthBwData = [];
   const monthAnimeData = [];
+  const monthUserData = [];
   for (let i = 29; i >= 0; i--) {
     const d = new Date(now.getTime() - i * 86400000);
     const dayKey = d.toISOString().slice(0, 10);
@@ -609,6 +604,7 @@ function renderAnalytics() {
     monthData.push(total);
     monthBwData.push(bwTotal);
     monthAnimeData.push(animeTotal);
+    monthUserData.push(userDailyCounts[dayKey] || 0);
   }
 
   return `
@@ -636,6 +632,10 @@ function renderAnalytics() {
       <h3 id="bwChartTitle">Bandwidth per Hour (Last 24h)</h3>
       <canvas id="bwChart" style="max-height:400px"></canvas>
     </div>
+    <div id="usersChartBox" class="chart-box" style="max-width:100%; margin-top:20px; display:none">
+      <h3 id="usersChartTitle">Unique Users per Day (Last 7 Days)</h3>
+      <canvas id="usersChart" style="max-height:400px"></canvas>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
       function _fmtBytesChart(b) {
@@ -662,6 +662,7 @@ function renderAnalytics() {
           data:      ${JSON.stringify(weekData)},
           bwData:    ${JSON.stringify(weekBwData)},
           animeData: ${JSON.stringify(weekAnimeData)},
+          userData:  ${JSON.stringify(weekUserData)},
           type:    'line',
           color:   '#3a7',
           bwColor: '#47a',
@@ -673,6 +674,7 @@ function renderAnalytics() {
           data:      ${JSON.stringify(monthData)},
           bwData:    ${JSON.stringify(monthBwData)},
           animeData: ${JSON.stringify(monthAnimeData)},
+          userData:  ${JSON.stringify(monthUserData)},
           type:    'line',
           color:   '#47a',
           bwColor: '#a73',
@@ -734,6 +736,30 @@ function renderAnalytics() {
         });
       }
 
+      let usersChart = null;
+
+      function buildUsersChart(period) {
+        var el = document.getElementById('usersChartBox');
+        if (period === 'today') { el.style.display = 'none'; return null; }
+        el.style.display = '';
+        var d = DATA[period];
+        document.getElementById('usersChartTitle').textContent =
+          period === 'week' ? 'Unique Users per Day (Last 7 Days)' : 'Unique Users per Day (Last 30 Days)';
+        return new Chart(document.getElementById('usersChart'), {
+          type: 'line',
+          data: { labels: d.labels, datasets: [{ label: 'Users', data: d.userData,
+            borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.1)', fill: true, tension: 0.3 }] },
+          options: {
+            responsive: true, maintainAspectRatio: true,
+            plugins: { legend: { display: false }, tooltip: {} },
+            scales: {
+              x: { ticks: { color: '#555', maxRotation: 45 }, grid: { color: '#111125' } },
+              y: { ticks: { color: '#555' }, grid: { color: '#111125' }, beginAtZero: true }
+            }
+          }
+        });
+      }
+
       function switchPeriod(period, btn) {
         currentPeriod = period;
         document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
@@ -742,8 +768,10 @@ function renderAnalytics() {
         document.getElementById('bwChartTitle').textContent = DATA[period].bwTitle;
         if (chart) chart.destroy();
         if (bwChart) bwChart.destroy();
+        if (usersChart) usersChart.destroy();
         chart = buildChart('mainChart', period, false);
         bwChart = buildChart('bwChart', period, true);
+        usersChart = buildUsersChart(period);
       }
 
       document.getElementById('showAnime').addEventListener('change', function() {
@@ -755,9 +783,10 @@ function renderAnalytics() {
 
       chart = buildChart('mainChart', 'today', false);
       bwChart = buildChart('bwChart', 'today', true);
+      usersChart = buildUsersChart('today');
 
       // Live data refresh — every 60s
-      function _buildAnalyticsData(buckets, bwBuckets, animeBuckets) {
+      function _buildAnalyticsData(buckets, bwBuckets, animeBuckets, userBuckets) {
         var now = new Date();
         var tL = [], tD = [], tBw = [], tAn = [];
         for (var i = 23; i >= 0; i--) {
@@ -766,28 +795,28 @@ function renderAnalytics() {
           tL.push(String(d.getUTCHours()).padStart(2, '0') + ':00');
           tD.push(buckets[key] || 0); tBw.push(bwBuckets[key] || 0); tAn.push(animeBuckets[key] || 0);
         }
-        var wL = [], wD = [], wBw = [], wAn = [];
+        var wL = [], wD = [], wBw = [], wAn = [], wU = [];
         for (var i = 6; i >= 0; i--) {
           var d = new Date(now.getTime() - i * 86400000);
           var dayKey = d.toISOString().slice(0, 10);
           wL.push(dayKey.slice(5));
           var t = 0, b = 0, a = 0;
           for (var h = 0; h < 24; h++) { var hk = dayKey + 'T' + String(h).padStart(2, '0'); t += buckets[hk]||0; b += bwBuckets[hk]||0; a += animeBuckets[hk]||0; }
-          wD.push(t); wBw.push(b); wAn.push(a);
+          wD.push(t); wBw.push(b); wAn.push(a); wU.push((userBuckets && userBuckets[dayKey]) || 0);
         }
-        var mL = [], mD = [], mBw = [], mAn = [];
+        var mL = [], mD = [], mBw = [], mAn = [], mU = [];
         for (var i = 29; i >= 0; i--) {
           var d = new Date(now.getTime() - i * 86400000);
           var dayKey = d.toISOString().slice(0, 10);
           mL.push(dayKey.slice(5));
           var t = 0, b = 0, a = 0;
           for (var h = 0; h < 24; h++) { var hk = dayKey + 'T' + String(h).padStart(2, '0'); t += buckets[hk]||0; b += bwBuckets[hk]||0; a += animeBuckets[hk]||0; }
-          mD.push(t); mBw.push(b); mAn.push(a);
+          mD.push(t); mBw.push(b); mAn.push(a); mU.push((userBuckets && userBuckets[dayKey]) || 0);
         }
         return {
-          today: { labels: tL, data: tD, bwData: tBw, animeData: tAn },
-          week:  { labels: wL, data: wD, bwData: wBw, animeData: wAn },
-          month: { labels: mL, data: mD, bwData: mBw, animeData: mAn }
+          today: { labels: tL, data: tD, bwData: tBw, animeData: tAn, userData: [] },
+          week:  { labels: wL, data: wD, bwData: wBw, animeData: wAn, userData: wU },
+          month: { labels: mL, data: mD, bwData: mBw, animeData: mAn, userData: mU }
         };
       }
 
@@ -796,17 +825,20 @@ function renderAnalytics() {
           .then(function(r) { return r.ok ? r.json() : null; })
           .then(function(d) {
             if (!d) return;
-            var nd = _buildAnalyticsData(d.buckets, d.bwBuckets, d.animeBuckets);
+            var nd = _buildAnalyticsData(d.buckets, d.bwBuckets, d.animeBuckets, d.userBuckets);
             ['today', 'week', 'month'].forEach(function(p) {
               DATA[p].labels    = nd[p].labels;
               DATA[p].data      = nd[p].data;
               DATA[p].bwData    = nd[p].bwData;
               DATA[p].animeData = nd[p].animeData;
+              DATA[p].userData  = nd[p].userData;
             });
-            if (chart)   chart.destroy();
-            if (bwChart) bwChart.destroy();
-            chart   = buildChart('mainChart', currentPeriod, false);
-            bwChart = buildChart('bwChart',   currentPeriod, true);
+            if (chart)      chart.destroy();
+            if (bwChart)    bwChart.destroy();
+            if (usersChart) usersChart.destroy();
+            chart      = buildChart('mainChart', currentPeriod, false);
+            bwChart    = buildChart('bwChart',   currentPeriod, true);
+            usersChart = buildUsersChart(currentPeriod);
           })
           .catch(function() {});
       }, 60000);
@@ -1408,22 +1440,16 @@ router.delete('/dashboard/api/failed/:imdbId/not-dubbed', requireAuthApi, (req, 
 
 /** GET /dashboard/api/overview — top anime for live polling */
 router.get('/dashboard/api/overview', requireAuthApi, (req, res) => {
-  const allLogs = logger.getAllLogs();
-  res.json({ topAnime: stats.getTopAnime(allLogs, 5) });
+  res.json({ topAnime: stats.getTopAnime(5) });
 });
 
 /** GET /dashboard/api/analytics — raw hourly buckets for live chart refresh */
 router.get('/dashboard/api/analytics', requireAuthApi, (req, res) => {
-  const buckets   = stats.getHourlyBuckets();
-  const bwBuckets = stats.getBandwidthBuckets();
-  const animeBuckets = {};
-  for (const e of logger.getAllLogs()) {
-    if (e.isAnime === true) {
-      const key = new Date(e.ts).toISOString().slice(0, 13);
-      animeBuckets[key] = (animeBuckets[key] || 0) + 1;
-    }
-  }
-  res.json({ buckets, bwBuckets, animeBuckets });
+  const buckets     = stats.getHourlyBuckets();
+  const bwBuckets   = stats.getBandwidthBuckets();
+  const animeBuckets = stats.getAnimeBuckets();
+  const userBuckets  = users.getDailyUserCounts();
+  res.json({ buckets, bwBuckets, animeBuckets, userBuckets });
 });
 
 /** GET /dashboard/api/logs — filtered log entries for live table refresh */

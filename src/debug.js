@@ -112,7 +112,7 @@ router.get('/debug/export', (req, res) => {
  * POST /debug/import
  * Accepts a JSON body with ignoredLookups and/or notDubbedLookups and merges them.
  */
-router.post('/debug/import', express.json(), (req, res) => {
+router.post('/debug/import', express.json({ limit: '50mb' }), (req, res) => {
   if (!req.body || typeof req.body !== 'object') {
     return res.status(400).json({ ok: false, error: 'Invalid JSON body' });
   }

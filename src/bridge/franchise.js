@@ -33,18 +33,27 @@ async function findSeasonRelease(releaseId, targetSeason) {
     const franchise = await anilibria.getFranchiseByRelease(releaseId);
 
     if (!franchise || !franchise.franchise_releases || franchise.franchise_releases.length <= 1) {
-      // No franchise or single release — cache null for all known IDs
-      franchiseCache.set(releaseId, null);
+      // Cache null for every member we know about so future calls skip the API
+      if (franchise?.franchise_releases) {
+        for (const fr of franchise.franchise_releases) {
+          const id = fr.release?.id || fr.id;
+          if (id) franchiseCache.set(id, null);
+        }
+      } else {
+        franchiseCache.set(releaseId, null);
+      }
       return null;
     }
 
-    // Filter to TV-type releases only, sorted by sort_order
+    // Exclude definitive non-season content (movies, OVAs, specials, clips).
+    // TV and ONA are both valid season types on streaming platforms.
     tvReleases = franchise.franchise_releases
       .filter(fr => {
-        const type = fr.release?.type?.value || fr.type?.value || fr.type || '';
-        return String(type).toUpperCase() === 'TV';
+        const raw = fr.release?.type?.value ?? fr.type?.value ?? fr.type ?? '';
+        const type = String(raw).toUpperCase();
+        return !['MOVIE', 'OVA', 'OVA_13', 'SPECIAL', 'CLIP'].includes(type);
       })
-      .sort((a, b) => a.sort_order - b.sort_order)
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
       .map(fr => ({
         releaseId: fr.release?.id || fr.id,
         alias: fr.release?.alias || fr.alias || '',

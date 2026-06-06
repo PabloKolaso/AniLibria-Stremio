@@ -59,11 +59,12 @@ async function searchReleases(query) {
  * @param {number|string} id - Anilibria release ID
  */
 async function getRelease(id) {
-  if (releaseCache.has(id)) return releaseCache.get(id);
+  const key = String(id);
+  if (releaseCache.has(key)) return releaseCache.get(key);
 
   try {
     const { data } = await client.get(`/anime/releases/${id}`);
-    releaseCache.set(id, data);
+    releaseCache.set(key, data);
     return data;
   } catch (err) {
     const status = err.response?.status;
@@ -97,7 +98,7 @@ async function* allReleases(pageSize = 50) {
  * Store a release object in the cache (avoids re-fetching after alias lookup).
  */
 function cacheRelease(id, data) {
-  releaseCache.set(id, data);
+  releaseCache.set(String(id), data);
 }
 
 /**
@@ -109,7 +110,9 @@ function cacheRelease(id, data) {
 async function getFranchiseByRelease(releaseId) {
   try {
     const { data } = await client.get(`/anime/franchises/release/${releaseId}`);
-    return data || null;
+    // The API returns an array; take the first (and only) franchise object.
+    const franchise = Array.isArray(data) ? (data[0] || null) : (data || null);
+    return franchise;
   } catch (err) {
     if (err.response?.status === 404) return null;
     console.warn(`[anilibria] Franchise lookup failed for release ${releaseId}:`, err.message);

@@ -56,7 +56,8 @@ async function backfillMissingTitles(failedLookups, updateCallback, opts = {}) {
   const batch = missing.slice(0, cap);
   let enriched = 0;
 
-  for (const entry of batch) {
+  for (let i = 0; i < batch.length; i++) {
+    const entry = batch[i];
     try {
       const info = await fetchTitleInfo(entry.imdbId);
       if (info) {
@@ -66,7 +67,7 @@ async function backfillMissingTitles(failedLookups, updateCallback, opts = {}) {
     } catch {
       // skip this entry
     }
-    if (batch.indexOf(entry) < batch.length - 1) {
+    if (i < batch.length - 1) {
       await new Promise(r => setTimeout(r, delayMs));
     }
   }

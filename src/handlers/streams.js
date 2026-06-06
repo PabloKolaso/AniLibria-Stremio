@@ -10,9 +10,10 @@
 const resolver  = require('../bridge/resolver');
 const anilibria = require('../api/anilibria');
 const { GeoBlockedError } = require('../api/anilibria');
-const cinemeta = require('../api/cinemeta');
-const logger = require('../logger');
-const stats  = require('../stats');
+const franchise = require('../bridge/franchise');
+const cinemeta  = require('../api/cinemeta');
+const logger    = require('../logger');
+const stats     = require('../stats');
 
 const IMDB_RE = /^tt\d{7,10}$/;
 
@@ -217,35 +218,67 @@ async function streamHandler({ type, id }) {
     const ep = episodes[0];
     resultStreams = buildStreams(release, ep, imdbId);
   } else {
-    // Step 4: find the specific episode
-    let ep = findEpisode(episodes, season, episode);
+    let ep = null;
 
-    // Step 4.5: Franchise fallback — if episode not found and season > 1,
-    // find the correct season's release via franchise data
-    if (!ep && season > 1) {
-      const franchise = require('../bridge/franchise');
+    // For season > 1: always resolve via franchise first.
+    // The resolver maps to the primary (S1) release; calling findEpisode on it
+    // would falsely match S1's ordinal=1 when S2E1 is requested.
+    if (season > 1) {
       const seasonResult = await franchise.findSeasonRelease(anilibriaId, season);
       if (seasonResult) {
         console.log(`[streams] Franchise: s${season} → release ${seasonResult.releaseId} (${seasonResult.alias})`);
+        let franchiseFetchOk = false;
         try {
           const seasonRelease = await anilibria.getRelease(seasonResult.releaseId);
           if (seasonRelease?.episodes?.length > 0) {
             release = seasonRelease;
             ep = findEpisode(seasonRelease.episodes, season, episode);
+            franchiseFetchOk = true; // we know this is the right season — don't fall back
           }
         } catch (err) {
           console.warn(`[streams] Franchise fetch failed for release ${seasonResult.releaseId}:`, err.message);
+        }
+        // Only fall back to original release if the franchise fetch itself failed
+        if (!ep && !franchiseFetchOk) ep = findEpisode(episodes, season, episode);
+      } else {
+        // No franchise data — the resolved release may be the only one
+        ep = findEpisode(episodes, season, episode);
+      }
+    } else {
+      // Season 1: try the resolved release first; use franchise only if episode missing
+      // (handles the edge case where the resolver mapped to a later season's release).
+      ep = findEpisode(episodes, season, episode);
+      if (!ep) {
+        const seasonResult = await franchise.findSeasonRelease(anilibriaId, season);
+        if (seasonResult) {
+          console.log(`[streams] Franchise: s${season} → release ${seasonResult.releaseId} (${seasonResult.alias})`);
+          try {
+            const seasonRelease = await anilibria.getRelease(seasonResult.releaseId);
+            if (seasonRelease?.episodes?.length > 0) {
+              release = seasonRelease;
+              ep = findEpisode(seasonRelease.episodes, season, episode);
+            }
+          } catch (err) {
+            console.warn(`[streams] Franchise fetch failed for release ${seasonResult.releaseId}:`, err.message);
+          }
         }
       }
     }
 
     if (!ep) {
       console.log(`[streams] Episode s${season}e${episode} not found in release ${anilibriaId} (${episodes.length} eps)`);
-      resultStreams = [];
-    } else {
-      resultStreams = buildStreams(release, ep, imdbId);
-      console.log(`[streams] Returning ${resultStreams.length} stream(s) for ${imdbId} s${season}e${episode}`);
+      logger.log({
+        imdbId, stremioId: id, type,
+        outcome: 'not_found', title: resolution.title, isAnime: true, method: resolution.method,
+        responseTimeMs: Date.now() - startTime,
+        streamCount: 0, error: null,
+      });
+      stats.recordRequest({ outcome: 'not_found', isAnime: true });
+      return { streams: [] };
     }
+
+    resultStreams = buildStreams(release, ep, imdbId);
+    console.log(`[streams] Returning ${resultStreams.length} stream(s) for ${imdbId} s${season}e${episode}`);
   }
 
   logger.log({

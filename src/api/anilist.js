@@ -44,6 +44,20 @@ query ($id: Int) {
   }
 }`;
 
+const BY_MAL_QUERY = `
+query ($idMal: Int) {
+  Media(idMal: $idMal, type: ANIME) {
+    id
+    idMal
+    title {
+      romaji
+      english
+      native
+    }
+    synonyms
+  }
+}`;
+
 async function gql(query, variables) {
   const { data } = await axios.post(
     ENDPOINT,
@@ -69,6 +83,26 @@ async function searchAnime(title) {
 }
 
 /**
+ * Get a single anime by MAL ID using the idMal field.
+ * The text `search` parameter does not accept "mal:ID" syntax — this uses the
+ * correct idMal query variable instead.
+ */
+async function getByMalId(malId) {
+  const key = `mal:${malId}`;
+  if (cache.has(key)) return cache.get(key);
+  let data;
+  try {
+    data = await gql(BY_MAL_QUERY, { idMal: malId });
+  } catch (err) {
+    console.warn(`[anilist] getByMalId(${malId}) failed: ${err.message}`);
+    return null;
+  }
+  const media = data?.Media || null;
+  if (media) cache.set(key, media);
+  return media;
+}
+
+/**
  * Get a single anime by AniList ID.
  */
 async function getById(anilistId) {
@@ -89,14 +123,16 @@ async function getById(anilistId) {
 
 /**
  * Collect all title variants for an AniList media object into a flat array.
+ * Romaji is placed first because Anilibria catalogues by romanized Japanese names.
+ * English follows as a strong secondary signal for alias/search matching.
  */
 function collectTitles(media) {
   const titles = [];
-  if (media.title?.english)  titles.push(media.title.english);
   if (media.title?.romaji)   titles.push(media.title.romaji);
+  if (media.title?.english)  titles.push(media.title.english);
   if (media.title?.native)   titles.push(media.title.native);
   if (media.synonyms)        titles.push(...media.synonyms);
   return titles.filter(Boolean);
 }
 
-module.exports = { searchAnime, getById, collectTitles };
+module.exports = { searchAnime, getById, getByMalId, collectTitles };

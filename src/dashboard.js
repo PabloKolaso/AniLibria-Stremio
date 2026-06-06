@@ -997,6 +997,24 @@ function renderFailedLookups(query = {}) {
   if (query.anime === 'true')  active = active.filter(e => e.isAnime === true);
   if (query.anime === 'false') active = active.filter(e => e.isAnime === false);
 
+  // Pagination
+  const PAGE_SIZE  = 100;
+  const totalItems = active.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  const currentPage = Math.min(Math.max(1, parseInt(query.page, 10) || 1), totalPages);
+  const pageStart  = (currentPage - 1) * PAGE_SIZE;
+  const pageItems  = active.slice(pageStart, pageStart + PAGE_SIZE);
+
+  // Build base query string for pagination links (preserves anime filter)
+  const baseParams = new URLSearchParams({ tab: 'failed' });
+  if (query.anime && query.anime !== 'all') baseParams.set('anime', query.anime);
+
+  function pageUrl(p) {
+    const params = new URLSearchParams(baseParams);
+    if (p > 1) params.set('page', p);
+    return '/dashboard?' + params.toString();
+  }
+
   function animeBadge(e) {
     return e.isAnime === true
       ? '<span class="badge badge-anime">Anime</span>'
@@ -1006,10 +1024,10 @@ function renderFailedLookups(query = {}) {
   }
 
   let activeRows = '';
-  if (active.length === 0) {
+  if (totalItems === 0) {
     activeRows = '<tr><td colspan="6" style="text-align:center;color:#666;padding:24px">No failed lookups recorded</td></tr>';
   } else {
-    activeRows = active.map(e =>
+    activeRows = pageItems.map(e =>
       `<tr data-imdbid="${esc(e.imdbId)}">
         <td>${e.title ? esc(e.title) : '<span style="color:#555">-</span>'}</td>
         <td><a class="imdb-link" href="https://www.imdb.com/title/${esc(e.imdbId)}/" target="_blank" rel="noopener">${esc(e.imdbId)}</a></td>
@@ -1029,6 +1047,25 @@ function renderFailedLookups(query = {}) {
       </tr>`
     ).join('');
   }
+
+  // Pagination controls HTML
+  const showingFrom = totalItems === 0 ? 0 : pageStart + 1;
+  const showingTo   = Math.min(pageStart + PAGE_SIZE, totalItems);
+  const paginationHtml = `
+    <div class="pagination" style="display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap">
+      <span style="color:#555;font-size:12px">
+        Showing <strong style="color:#aaa">${showingFrom}–${showingTo}</strong> of <strong style="color:#aaa">${totalItems}</strong>
+      </span>
+      <div style="display:flex;gap:6px;align-items:center;margin-left:auto">
+        ${currentPage > 1
+          ? `<a href="${pageUrl(1)}" class="page-btn">«</a><a href="${pageUrl(currentPage - 1)}" class="page-btn">‹ Prev</a>`
+          : `<span class="page-btn disabled">«</span><span class="page-btn disabled">‹ Prev</span>`}
+        <span style="color:#666;font-size:13px;padding:0 6px">Page ${currentPage} of ${totalPages}</span>
+        ${currentPage < totalPages
+          ? `<a href="${pageUrl(currentPage + 1)}" class="page-btn">Next ›</a><a href="${pageUrl(totalPages)}" class="page-btn">»</a>`
+          : `<span class="page-btn disabled">Next ›</span><span class="page-btn disabled">»</span>`}
+      </div>
+    </div>`;
 
   let ignoredRows = '';
   if (ignoredList.length > 0) {
@@ -1112,6 +1149,9 @@ function renderFailedLookups(query = {}) {
       .override-toolbar { display:flex; gap:8px; margin-bottom:12px }
       .override-toolbar button { background:#0f0f18; border:1px solid #22223a; color:#5a8acc; padding:7px 16px; border-radius:8px; cursor:pointer; font-size:12px; transition:all 0.2s }
       .override-toolbar button:hover { background:#16162a; border-color:#333; color:#88aadd }
+      .page-btn { display:inline-flex;align-items:center;padding:5px 11px;border-radius:7px;font-size:12px;font-weight:500;text-decoration:none;transition:all 0.2s;border:1px solid #22223a;background:#0f0f18;color:#aaa }
+      .page-btn:hover { background:#16162a;border-color:#444;color:#ddd }
+      .page-btn.disabled { color:#333;border-color:#161622;background:#0a0a14;pointer-events:none;cursor:default }
     </style>
     <div style="color:#555;font-size:12px;margin-bottom:8px">
       Titles that users requested but weren't found in AniLibria. Sorted by most requested.
@@ -1150,9 +1190,10 @@ function renderFailedLookups(query = {}) {
         <thead>
           <tr><th>Title</th><th>IMDB ID</th><th>Anime?</th><th>Times Requested</th><th>Last Requested</th><th></th></tr>
         </thead>
-        <tbody>${activeRows}</tbody>
+        <tbody id="failed-tbody">${activeRows}</tbody>
       </table>
     </div>
+    ${paginationHtml}
     ${notDubbedSection}
     ${ignoredSection}
     <script>
@@ -1220,7 +1261,7 @@ function renderFailedLookups(query = {}) {
         }
       });
 
-      // Live data refresh — every 30s
+      // Live data refresh — every 30s, page-aware
       (function() {
         function _esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
         function _fmtDate(ts) { return new Date(ts).toISOString().replace('T',' ').slice(0,19); }
@@ -1251,21 +1292,24 @@ function renderFailedLookups(query = {}) {
             + '</td>'
             + '</tr>';
         }
-        var animeParam = new URLSearchParams(window.location.search).get('anime') || 'all';
-        var activeTbody = document.querySelector('table tbody');
+        var qs         = new URLSearchParams(window.location.search);
+        var animeParam = qs.get('anime') || 'all';
+        var pageParam  = parseInt(qs.get('page'), 10) || 1;
+        var PAGE_SIZE  = 100;
+        var activeTbody = document.getElementById('failed-tbody');
         setInterval(function() {
           if (document.querySelector('.ignore-form[style*="flex"]')) return; // user mid-action
-          fetch('/dashboard/api/failed-lookups', { credentials: 'same-origin' })
+          var apiUrl = '/dashboard/api/failed-lookups?page=' + pageParam + '&pageSize=' + PAGE_SIZE;
+          if (animeParam !== 'all') apiUrl += '&anime=' + encodeURIComponent(animeParam);
+          fetch(apiUrl, { credentials: 'same-origin' })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(d) {
               if (!d || !activeTbody) return;
-              var active = d.allFailed.filter(function(e) { return !d.ignored[e.imdbId] && !d.notDubbed[e.imdbId]; });
-              if (animeParam === 'true')  active = active.filter(function(e) { return e.isAnime === true; });
-              if (animeParam === 'false') active = active.filter(function(e) { return e.isAnime === false; });
-              if (active.length === 0) {
+              var rows = d.rows || [];
+              if (rows.length === 0) {
                 activeTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#666;padding:24px">No failed lookups recorded</td></tr>';
               } else {
-                activeTbody.innerHTML = active.map(_buildFailedRow).join('');
+                activeTbody.innerHTML = rows.map(_buildFailedRow).join('');
               }
             })
             .catch(function() {});
@@ -1486,13 +1530,24 @@ router.post('/dashboard/api/enrich-titles', requireAuthApi, (req, res) => {
   });
 });
 
-/** GET /dashboard/api/failed-lookups — failed lookup data for live table refresh */
+/** GET /dashboard/api/failed-lookups — paginated failed lookup data for live table refresh */
 router.get('/dashboard/api/failed-lookups', requireAuthApi, (req, res) => {
-  res.json({
-    allFailed: stats.getFailedLookups(),
-    ignored:   stats.getIgnoredLookups(),
-    notDubbed: stats.getNotDubbedLookups(),
-  });
+  const allFailed = stats.getFailedLookups();
+  const ignored   = stats.getIgnoredLookups();
+  const notDubbed = stats.getNotDubbedLookups();
+
+  let active = allFailed.filter(e => !ignored[e.imdbId] && !notDubbed[e.imdbId]);
+  const animeFilter = req.query.anime;
+  if (animeFilter === 'true')  active = active.filter(e => e.isAnime === true);
+  if (animeFilter === 'false') active = active.filter(e => e.isAnime === false);
+
+  const pageSize   = Math.min(Math.max(1, parseInt(req.query.pageSize, 10) || 100), 500);
+  const page       = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const totalPages = Math.max(1, Math.ceil(active.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const rows = active.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  res.json({ rows, total: active.length, page: currentPage, totalPages });
 });
 
 // ─── Routes ──────────────────────────────────────────────────────────────────

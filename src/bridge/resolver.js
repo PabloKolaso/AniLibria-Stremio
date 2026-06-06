@@ -40,6 +40,9 @@ const anilist      = require('../api/anilist');
 // Cache: imdbId -> anilibria release id  (permanent for this session)
 const resolvedMap = new NodeCache({ stdTTL: 86400, checkperiod: 600 });
 
+// In-flight promise deduplication: prevents parallel _resolve() calls for the same imdbId
+const _inFlight = new Map();
+
 // ─── Cache hit/miss counters ────────────────────────────────────────────────
 const cacheStats = {
   hits: 0,
@@ -85,7 +88,11 @@ function flushToDisk() {
       const expiresAt = resolvedMap.getTtl(key); // ms epoch timestamp
       out[key] = { value: value !== undefined ? value : null, expiresAt: expiresAt || 0 };
     }
-    fs.writeFileSync(CACHE_FILE, JSON.stringify(out));
+    // Write to a temp file first then rename for an atomic update; prevents
+    // a corrupted cache file if the process is killed mid-write.
+    const tmp = CACHE_FILE + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify(out));
+    fs.renameSync(tmp, CACHE_FILE);
   } catch (err) {
     console.warn('[resolver] Failed to flush cache to disk:', err.message);
   }
@@ -182,7 +189,7 @@ function stripSuffixes(title) {
   return title
     .replace(/\s*\(\d{4}\)\s*$/i, '')               // "(2011)"
     .replace(/\s+(?:season|part|s)\s*\d+\s*$/i, '') // "Season 2", "Part 3", "S2"
-    .replace(/\s+[IVX]{1,4}\s*$/i, '')              // trailing " II", " III", " IV"
+    .replace(/\s+(?:II{1,2}|IV|VI{1,3}|IX|XI{1,2}|X{2,3})\s*$/i, '') // trailing " II"–" XIII" etc. (not bare "I", "V", "X")
     .trim();
 }
 
@@ -373,18 +380,14 @@ async function _resolve(imdbId) {
         const media = await anilist.getById(ids.anilist_id);
         if (media) titleVariants = anilist.collectTitles(media);
       }
-      // Fallback: search AniList by MAL ID
+      // Fallback: look up by MAL ID directly (AniList text search does not accept "mal:ID" syntax)
       if (titleVariants.length === 0 && ids.mal_id) {
-        const results = await anilist.searchAnime(`mal:${ids.mal_id}`).catch(() => []);
-        const match = results.find(r => r.idMal === ids.mal_id);
-        if (match) titleVariants = anilist.collectTitles(match);
+        const media = await anilist.getByMalId(ids.mal_id).catch(() => null);
+        if (media) titleVariants = anilist.collectTitles(media);
       }
 
-      // Reorder: put rōmaji first — Anilibria catalogs by Japanese romanized names.
-      // collectTitles returns [english, romaji, native, ...synonyms]; swap 0 and 1.
-      if (titleVariants.length >= 2 && titleVariants[1]) {
-        titleVariants = [titleVariants[1], titleVariants[0], ...titleVariants.slice(2)];
-      }
+      // collectTitles() already returns [romaji, english, native, ...synonyms].
+      // No reorder needed here.
     }
 
     log(`[resolver] Trying titles for ${imdbId}:`, titleVariants.slice(0, 3));
@@ -420,6 +423,17 @@ async function _resolve(imdbId) {
 }
 
 /**
+ * Deduplicated wrapper around _resolve: concurrent calls for the same imdbId
+ * share one in-flight promise instead of firing parallel API chains.
+ */
+async function _resolveOnce(imdbId) {
+  if (_inFlight.has(imdbId)) return _inFlight.get(imdbId);
+  const p = _resolve(imdbId).finally(() => _inFlight.delete(imdbId));
+  _inFlight.set(imdbId, p);
+  return p;
+}
+
+/**
  * Resolve an IMDB ID to an Anilibria release ID.
  * Backwards-compatible: returns number|null.
  */
@@ -431,7 +445,7 @@ async function resolveImdbToAnilibria(imdbId) {
   }
   cacheStats.misses++;
 
-  const result = await _resolve(imdbId);
+  const result = await _resolveOnce(imdbId);
 
   if (result.id && result.method) {
     cacheStats.methods[result.method] = (cacheStats.methods[result.method] || 0) + 1;
@@ -457,14 +471,13 @@ async function resolveImdbToAnilibriaDetailed(imdbId) {
   const cached = resolvedMap.get(imdbId);
   if (cached !== undefined) {
     cacheStats.hits++;
-    const ids = await mappingCache.getByImdb(imdbId);
-    const inFribb = !!(ids?.mal_id || ids?.anilist_id);
-    if (cached) return { ...cached, method: cached.method || 'cache', inFribb };
-    return { id: null, title: null, method: null, titleVariants: [], inFribb };
+    // inFribb is stored on the cached result by _resolve(); no need to re-fetch Fribb here.
+    if (cached) return { ...cached, method: cached.method || 'cache' };
+    return { id: null, title: null, method: null, titleVariants: [], inFribb: false };
   }
   cacheStats.misses++;
 
-  const result = await _resolve(imdbId);
+  const result = await _resolveOnce(imdbId);
 
   if (result.id && result.method) {
     cacheStats.methods[result.method] = (cacheStats.methods[result.method] || 0) + 1;

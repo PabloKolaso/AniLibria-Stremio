@@ -82,7 +82,9 @@ async function start() {
       const chunkSize = (chunk && (typeof chunk === 'string' || Buffer.isBuffer(chunk)))
         ? Buffer.byteLength(chunk)
         : 0;
-      const bytes = contentLength || chunkSize;
+      // Prefer content-length when it is a positive finite number; fall back to chunk size.
+      // Avoids the "0 || chunkSize" falsy-zero bug when content-length is explicitly 0.
+      const bytes = (Number.isFinite(contentLength) && contentLength > 0) ? contentLength : chunkSize;
       if (bytes > 0) stats.recordBandwidth(bytes);
     };
     next();

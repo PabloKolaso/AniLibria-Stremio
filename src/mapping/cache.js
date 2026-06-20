@@ -41,8 +41,12 @@ async function load() {
     byAnidb.clear();
 
     for (const entry of data) {
-      const imdb = entry.imdb_id;
-      if (!imdb) continue;
+      const imdbRaw = entry.imdb_id;
+      if (!imdbRaw) continue;
+
+      // Fribb now emits imdb_id as an array; handle both old (string) and new (array) formats.
+      const imdbIds = Array.isArray(imdbRaw) ? imdbRaw : [imdbRaw];
+      const primaryImdb = imdbIds[0];
 
       const rec = {
         mal_id:     entry.mal_id     || null,
@@ -50,10 +54,10 @@ async function load() {
         anidb_id:   entry.anidb_id   || null,
       };
 
-      byImdb.set(imdb, rec);
-      if (rec.mal_id)     byMal.set(rec.mal_id, imdb);
-      if (rec.anilist_id) byAnilist.set(rec.anilist_id, imdb);
-      if (rec.anidb_id)   byAnidb.set(rec.anidb_id, imdb);
+      for (const id of imdbIds) byImdb.set(id, rec);
+      if (rec.mal_id)     byMal.set(rec.mal_id, primaryImdb);
+      if (rec.anilist_id) byAnilist.set(rec.anilist_id, primaryImdb);
+      if (rec.anidb_id)   byAnidb.set(rec.anidb_id, primaryImdb);
     }
 
     lastLoaded = Date.now();

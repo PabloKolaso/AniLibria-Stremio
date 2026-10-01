@@ -19,6 +19,8 @@
 [![Install in Stremio](https://img.shields.io/badge/%E2%96%B6%20Install%20in%20Stremio-CC3333?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik04IDV2MTRsMTEtN3oiLz48L3N2Zz4=)](https://anilibria-stremio.online)
 &nbsp;
 [![Install Page](https://img.shields.io/badge/Install%20Page-anilibria--stremio.online-7B5EA7?style=for-the-badge)](https://anilibria-stremio.online)
+&nbsp;
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/anilibriastremio)
 
 </div>
 
@@ -101,8 +103,9 @@ Or click **+ Add addon** in Stremio → Addons and paste the URL.
 3. In the stream picker, select **AniLibria 1080p / 720p / 480p**
 4. Enjoy the Russian dub
 
-The last entry in the list, **☕ Support**, opens the project's Buy Me a Coffee page. It only
-appears when streams were found and is never picked by auto-play.
+The last entry in the list, **☕ Support**, opens the project's
+[Buy Me a Coffee page](https://buymeacoffee.com/anilibriastremio). It only appears when streams were
+found and is never picked by auto-play.
 
 ---
 
@@ -312,6 +315,15 @@ test/                   — node:test suites (npm test)
 
 ---
 
+## Support
+
+The addon is free and has no ads. If it is useful to you, you can support its development and
+hosting on Buy Me a Coffee:
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/anilibriastremio)
+
+---
+
 ## License
 
 Copyright (c) 2025-2026 **Matvei Stupachenko**
@@ -409,8 +421,9 @@ https://anilibria-stremio.online/manifest.json
 3. В списке источников выберите **AniLibria 1080p / 720p / 480p**
 4. Смотрите с русской озвучкой
 
-Последний пункт списка, **☕ Support**, открывает страницу проекта на Buy Me a Coffee. Он
-появляется только когда стримы найдены, и автовоспроизведение его никогда не выбирает.
+Последний пункт списка, **☕ Support**, открывает
+[страницу проекта на Buy Me a Coffee](https://buymeacoffee.com/anilibriastremio). Он появляется только
+когда стримы найдены, и автовоспроизведение его никогда не выбирает.
 
 ---
 
@@ -605,6 +618,15 @@ test/                   — тесты node:test (npm test)
 - Спецвыпуски из «нулевого сезона» Stremio не сопоставляются
 - Некоторые тайтлы могут быть геоблокированы на стороне AniLibria
 - Сервер на **бесплатном тарифе** Koyeb — всегда работает, без засыпания
+
+---
+
+## Поддержать проект
+
+Аддон бесплатный и без рекламы. Если он вам полезен, вы можете поддержать разработку и хостинг
+на Buy Me a Coffee:
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/anilibriastremio)
 
 ---
 

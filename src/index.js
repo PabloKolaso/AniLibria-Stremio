@@ -3,197 +3,240 @@
  */
 
 // Must be first — patches console before any other module logs
-const { router: debugRouter } = require('./debug');
+require('./monitoring/console');
 
-const { addonBuilder, getRouter } = require('stremio-addon-sdk');
-const express = require('express');
-const cors    = require('cors');
-const path    = require('path');
-
-const axios = require('axios');
-
-const compression        = require('compression');
-const manifest          = require('./manifest');
-const mappingCache      = require('./mapping/cache');
-const { streamHandler } = require('./handlers/streams');
-const { warmup, isIndexReady, loadPersistedCache, flushToDisk } = require('./bridge/resolver');
-const logger            = require('./logger');
-const stats             = require('./stats');
-const users             = require('./users');
-const dashboardRouter   = require('./dashboard');
-const renderInstallPage = require('./install-page');
+const { once }  = require('events');
+const config    = require('./config');
+const http      = require('./api/http');
+const anilist   = require('./api/anilist');
+const mapping   = require('./mapping/cache');
+const catalog   = require('./mapping/anilibria-catalog');
+const resolver  = require('./bridge/resolver');
+const releasing = require('./catalogs/releasing');
+const trending  = require('./catalogs/trending');
+const requestLog = require('./telemetry/request-log');
+const missing    = require('./telemetry/missing');
+const legacy     = require('./telemetry/legacy-stats');
+const lifecycle  = require('./monitoring/lifecycle');
+const processMetrics = require('./monitoring/process-metrics');
+const alerts     = require('./monitoring/alerts');
+const jobs       = require('./monitoring/jobs');
+const JsonStore  = require('./util/json-store');
 const { isFirstRun: authIsFirstRun } = require('./auth');
+const { createApp } = require('./app');
 
-const PORT = process.env.PORT || 7000;
+const KEEPALIVE_INTERVAL_MS = 12 * 60 * 1000; // Render free tier spins down after 15 min idle
+const SHUTDOWN_TIMEOUT_MS   = 5000;
 
 // ─── Crash guards ────────────────────────────────────────────────────────────
-// Prevent the process from dying on unhandled errors.
-// Log the error and keep running.
+// Keep serving after an unexpected error in a background task; log it loudly
+// and record it (dashboard, alerts).
 process.on('uncaughtException', err => {
-  console.error('[uncaughtException]', err.message, err.stack);
+  console.error('[uncaughtException]', err);
+  lifecycle.recordFatal('uncaughtException', err);
 });
 
-process.on('unhandledRejection', (reason) => {
+process.on('unhandledRejection', reason => {
   console.error('[unhandledRejection]', reason);
+  lifecycle.recordFatal('unhandledRejection', reason);
 });
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** Background jobs the dashboard can see (passive) or trigger (manual). */
+function defineJobs() {
+  jobs.define('keepalive', {
+    label: 'Keep-alive ping',
+    description: 'Self-ping of PUBLIC_URL/health so free hosting tiers do not spin the service down',
+    schedule: config.publicUrl ? 'every 12 min' : 'disabled (PUBLIC_URL not set)',
+  });
+  jobs.define('stremio-publish', {
+    label: 'Stremio catalog registration',
+    description: 'Registers the manifest with the Stremio Community addon catalog',
+    schedule: config.publicUrl ? 'at startup' : 'disabled (PUBLIC_URL not set)',
+  });
+  jobs.define('refresh-releasing', {
+    label: 'Refresh Releasing catalog',
+    description: 'Poll AniLibria for in-production releases and new episodes now',
+    schedule: 'every 60 s',
+    cooldownMs: 30_000,
+    run: async () => {
+      const items = await releasing.refresh();
+      const info = releasing.info();
+      if (info.lastError && info.lastFailureAt >= info.lastAttemptAt) throw new Error(info.lastError);
+      return `${items?.length ?? 0} titles listed`;
+    },
+  });
+  jobs.define('refresh-trending', {
+    label: 'Refresh Trending catalog',
+    description: 'Fetch AniList trending (2 requests) and re-match against AniLibria',
+    schedule: 'every 5 min',
+    cooldownMs: 60_000,
+    run: async () => {
+      const items = await trending.refresh();
+      const info = trending.info();
+      if (info.lastError && info.lastFailureAt >= info.lastAttemptAt) throw new Error(info.lastError);
+      return `${items?.length ?? 0} titles listed`;
+    },
+  });
+  jobs.define('rebuild-index', {
+    label: 'Rebuild AniLibria index',
+    description: 'Re-download the full AniLibria catalog (about 40 API pages)',
+    schedule: 'every 2 h',
+    cooldownMs: 10 * 60_000,
+    confirm: 'Downloads the whole AniLibria catalog (~40 requests). Continue?',
+    run: async () => {
+      const index = await catalog.rebuild();
+      return `${index.size} releases indexed${index.complete ? '' : ' (incomplete)'}`;
+    },
+  });
+  jobs.define('refresh-mapping', {
+    label: 'Re-download ID mapping',
+    description: 'Download the Fribb IMDB ↔ MAL/AniList mapping from GitHub',
+    schedule: 'every 24 h',
+    cooldownMs: 30 * 60_000,
+    confirm: 'Downloads the Fribb mapping from GitHub (several MB). Continue?',
+    run: async () => {
+      await mapping.forceRefresh();
+      return `${mapping.getInfo().imdbIds} IMDB IDs mapped`;
+    },
+  });
+  jobs.define('clear-resolver', {
+    label: 'Clear resolver cache',
+    description: 'Forget every memoized anime → release match; the next requests re-resolve (more upstream calls)',
+    schedule: 'cleared automatically when the index changes',
+    cooldownMs: 30_000,
+    confirm: 'Every anime will be re-resolved on its next request. Continue?',
+    run: async () => `${resolver.clearAll()} cached matches cleared`,
+  });
+  jobs.define('recheck-missing', {
+    label: 'Re-check missing titles',
+    description: 'Look for missing titles that are now available (offline, against the local index)',
+    schedule: 'hourly and after index/mapping updates',
+    cooldownMs: 30_000,
+    run: async () => {
+      const r = missing.recheck();
+      return `${r.checked} checked, ${r.available} newly available`;
+    },
+  });
+}
+
 async function start() {
-  const host = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
-  manifest.logo = 'https://fandub.wiki/images/thumb/0/06/AniLibria_%D0%9B%D0%BE%D0%B3%D0%BE%D1%82%D0%B8%D0%BF_%D0%BA%D0%BE%D0%BB%D0%BB%D0%B5%D0%BA%D1%82%D0%B8%D0%B2%D0%B0.jpg/200px-AniLibria_%D0%9B%D0%BE%D0%B3%D0%BE%D1%82%D0%B8%D0%BF_%D0%BA%D0%BE%D0%BB%D0%BB%D0%B5%D0%BA%D1%82%D0%B8%D0%B2%D0%B0.jpg';
-
-  // Build the addon
-  const builder = new addonBuilder(manifest);
-  builder.defineStreamHandler(streamHandler);
   console.log('=== Stremio AniLibria Addon ===');
+  const host = config.publicUrl || `http://localhost:${config.port}`;
 
-  // Load the Fribb IMDB mapping (required for all lookups)
-  try {
-    await mappingCache.load();
-  } catch (err) {
-    console.error('[boot] Fribb mapping failed to load:', err.message);
-    console.warn('[boot] Retrying mapping load in 30 seconds...');
-    setTimeout(() => mappingCache.load().catch(console.error), 30_000);
-  }
+  lifecycle.start();
+  processMetrics.start();
+  anilist.loadCache();
+  defineJobs();
 
-  // Restore resolver cache from previous run
-  loadPersistedCache();
+  const app = createApp();
+  const server = app.listen(config.port);
+  // Longer than typical load-balancer idle timeouts, so proxies never reuse a closed socket
+  server.keepAliveTimeout = 65_000;
+  server.headersTimeout = 66_000;
+  await Promise.race([
+    once(server, 'listening'),
+    once(server, 'error').then(([err]) => { throw err; }),
+  ]);
 
-  // Start the HTTP server
-  const addonInterface = builder.getInterface();
-  const app = express();
-  app.set('trust proxy', true);
-  app.use(cors());
-  app.use(compression());
-
-  // Security headers
-  app.use((req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
-    next();
-  });
-
-  // Bandwidth tracking — capture outbound response sizes
-  app.use((req, res, next) => {
-    const origEnd = res.end;
-    res.end = function(chunk, encoding) {
-      origEnd.call(this, chunk, encoding);
-      const contentLength = parseInt(res.getHeader('content-length'), 10);
-      const chunkSize = (chunk && (typeof chunk === 'string' || Buffer.isBuffer(chunk)))
-        ? Buffer.byteLength(chunk)
-        : 0;
-      // Prefer content-length when it is a positive finite number; fall back to chunk size.
-      // Avoids the "0 || chunkSize" falsy-zero bug when content-length is explicitly 0.
-      const bytes = (Number.isFinite(contentLength) && contentLength > 0) ? contentLength : chunkSize;
-      if (bytes > 0) stats.recordBandwidth(bytes);
-    };
-    next();
-  });
-
-  // Unique user tracking — capture client IP on stream requests
-  app.use((req, res, next) => {
-    if (req.method === 'GET' && req.path.startsWith('/stream/')) {
-      const ip = req.ip || 'unknown';
-      if (ip !== 'unknown') users.recordUser(ip);
-    }
-    next();
-  });
-
-  // Serve local logo
-  app.get('/logo.jpg', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../assets/logo.jpg'));
-  });
-
-  // Health endpoint (before SDK router so it doesn't intercept)
-  app.get('/health', (req, res) => {
-    res.json({
-      status: 'ok',
-      uptime: Math.round(process.uptime()),
-      mappingLoaded: mappingCache.getMappingSize() > 0,
-      indexReady: isIndexReady(),
-    });
-  });
-
-  // Public install page at root
-  app.get('/', (req, res) => {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.send(renderInstallPage());
-  });
-
-  // Dashboard must be mounted before SDK router so /dashboard isn't intercepted
-  app.use('/', dashboardRouter);
-  app.use('/', getRouter(addonInterface));
-  app.use('/', debugRouter);
-
-  const server = app.listen(PORT);
-  // Start logger cleanup interval (prune entries older than 3 days, every hour)
-  logger.startCleanupInterval();
+  requestLog.start();
 
   console.log(`\nAddon running at: ${host}/manifest.json`);
   console.log(`Dashboard:        ${host}/dashboard`);
   console.log(`Health check:     ${host}/health`);
   console.log('Install in Stremio by opening the manifest URL above.\n');
 
-  if (process.env.DASHBOARD_PASSWORD) {
+  if (config.dashboardPassword) {
     console.log('Dashboard password: set via DASHBOARD_PASSWORD env var');
   } else if (authIsFirstRun()) {
-    const ntfyNote = process.env.NTFY_TOPIC ? ` and sent to ntfy.sh/${process.env.NTFY_TOPIC}` : '';
+    const ntfyNote = config.ntfyTopic ? ` and sent to ntfy.sh/${config.ntfyTopic}` : '';
     console.log(`Dashboard password saved to: data/dashboard-password.txt${ntfyNote}`);
   } else {
     console.log('Dashboard password: loaded from data/auth.json');
   }
 
-  // Self-ping keep-alive to prevent Render free tier spin-down (15 min idle)
-  let pingTimer = null;
-  if (process.env.PUBLIC_URL) {
-    const PING_INTERVAL = 12 * 60 * 1000; // 12 minutes
-    pingTimer = setInterval(() => {
-      axios.get(`${process.env.PUBLIC_URL}/health`)
-        .then(() => console.log('[keepalive] Ping OK'))
-        .catch(err => console.warn('[keepalive] Ping failed:', err.message));
-    }, PING_INTERVAL);
-    console.log('[keepalive] Self-ping enabled (every 12 min)');
-  }
+  // Load the IMDB ↔ anime mapping (disk cache first, GitHub refresh in background)
+  // and build the AniLibria catalog index. Stream requests arriving before
+  // these are ready wait briefly for them.
+  mapping.init().catch(err => console.error('[mapping] Initialization failed:', err.message));
+  resolver.warmup();
 
-  // Register with Stremio Community Addons catalog
-  if (process.env.PUBLIC_URL) {
-    axios.post('https://api.strem.io/api/addonPublish', {
-      transportUrl: 'https://anilibria-stremio.online/manifest.json',
-      transportName: 'http',
-    })
-    .then(r => console.log('[publish] Registered with Stremio Community:', JSON.stringify(r.data)))
-    .catch(e => console.warn('[publish] Failed to register with Stremio:', e.message));
-  }
+  // Live catalogs: AniLibria update poller (every minute) and AniList trending (every 5 minutes)
+  releasing.start();
+  trending.start();
 
-  // Graceful shutdown
-  process.on('SIGTERM', () => {
-    console.log('[shutdown] SIGTERM received, closing server...');
-    if (pingTimer) clearInterval(pingTimer);
-    logger.stopCleanupInterval();
-    logger.flush();
-    stats.flush();
-    users.flush();
-    flushToDisk();
-    server.close(() => {
-      console.log('[shutdown] Server closed.');
-      process.exit(0);
-    });
-    setTimeout(() => process.exit(0), 5000);
-  });
+  // Missing titles: classify imported entries, fetch titles, recheck hourly
+  missing.start();
+  alerts.start();
 
-  // Pre-warm the Anilibria title index in the background
-  warmup();
-
-  // Backfill missing titles for failed lookups via Cinemeta (rate-limited)
+  // Imported v1 statistics are saved in their new stores: retire the old files
   setTimeout(() => {
-    const cinemeta = require('./api/cinemeta');
-    cinemeta.backfillMissingTitles(
-      stats.getFailedLookups(),
-      (imdbId, info) => stats.updateFailedLookup(imdbId, info),
-    ).then(count => {
-      if (count > 0) console.log(`[cinemeta] Backfilled ${count} missing titles`);
-    }).catch(err => console.warn('[cinemeta] Backfill error:', err.message));
-  }, 10_000);
+    JsonStore.flushAll().then(() => legacy.retire()).catch(err => console.warn('[migration]', err.message));
+  }, 15_000).unref();
+
+  // Self-ping keep-alive to prevent free-tier spin-down
+  let pingTimer = null;
+  if (config.publicUrl) {
+    pingTimer = setInterval(() => {
+      const started = Date.now();
+      http.request(`${config.publicUrl}/health`, { service: 'keepalive', timeout: 10_000, responseType: 'text' })
+        .then(() => {
+          jobs.report('keepalive', { ok: true, message: 'Ping OK', durationMs: Date.now() - started });
+          console.log('[keepalive] Ping OK');
+        })
+        .catch(err => {
+          jobs.report('keepalive', { ok: false, message: err.message, durationMs: Date.now() - started });
+          console.warn('[keepalive] Ping failed:', err.message);
+        });
+    }, KEEPALIVE_INTERVAL_MS);
+    pingTimer.unref();
+    console.log('[keepalive] Self-ping enabled (every 12 min)');
+
+    // Register with the Stremio Community Addons catalog
+    const started = Date.now();
+    http.postJson('https://api.strem.io/api/addonPublish', {
+      transportUrl: `${config.addonUrl}/manifest.json`,
+      transportName: 'http',
+    }, { service: 'Stremio publish', timeout: 15_000 })
+      .then(r => {
+        jobs.report('stremio-publish', { ok: true, message: JSON.stringify(r).slice(0, 200), durationMs: Date.now() - started });
+        console.log('[publish] Registered with Stremio Community:', JSON.stringify(r));
+      })
+      .catch(err => {
+        jobs.report('stremio-publish', { ok: false, message: err.message, durationMs: Date.now() - started });
+        console.warn('[publish] Failed to register with Stremio:', err.message);
+      });
+  }
+
+  // Graceful shutdown: stop accepting connections, persist state, exit
+  let shuttingDown = false;
+  async function shutdown(signal) {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`[shutdown] ${signal} received, closing server...`);
+    setTimeout(() => process.exit(0), SHUTDOWN_TIMEOUT_MS).unref();
+
+    if (pingTimer) clearInterval(pingTimer);
+    requestLog.stop();
+    catalog.stop();
+    releasing.stop();
+    trending.stop();
+    missing.stop();
+    alerts.stop();
+    processMetrics.stop();
+
+    const closed = new Promise(resolve => server.close(resolve));
+    server.closeIdleConnections?.();
+    await Promise.all([
+      closed,
+      lifecycle.markShutdown(signal).catch(() => {}),
+      JsonStore.flushAll().catch(err => console.warn('[shutdown] Failed to save state:', err.message)),
+    ]);
+    console.log('[shutdown] Server closed, state saved.');
+    process.exit(0);
+  }
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 start().catch(err => {

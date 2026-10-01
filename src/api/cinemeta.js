@@ -1,15 +1,55 @@
 /**
- * Cinemeta Title Info Fetcher
+ * Cinemeta client (Stremio's official metadata addon).
  *
- * Fetches title metadata from Stremio's Cinemeta catalog.
- * Used to enrich failed lookups with a human-readable title and
- * to determine whether a given IMDB ID is anime.
+ * Used to:
+ *  1. Title and classify IMDB IDs outside the anime mapping (missing titles).
+ *  2. Get per-season episode counts, needed to convert Stremio's
+ *     season/episode numbering into absolute episode numbers for long
+ *     single-entry shows (One Piece, Naruto Shippuden, Bleach, ...).
  */
 
-const axios = require('axios');
+const http     = require('./http');
+const TTLCache = require('../util/ttl-cache');
 
-const BASE = 'https://v3-cinemeta.strem.io/meta';
-const TIMEOUT_MS = 5_000;
+const BASE    = 'https://v3-cinemeta.strem.io/meta';
+const SERVICE = 'Cinemeta';
+
+// imdbId:type -> meta object (or null when Cinemeta does not know the ID)
+const metaCache = new TTLCache({ ttlMs: 12 * 60 * 60 * 1000, max: 5000, name: 'Cinemeta', description: 'Titles, genres and season sizes by IMDB ID' });
+const inFlight  = new Map();
+
+/**
+ * Fetch Cinemeta meta for an IMDB ID and type.
+ * @returns {Promise<object|null>} null if Cinemeta has no entry
+ * @throws {HttpError} on transient failures
+ */
+async function getMeta(type, imdbId) {
+  const key = `${type}:${imdbId}`;
+  const cached = metaCache.get(key);
+  if (cached !== undefined) return cached;
+  if (inFlight.has(key)) return inFlight.get(key);
+
+  const promise = (async () => {
+    let meta = null;
+    try {
+      const data = await http.getJson(`${BASE}/${type}/${encodeURIComponent(imdbId)}.json`, {
+        service: SERVICE, timeout: 6_000,
+      });
+      meta = data?.meta && typeof data.meta === 'object' ? data.meta : null;
+    } catch (err) {
+      if (err.status !== 404) throw err;
+    }
+    metaCache.set(key, meta);
+    return meta;
+  })();
+
+  inFlight.set(key, promise);
+  try {
+    return await promise;
+  } finally {
+    inFlight.delete(key);
+  }
+}
 
 /**
  * Fetch title info from Cinemeta for a given IMDB ID.
@@ -22,57 +62,37 @@ async function fetchTitleInfo(imdbId, typeHint) {
   const types = typeHint === 'movie' ? ['movie', 'series'] : ['series', 'movie'];
 
   for (const type of types) {
+    let meta;
     try {
-      const { data } = await axios.get(`${BASE}/${type}/${imdbId}.json`, {
-        timeout: TIMEOUT_MS,
-      });
-      if (data?.meta?.name) {
-        const genres = (data.meta.genres || []).map(g => g.toLowerCase());
-        const isAnime = genres.includes('anime');
-        return { title: data.meta.name, isAnime };
-      }
-    } catch (err) {
-      if (err.response?.status === 404) continue;
-      // Network / timeout — try next type
-      continue;
+      meta = await getMeta(type, imdbId);
+    } catch {
+      continue; // network / timeout — try the other type
+    }
+    if (meta?.name) {
+      const genres = Array.isArray(meta.genres) ? meta.genres.map(g => String(g).toLowerCase()) : [];
+      return { title: meta.name, isAnime: genres.includes('anime') };
     }
   }
   return null;
 }
 
 /**
- * Backfill missing titles for failed lookups.
+ * Highest episode number of every regular season (season >= 1) of a series.
  *
- * @param {Array<{imdbId: string, title: string|null}>} failedLookups
- * @param {(imdbId: string, info: {title: string, isAnime: boolean}) => void} updateCallback
- * @param {{ cap?: number, delayMs?: number }} [opts]
- * @returns {Promise<number>} number of entries enriched
+ * @returns {Promise<Map<number, number>|null>} season -> episode count, or null if unknown
+ * @throws {HttpError} on transient failures
  */
-async function backfillMissingTitles(failedLookups, updateCallback, opts = {}) {
-  const cap = opts.cap || 50;
-  const delayMs = opts.delayMs || 500;
-
-  const missing = failedLookups.filter(e => !e.title);
-  const batch = missing.slice(0, cap);
-  let enriched = 0;
-
-  for (let i = 0; i < batch.length; i++) {
-    const entry = batch[i];
-    try {
-      const info = await fetchTitleInfo(entry.imdbId);
-      if (info) {
-        updateCallback(entry.imdbId, info);
-        enriched++;
-      }
-    } catch {
-      // skip this entry
-    }
-    if (i < batch.length - 1) {
-      await new Promise(r => setTimeout(r, delayMs));
-    }
+async function getSeasonEpisodeCounts(imdbId) {
+  const meta = await getMeta('series', imdbId);
+  const videos = Array.isArray(meta?.videos) ? meta.videos : [];
+  const counts = new Map();
+  for (const video of videos) {
+    const season = Number(video.season);
+    const episode = Number(video.episode ?? video.number);
+    if (!Number.isInteger(season) || season < 1 || !Number.isFinite(episode)) continue;
+    counts.set(season, Math.max(counts.get(season) || 0, episode));
   }
-
-  return enriched;
+  return counts.size > 0 ? counts : null;
 }
 
-module.exports = { fetchTitleInfo, backfillMissingTitles };
+module.exports = { fetchTitleInfo, getSeasonEpisodeCounts };

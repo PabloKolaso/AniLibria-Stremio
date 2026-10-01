@@ -6,7 +6,7 @@
 
 *Russian anime dubs, directly inside Stremio.*
 
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Stremio Addon](https://img.shields.io/badge/stremio-addon-7B5EA7)](https://stremio.com)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Deploy: Koyeb](https://img.shields.io/badge/deploy-Koyeb-121212?logo=koyeb&logoColor=white)](https://koyeb.com)
@@ -37,13 +37,13 @@ Watch Russian-dubbed anime in Stremio without leaving the app or managing a sepa
 | Feature | Detail |
 |---|---|
 | Multi-quality HLS | 480p · 720p · 1080p per episode |
-| Zero catalog noise | Stream-only addon — no duplicate browse sections |
-| 4-step ID resolution | Alias → API search → Fuse.js fuzzy → session-cached |
-| Binge-watch support | Auto-plays next episode via `bingeGroup` |
+| Live catalogs | **AniLibria – Releasing** and **Trending Anime – AniLibria**, updated automatically (see below) |
+| Season-aware matching | Each Stremio season/episode maps to the exact AniLibria release by MyAnimeList ID |
+| Long runners | One Piece, Naruto Shippuden, Bleach… use absolute episode numbers |
+| Binge-watch support | Auto-plays the next episode in the quality you picked (`bingeGroup`) |
 | Geo-block detection | Shows a readable message instead of a dead spinner |
-| Fast cold starts | Full AniLibria index pre-warmed on server boot |
-| Session caching | Each title resolved once; failed lookups retry after 2 hours |
-| Admin dashboard | `/dashboard` — Overview, Analytics, Logs, Failed Lookups |
+| Fast cold starts | ID mapping and AniList data cached on disk; AniLibria catalog indexed at boot |
+| Admin dashboard | `/dashboard` (password protected) — health monitoring, traffic, catalogs, missing titles, logs, admin tools |
 
 ---
 
@@ -52,20 +52,19 @@ Watch Russian-dubbed anime in Stremio without leaving the app or managing a sepa
 Every stream request follows this resolution pipeline:
 
 ```
-Stremio  ──▶  IMDB ID  (e.g. tt0388629)
+Stremio  ──▶  IMDB ID + season + episode  (e.g. tt9335498:2:3)
                 │
                 ▼
-         Fribb anime-list          IMDB → AniList / MAL / AniDB ID
-                │
+         Fribb anime-list          IMDB → every MAL / AniList entry of the show,
+                │                  each with its TVDB season + episode offset
                 ▼
-         AniList GraphQL API       AniList ID → English + Rōmaji titles
-                │
-         ┌──────┴────────────────────────────────────┐
-         ▼                                           ▼  fallback chain
-  Anilibria alias lookup  →  Anilibria search API  →  Fuse.js index
-  /api/v1/releases/{slug}     (word-prefix guard)      (full catalog,
-                                                         threshold 0.25)
-                │
+         Season targeting          S2E3 → the entry for season 2, local episode 3
+                │                  (single-entry long runners → absolute episode)
+                ▼
+         AniLibria catalog index   MAL ID → release (exact; year cross-checked
+                │                  against AniList)
+                │   fallback for releases without IDs:
+                │   exact alias → Fuse.js fuzzy (same-season and ID guards)
                 ▼
          Episode HLS URLs   (480p / 720p / 1080p)
                 │
@@ -73,7 +72,9 @@ Stremio  ──▶  IMDB ID  (e.g. tt0388629)
             Stremio Player
 ```
 
-The alias lookup is instant and exact. The search API and fuzzy index serve as progressively broader fallbacks, each with false-positive guards to prevent wrong matches.
+AniLibria tags almost every release with its MyAnimeList ID, so most lookups are exact.
+Title matching is only a fallback, and it never accepts a release that AniLibria tags as a
+different anime — so an unavailable show returns no streams instead of the wrong one.
 
 ---
 
@@ -94,16 +95,36 @@ Or click **+ Add addon** in Stremio → Addons and paste the URL.
 
 ## Usage
 
-1. Browse any anime in Stremio (via Cinemeta or any catalog addon)
+1. Browse any anime in Stremio (via Cinemeta or any catalog addon), or open one of the addon's catalogs
 2. Open any episode
 3. In the stream picker, select **AniLibria 1080p / 720p / 480p**
 4. Enjoy the Russian dub
 
 ---
 
+## Catalogs
+
+Both catalogs appear on the Stremio home screen and in Discover. **Every title in them has a
+playable AniLibria dub** — the catalog, the episode list and the streams all come from the same
+AniLibria release (item IDs are `anilibria:<releaseId>`).
+
+| Catalog | Source | Refresh |
+|---|---|---|
+| **AniLibria – Releasing** | Releases AniLibria is dubbing right now (`production_statuses=IS_IN_PRODUCTION`), most recently updated first | every 60 s |
+| **Trending Anime – AniLibria** | AniList's live trending ranking (`TRENDING_DESC`, top 100), kept only when the anime matches an AniLibria release by MyAnimeList ID (or exact title and year) **and** that release has playable episodes | every 5 min |
+
+New episodes: AniLibria has no push notifications, so the addon polls its update feed
+(`/anime/releases/latest`) every minute and refetches only the releases that changed. A new
+episode shows up in the catalog, episode list and streams within about a minute — and a stream
+request for an episode we have not seen yet rechecks AniLibria immediately. Nothing requires a
+restart. If AniLibria or AniList is unreachable, the last verified lists stay in place; unverified
+titles are never shown.
+
+---
+
 ## Self-Hosting
 
-**Requirements:** Node.js ≥ 18
+**Requirements:** Node.js ≥ 20
 
 ```bash
 git clone https://github.com/PabloKolaso/stremio-anilibria-addon.git
@@ -111,6 +132,8 @@ cd stremio-anilibria-addon
 npm install
 npm start
 # Addon available at http://localhost:7000/manifest.json
+
+npm test   # unit + integration tests (offline)
 ```
 
 ### Environment Variables
@@ -118,32 +141,50 @@ npm start
 | Variable | Default | Purpose |
 |---|---|---|
 | `PORT` | `7000` | HTTP listen port |
-| `PUBLIC_URL` | — | Public base URL (e.g. `https://your-app.koyeb.app`) |
+| `PUBLIC_URL` | — | Public base URL of this deployment (e.g. `https://your-app.koyeb.app`). Enables the keep-alive self-ping and Stremio catalog registration |
+| `ADDON_URL` | `https://anilibria-stremio.online` | Canonical addon URL shown on the install page and registered with Stremio. Set it for your own instance |
+| `DASHBOARD_PASSWORD` | — | Dashboard password (recommended on cloud hosts). If unset, one is generated on first run and saved to `data/dashboard-password.txt` |
+| `NTFY_TOPIC` | — | Optional [ntfy.sh](https://ntfy.sh) topic that receives the generated password (and alerts, see below) |
+| `NTFY_ALERTS` | `false` | `true` sends admin alerts to `NTFY_TOPIC`: provider outages, stale catalogs, error-rate spikes, crashes, a mapping that stops refreshing |
+| `TRUST_PROXY` | `true` | Express `trust proxy` setting (`true`, `false`, hop count, or subnet list). Use the number of proxies in front of the app when known |
+| `DATA_DIR` | `./data` | Where stats, logs and caches are persisted |
+| `ANILIBRIA_API_URL` | `https://anilibria.top/api/v1` | AniLibria API base URL (in case the domain changes) |
 
 ### Deploy to Koyeb (free tier)
 
 1. Fork this repository
 2. Create a new **Web Service** on [koyeb.com](https://koyeb.com) pointing to your fork
 3. Koyeb auto-detects Node.js — build: `npm install`, run: `npm start`
-4. Add env var: `PUBLIC_URL` = `https://your-app-name.koyeb.app`
+4. Add env vars: `PUBLIC_URL` = `https://your-app-name.koyeb.app`, `ADDON_URL` = the same URL, and `DASHBOARD_PASSWORD`
 
 ---
 
 ## Dashboard
 
-An admin panel is available at `/dashboard` (no login required).
+An admin panel is available at `/dashboard`. It is password protected (see `DASHBOARD_PASSWORD`);
+sessions last 7 days, survive restarts (only token hashes are stored) and end when the password
+changes. Failed logins are rate-limited. Works on phones.
 
-- **Overview** — top resolved anime, system resource stats
-- **Analytics** — hourly / daily / monthly request and bandwidth charts
-- **Logs** — queryable request history with CSV export
-- **Failed Lookups** — titles that couldn't be resolved; manage ignored entries
+| Page | Answers |
+|---|---|
+| **Overview** | Is everything working? Health banner, status of every provider (AniLibria, AniList, Cinemeta, Fribb, Stremio API) and data source, 24 h KPIs (anime requests, users, error rate, coverage, p95 latency), grouped recent problems, top anime |
+| **Traffic** | How is the addon used and performing? 24 h / 7 d / 30 d / 90 d: requests by outcome, latency, unique users, resource mix, resolver match methods, outcome reasons — each compared with the previous period |
+| **Content** | What data is available and updating? Releasing and Trending catalogs with the reason every title is (not) listed, recent AniLibria updates, index and mapping status, low-confidence matches to approve/reject, coverage report |
+| **Missing titles** | What cannot be resolved, and why? Not on AniLibria · missing from the ID mapping · episode not found (with a likely cause) · not dubbed yet · now available · ignored |
+| **Logs** | What happened for one request? Filterable request log with details drawer and "re-resolve now", CSV export; live server console |
+| **Admin** | Resolve tester, background jobs and cache controls (with server-side cooldowns), process/restart/crash details, configuration, sessions |
 
-## Debug Panel
+Stremio asks every stream addon about every title a user opens, so most requests are for
+non-anime titles. These are counted separately ("non-anime pass-through") and never mixed into
+the anime metrics or the missing-titles list.
 
-A lightweight diagnostics page is available at `/debug`:
+## Debug Endpoint
 
-- Force-resolve any IMDB ID and trace the full lookup path step by step
-- Useful for reporting missing anime or incorrect title matches
+`/debug/resolve/{imdbId}?season=1&episode=1` (dashboard login required) re-resolves an ID,
+bypassing caches, and returns the outcome, the AniLibria release and the log lines of the lookup —
+useful for reporting missing anime or incorrect matches. Add `type=movie` for movies. The
+dashboard's **Admin → Resolve tester** shows the same with every step, and also accepts catalog IDs
+(`anilibria:9660:8`) and pasted Stremio/IMDB links.
 
 ---
 
@@ -151,18 +192,39 @@ A lightweight diagnostics page is available at `/debug`:
 
 ```
 src/
-  index.js          — Server entry point
-  manifest.js       — Addon manifest
-  mapping/
-    cache.js        — Fribb IMDB ↔ AniList mapping cache
-  api/
-    anilibria.js    — AniLibria REST API v1 client
-    anilist.js      — AniList GraphQL client
-  bridge/
-    resolver.js     — 4-step title matching & ID bridge
+  index.js              — Server entry point (boot, background jobs, graceful shutdown)
+  app.js                — Express app: protocol routes, install page, health, dashboard
+  stremio.js            — Stremio addon protocol (manifest + resource routes)
+  manifest.js           — Addon manifest
+  config.js             — Environment variables
   handlers/
-    streams.js      — Stream handler
-  debug.js          — Live diagnostics router
+    streams.js          — Stream handler (IMDB and catalog IDs)
+    catalog.js          — Catalog handler (paging)
+    meta.js             — Metadata for catalog items
+  catalogs/
+    releasing.js        — "Releasing" catalog + AniLibria update poller
+    trending.js         — "Trending" catalog (AniList → AniLibria)
+    meta.js             — Stremio metadata built from AniLibria releases
+  bridge/
+    resolver.js         — IMDB → anime entry → AniLibria release
+    targets.js          — Season/episode → mapping entry selection
+    episodes.js         — Episode selection inside a release
+    matching.js         — ID and title match validation
+    franchise.js        — Franchise-order fallback for unmapped seasons
+  mapping/
+    cache.js            — Fribb IMDB ↔ MAL/AniList mapping (disk-cached)
+    anilibria-catalog.js — AniLibria catalog index (MAL ID, alias, fuzzy)
+    availability.js     — Which AniLibria releases are playable (bulk-checked)
+  api/
+    http.js             — fetch wrapper: timeouts, retries, typed errors
+    anilibria.js        — AniLibria REST API v1 client
+    anilist.js          — AniList GraphQL client (disk-cached)
+    cinemeta.js         — Cinemeta client (titles, season sizes)
+  telemetry/              — request log, hourly traffic, users, top titles, missing titles, match review
+  monitoring/             — provider health, process metrics, lifecycle, problems, jobs, alerts
+  dashboard/              — dashboard routes and JSON API; public/ holds the browser app (ES modules)
+  overrides.js, auth.js, debug.js, install-page.js
+test/                   — node:test suites (npm test)
 ```
 
 ---
@@ -171,14 +233,13 @@ src/
 
 | Library | Role |
 |---|---|
-| [`stremio-addon-sdk`](https://github.com/Stremio/stremio-addon-sdk) | Stremio addon protocol |
-| `express` + `cors` | HTTP server |
-| `axios` | HTTP client |
-| [`fuse.js`](https://fusejs.io) | Fuzzy title matching |
-| `node-cache` | In-process session cache |
-| [Fribb `anime-list-mini.json`](https://github.com/Fribb/anime-lists) | IMDB → AniList/MAL/AniDB mapping |
-| [AniList GraphQL](https://anilist.gitbook.io/anilist-apiv2-docs) | Canonical anime title lookup |
-| [AniLibria REST API v1](https://anilibria.top) | HLS stream source |
+| `express` 5 + `cors` + `compression` | HTTP server and Stremio addon protocol |
+| [`fuse.js`](https://fusejs.io) | Fuzzy title matching (fallback) |
+| Node.js `fetch` | HTTP client |
+| [Fribb `anime-list-mini.json`](https://github.com/Fribb/anime-lists) | IMDB → MAL/AniList mapping with TVDB seasons |
+| [AniList GraphQL](https://anilist.gitbook.io/anilist-apiv2-docs) | Canonical titles and release years |
+| [Cinemeta](https://v3-cinemeta.strem.io) | Season sizes for absolute episode numbering |
+| [AniLibria REST API v1](https://anilibria.top) | Catalog and HLS stream source |
 
 ---
 
@@ -186,6 +247,7 @@ src/
 
 - **Russian dub only** — AniLibria does not offer original audio or subtitles
 - Anime not present in AniLibria's library return 0 streams (expected behavior)
+- Specials in Stremio's "season 0" are not mapped
 - Some titles may be geo-restricted by AniLibria independent of this addon
 - Hosted on the **free tier** of Koyeb — always running, no cold starts
 
@@ -227,39 +289,41 @@ This project is licensed under the [MIT License](LICENSE). You are free to use, 
 | Функция | Описание |
 |---|---|
 | Несколько качеств HLS | 480p · 720p · 1080p для каждой серии |
-| Без лишних каталогов | Только стримы — никаких дублирующих разделов просмотра |
-| 4-шаговое сопоставление ID | Алиас → поиск по API → нечёткий поиск Fuse.js → кэш |
-| Авто-следующая серия | Поддержка `bingeGroup` для автоматического перехода |
+| Живые каталоги | **AniLibria – Releasing** и **Trending Anime – AniLibria** обновляются автоматически (см. ниже) |
+| Учёт сезонов | Каждый сезон/серия Stremio сопоставляется с нужным релизом AniLibria по ID MyAnimeList |
+| Длинные сериалы | One Piece, Naruto Shippuden, Bleach… — сквозная нумерация серий |
+| Авто-следующая серия | `bingeGroup` сохраняет выбранное качество при переходе к следующей серии |
 | Определение геоблока | Понятное сообщение вместо зависшей загрузки |
-| Быстрый холодный старт | Полный индекс AniLibria загружается в фоне при запуске |
-| Кэш сессии | Каждый тайтл определяется один раз; повтор через 2 часа при ошибке |
-| Панель управления | `/dashboard` — Обзор, Аналитика, Логи, Ошибки поиска |
+| Быстрый холодный старт | Маппинг ID и данные AniList кэшируются на диске; каталог AniLibria индексируется при запуске |
+| Панель управления | `/dashboard` (защищена паролем) — Обзор, Аналитика, Логи, Ошибки поиска, Терминал |
 
 ---
 
 ## Как это работает
 
 ```
-Stremio  ──▶  IMDB ID  (напр. tt0388629)
+Stremio  ──▶  IMDB ID + сезон + серия  (напр. tt9335498:2:3)
                 │
                 ▼
-         Fribb anime-list          IMDB → AniList / MAL / AniDB ID
-                │
+         Fribb anime-list          IMDB → все записи MAL / AniList тайтла,
+                │                  у каждой — сезон TVDB и смещение серий
                 ▼
-         AniList GraphQL API       AniList ID → английское + ромадзи название
-                │
-         ┌──────┴────────────────────────────────────┐
-         ▼                                           ▼  цепочка запасных вариантов
-  Поиск по алиасу AniLibria  →  Поиск API AniLibria  →  Индекс Fuse.js
-  /api/v1/releases/{slug}        (проверка первого слова)  (весь каталог,
-                                                            порог 0.25)
-                │
+         Выбор сезона              S2E3 → запись 2-го сезона, серия 3
+                │                  (длинные сериалы → сквозной номер серии)
+                ▼
+         Индекс каталога AniLibria MAL ID → релиз (точно; год сверяется с AniList)
+                │   запасной вариант для релизов без ID:
+                │   точный алиас → нечёткий поиск Fuse.js (с проверкой сезона и ID)
                 ▼
          HLS-ссылки на серии   (480p / 720p / 1080p)
                 │
                 ▼
             Плеер Stremio
 ```
+
+Почти каждый релиз AniLibria помечен ID MyAnimeList, поэтому большинство сопоставлений точные.
+Поиск по названию — лишь запасной вариант, и он никогда не принимает релиз, который AniLibria
+помечает как другое аниме: недоступный тайтл вернёт 0 стримов, а не чужие серии.
 
 ---
 
@@ -280,16 +344,35 @@ https://anilibria-stremio.online/manifest.json
 
 ## Использование
 
-1. Откройте любое аниме в Stremio (через Cinemeta или другой каталог-аддон)
+1. Откройте любое аниме в Stremio (через Cinemeta, другой каталог-аддон или каталоги этого аддона)
 2. Выберите любую серию
 3. В списке источников выберите **AniLibria 1080p / 720p / 480p**
 4. Смотрите с русской озвучкой
 
 ---
 
+## Каталоги
+
+Оба каталога видны на главной странице Stremio и в разделе «Обзор». **У каждого тайтла в них есть
+озвучка AniLibria, которую можно посмотреть**: каталог, список серий и стримы берутся из одного и
+того же релиза AniLibria (ID элементов — `anilibria:<releaseId>`).
+
+| Каталог | Источник | Обновление |
+|---|---|---|
+| **AniLibria – Releasing** | Релизы, которые AniLibria озвучивает сейчас (`production_statuses=IS_IN_PRODUCTION`), сначала недавно обновлённые | каждые 60 с |
+| **Trending Anime – AniLibria** | Живой рейтинг трендов AniList (`TRENDING_DESC`, топ-100); остаются только тайтлы, совпавшие с релизом AniLibria по ID MyAnimeList (или по точному названию и году), **и** только если у релиза есть серии | каждые 5 мин |
+
+Новые серии: у AniLibria нет push-уведомлений, поэтому аддон раз в минуту опрашивает ленту
+обновлений (`/anime/releases/latest`) и заново загружает только изменившиеся релизы. Новая серия
+появляется в каталоге, списке серий и стримах примерно за минуту, а запрос серии, которой ещё нет в
+кэше, сразу перепроверяется в AniLibria. Перезапуск не нужен. Если AniLibria или AniList недоступны,
+остаются последние проверенные списки; непроверенные тайтлы не показываются никогда.
+
+---
+
 ## Самостоятельный запуск
 
-**Требования:** Node.js ≥ 18
+**Требования:** Node.js ≥ 20
 
 ```bash
 git clone https://github.com/PabloKolaso/stremio-anilibria-addon.git
@@ -297,6 +380,8 @@ cd stremio-anilibria-addon
 npm install
 npm start
 # Аддон доступен по адресу http://localhost:7000/manifest.json
+
+npm test   # модульные и интеграционные тесты (без сети)
 ```
 
 ### Переменные окружения
@@ -304,32 +389,43 @@ npm start
 | Переменная | По умолчанию | Назначение |
 |---|---|---|
 | `PORT` | `7000` | Порт HTTP-сервера |
-| `PUBLIC_URL` | — | Публичный URL (напр. `https://your-app.koyeb.app`) |
+| `PUBLIC_URL` | — | Публичный URL этого развёртывания (напр. `https://your-app.koyeb.app`). Включает самопинг и регистрацию в каталоге Stremio |
+| `ADDON_URL` | `https://anilibria-stremio.online` | Основной URL аддона для страницы установки и регистрации в Stremio. Укажите для своего экземпляра |
+| `DASHBOARD_PASSWORD` | — | Пароль панели (рекомендуется для облака). Если не задан, генерируется при первом запуске и сохраняется в `data/dashboard-password.txt` |
+| `NTFY_TOPIC` | — | Необязательный топик [ntfy.sh](https://ntfy.sh) для отправки сгенерированного пароля (и оповещений) |
+| `NTFY_ALERTS` | `false` | `true` — отправлять в `NTFY_TOPIC` оповещения: сбои провайдеров, устаревшие каталоги, всплески ошибок, падения, устаревший маппинг |
+| `TRUST_PROXY` | `true` | Настройка Express `trust proxy` (`true`, `false`, число прокси или список подсетей) |
+| `DATA_DIR` | `./data` | Каталог для статистики, логов и кэшей |
+| `ANILIBRIA_API_URL` | `https://anilibria.top/api/v1` | Базовый URL API AniLibria (на случай смены домена) |
 
 ### Деплой на Koyeb (бесплатный тариф)
 
 1. Форкнуть репозиторий
 2. Создать новый **Web Service** на [koyeb.com](https://koyeb.com), указав форк
 3. Koyeb автоматически определяет Node.js — сборка: `npm install`, запуск: `npm start`
-4. Добавить переменную окружения: `PUBLIC_URL` = `https://your-app-name.koyeb.app`
+4. Добавить переменные окружения: `PUBLIC_URL` = `https://your-app-name.koyeb.app`, `ADDON_URL` = тот же URL и `DASHBOARD_PASSWORD`
 
 ---
 
 ## Панель управления
 
-Панель администратора доступна по адресу `/dashboard` (вход без пароля).
+Панель администратора доступна по адресу `/dashboard`. Она защищена паролем (см. `DASHBOARD_PASSWORD`);
+сессия действует 7 дней и переживает перезапуск (хранятся только хэши токенов), смена пароля завершает
+все сессии. Число неудачных попыток входа ограничено. Панель работает и на телефоне.
 
-- **Обзор** — топ найденных тайтлов, статистика ресурсов сервера
-- **Аналитика** — графики запросов и трафика по часам / дням / месяцам
-- **Логи** — история запросов с фильтрацией и экспортом в CSV
-- **Ошибки поиска** — тайтлы, которые не удалось определить; управление игнорируемыми записями
+- **Overview** — всё ли работает: статус провайдеров и данных, показатели за 24 ч, сгруппированные проблемы, топ аниме
+- **Traffic** — исходы запросов, задержка, пользователи, ресурсы и методы сопоставления с сравнением с прошлым периодом
+- **Content** — каталоги Releasing и Trending с причинами исключения, обновления AniLibria, индекс и маппинг, неточные совпадения, покрытие
+- **Missing titles** — нет на AniLibria, нет в маппинге, серия не найдена, ещё не озвучено, уже доступно, скрыто
+- **Logs** — журнал запросов с фильтрами и подробностями, экспорт CSV; консоль сервера
+- **Admin** — проверка запроса, фоновые задачи и кэши, процесс и перезапуски, конфигурация, сессии
 
 ## Диагностика
 
-Лёгкая страница диагностики доступна по адресу `/debug`:
-
-- Принудительное определение любого IMDB ID с трассировкой всех шагов
-- Помогает выявить проблемы с отсутствующими тайтлами или неверными совпадениями
+`/debug/resolve/{imdbId}?season=1&episode=1` (нужен вход в панель) заново определяет ID в обход кэшей
+и возвращает результат, релиз AniLibria и строки лога — помогает разбирать отсутствующие тайтлы
+или неверные совпадения. Для фильмов добавьте `type=movie`. То же самое, с подробностями каждого шага,
+показывает **Admin → Resolve tester** в панели.
 
 ---
 
@@ -337,18 +433,39 @@ npm start
 
 ```
 src/
-  index.js          — Точка входа сервера
-  manifest.js       — Манифест аддона
-  mapping/
-    cache.js        — Кэш маппинга Fribb IMDB ↔ AniList
-  api/
-    anilibria.js    — Клиент AniLibria REST API v1
-    anilist.js      — Клиент AniList GraphQL
-  bridge/
-    resolver.js     — 4-шаговое сопоставление названий и ID
+  index.js              — Точка входа (запуск, фоновые задачи, корректное завершение)
+  app.js                — Express: маршруты протокола, страница установки, health, панель
+  stremio.js            — Протокол аддонов Stremio (манифест и ресурсы)
+  manifest.js           — Манифест аддона
+  config.js             — Переменные окружения
   handlers/
-    streams.js      — Обработчик стримов
-  debug.js          — Роутер диагностики
+    streams.js          — Обработчик стримов (IMDB и ID каталогов)
+    catalog.js          — Обработчик каталогов (постраничный вывод)
+    meta.js             — Метаданные элементов каталогов
+  catalogs/
+    releasing.js        — Каталог «Releasing» + опрос обновлений AniLibria
+    trending.js         — Каталог «Trending» (AniList → AniLibria)
+    meta.js             — Метаданные Stremio из релизов AniLibria
+  bridge/
+    resolver.js         — IMDB → запись аниме → релиз AniLibria
+    targets.js          — Выбор записи по сезону/серии
+    episodes.js         — Выбор серии внутри релиза
+    matching.js         — Проверка совпадений по ID и названиям
+    franchise.js        — Запасной выбор сезона по порядку франшизы
+  mapping/
+    cache.js            — Маппинг Fribb IMDB ↔ MAL/AniList (кэш на диске)
+    anilibria-catalog.js — Индекс каталога AniLibria (MAL ID, алиас, нечёткий поиск)
+    availability.js     — Какие релизы AniLibria можно посмотреть (пакетная проверка)
+  api/
+    http.js             — Обёртка над fetch: таймауты, повторы, типизированные ошибки
+    anilibria.js        — Клиент AniLibria REST API v1
+    anilist.js          — Клиент AniList GraphQL (кэш на диске)
+    cinemeta.js         — Клиент Cinemeta (названия, размеры сезонов)
+  telemetry/              — журнал запросов, почасовая статистика, пользователи, топ, отсутствующие тайтлы
+  monitoring/             — здоровье провайдеров, метрики процесса, перезапуски, проблемы, задачи, оповещения
+  dashboard/              — маршруты и JSON API панели; public/ — браузерное приложение (ES-модули)
+  overrides.js, auth.js, debug.js, install-page.js
+test/                   — тесты node:test (npm test)
 ```
 
 ---
@@ -357,9 +474,10 @@ src/
 
 | API | Назначение |
 |---|---|
-| `anilibria.top/api/v1/` | Поиск аниме + HLS-ссылки |
-| Fribb `anime-list-mini.json` | Маппинг IMDB ↔ MAL / AniList / AniDB |
-| `graphql.anilist.co` | Канонические названия тайтлов по AniList ID |
+| `anilibria.top/api/v1/` | Каталог аниме + HLS-ссылки |
+| Fribb `anime-list-mini.json` | Маппинг IMDB ↔ MAL / AniList с сезонами TVDB |
+| `graphql.anilist.co` | Канонические названия и годы выхода |
+| Cinemeta | Размеры сезонов для сквозной нумерации серий |
 
 ---
 
@@ -367,6 +485,7 @@ src/
 
 - **Только русская озвучка** — AniLibria не предоставляет оригинальный звук или субтитры
 - Аниме, не вышедшее на AniLibria, возвращает 0 стримов (ожидаемое поведение)
+- Спецвыпуски из «нулевого сезона» Stremio не сопоставляются
 - Некоторые тайтлы могут быть геоблокированы на стороне AniLibria
 - Сервер на **бесплатном тарифе** Koyeb — всегда работает, без засыпания
 

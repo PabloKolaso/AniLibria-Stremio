@@ -1,123 +1,77 @@
 /**
- * Debug module — live log capture and diagnostic HTTP routes.
+ * Debug routes (all require a dashboard session).
  *
- * Must be required FIRST in index.js so console is patched before
- * any other module logs anything.
+ * Kept for scripts and bookmarks; the dashboard itself uses /dashboard/api.
+ *   GET  /debug                  → the dashboard's server console
+ *   GET  /debug/resolve/:imdbId  → re-resolve an ID (JSON), see monitoring/diagnose.js
+ *   GET  /debug/logs             → buffered console lines (JSON array of strings)
+ *   GET  /debug/export           → manual overrides as a JSON file
+ *   POST /debug/import           → merge an overrides file
  */
 
+const consoleCapture = require('./monitoring/console');
 const express = require('express');
-const { Router } = express;
-const resolver = require('./bridge/resolver');
-const stats = require('./stats');
+const { requireAuth, requireAuthApi } = require('./auth');
 
-// ─── Log capture ─────────────────────────────────────────────────────────────
+const router = express.Router();
 
-const MAX_LOGS = 300;
-const logBuffer = [];
-
-function capture(level, original) {
-  return function (...args) {
-    const line = `[${new Date().toISOString()}] [${level}] ${args.map(a =>
-      typeof a === 'object' ? JSON.stringify(a) : String(a)
-    ).join(' ')}`;
-    logBuffer.push(line);
-    if (logBuffer.length > MAX_LOGS) logBuffer.shift();
-    original.apply(console, args);
-  };
-}
-
-console.log   = capture('LOG',   console.log);
-console.warn  = capture('WARN',  console.warn);
-console.error = capture('ERROR', console.error);
-
-function getLogs() {
-  return logBuffer.slice();
-}
-
-// ─── HTML helpers ─────────────────────────────────────────────────────────────
-
-function colorLine(line) {
-  if (line.includes('[ERROR]')) return `<span style="color:#ff5555">${esc(line)}</span>`;
-  if (line.includes('[WARN]'))  return `<span style="color:#ffaa00">${esc(line)}</span>`;
-  return esc(line);
-}
-
-function esc(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-// ─── Routes ───────────────────────────────────────────────────────────────────
-
-const router = Router();
-
-/**
- * GET /debug
- * Redirects to the dashboard logs tab.
- */
-router.get('/debug', (req, res) => {
-  res.redirect('/dashboard?tab=logs');
+router.get('/debug', requireAuth, (req, res) => {
+  res.redirect('/dashboard?tab=logs&view=console');
 });
 
 /**
- * GET /debug/resolve/:imdbId
- * Forces re-resolution of an IMDB ID (bypasses cache) and returns JSON
- * with the resolved Anilibria ID + recent log lines.
+ * GET /debug/resolve/:imdbId[?type=series&season=1&episode=1]
+ * Forces re-resolution (bypasses the resolver memo) and returns the outcome
+ * plus the log lines produced while resolving. Does not affect statistics.
  */
-router.get('/debug/resolve/:imdbId', async (req, res) => {
+router.get('/debug/resolve/:imdbId', requireAuthApi, async (req, res) => {
+  const { diagnose, DiagnoseError } = require('./monitoring/diagnose');
   const { imdbId } = req.params;
-
   if (!/^tt\d{7,10}$/.test(imdbId)) {
-    return res.json({ imdbId, anilibriaId: null, error: 'Invalid IMDB ID format', logs: [] });
+    return res.status(400).json({ imdbId, anilibriaId: null, error: 'Invalid IMDB ID format', logs: [] });
   }
-
-  const logsBefore = logBuffer.length;
-
-  let anilibriaId = null;
-  let error = null;
-
+  const type = req.query.type === 'movie' ? 'movie' : 'series';
   try {
-    // Force re-resolution by clearing the cache entry
-    resolver.clearCache(imdbId);
-    anilibriaId = await resolver.resolveImdbToAnilibria(imdbId);
+    const r = await diagnose({
+      input: imdbId, type,
+      season: type === 'movie' ? undefined : (typeof req.query.season === 'string' ? req.query.season : 1),
+      episode: type === 'movie' ? undefined : (typeof req.query.episode === 'string' ? req.query.episode : 1),
+    });
+    res.json({
+      imdbId, type: r.parsed.type, season: r.parsed.season, episode: r.parsed.episode,
+      anilibriaId: r.release?.id ?? null,
+      outcome: r.outcome,
+      reason: r.reason,
+      title: r.title,
+      method: r.method,
+      streamCount: r.streams.length,
+      error: r.error,
+      logs: r.logs,
+    });
   } catch (err) {
-    error = err.message;
+    if (err instanceof DiagnoseError) return res.status(err.status).json({ imdbId, error: err.message, logs: [] });
+    throw err;
   }
-
-  // Grab only the log lines produced during this resolution
-  const newLogs = logBuffer.slice(logsBefore);
-
-  res.json({ imdbId, anilibriaId, error, logs: newLogs });
 });
 
-/**
- * GET /debug/logs
- * Raw JSON array of all buffered log lines.
- */
-router.get('/debug/logs', (req, res) => {
-  res.json(getLogs());
+router.get('/debug/logs', requireAuthApi, (req, res) => {
+  res.json(consoleCapture.getLines({ limit: 300 }).map(consoleCapture.formatLine));
 });
 
-/**
- * GET /debug/export
- * Downloads all manual overrides (ignored + not-dubbed) as a JSON file.
- */
-router.get('/debug/export', (req, res) => {
-  const overrides = stats.getOverrides();
-  res.setHeader('Content-Type', 'application/json');
+router.get('/debug/export', requireAuth, (req, res) => {
+  const overrides = require('./overrides');
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Content-Disposition', 'attachment; filename="overrides.json"');
-  res.send(JSON.stringify(overrides, null, 2));
+  res.send(JSON.stringify(overrides.exportAll(), null, 2));
 });
 
-/**
- * POST /debug/import
- * Accepts a JSON body with ignoredLookups and/or notDubbedLookups and merges them.
- */
-router.post('/debug/import', express.json({ limit: '50mb' }), (req, res) => {
-  if (!req.body || typeof req.body !== 'object') {
+router.post('/debug/import', requireAuthApi, express.json({ limit: '10mb' }), (req, res) => {
+  const overrides = require('./overrides');
+  if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
     return res.status(400).json({ ok: false, error: 'Invalid JSON body' });
   }
-  const counts = stats.importOverrides(req.body);
+  const counts = overrides.importAll(req.body);
   res.json({ ok: true, imported: counts });
 });
 
-module.exports = { router, getLogs };
+module.exports = { router };

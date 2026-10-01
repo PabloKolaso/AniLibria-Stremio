@@ -1,556 +1,380 @@
 /**
- * ID Bridge & Title Resolver
+ * ID Bridge & Resolver
  *
- * Connects Stremio's IMDB IDs to Anilibria release IDs using:
- *  1. Fribb anime-lists (IMDB → MAL/AniList ID)
- *  2. AniList API (AniList ID → canonical titles)
- *  3. Alias-based direct lookup on Anilibria (fast + accurate)
- *  4. Fuse.js fuzzy matching over the full Anilibria catalog
+ * Connects Stremio requests (IMDB ID + season/episode) to AniLibria releases:
  *
- * The resolved mapping is cached in memory so each anime is only
- * looked up once per server lifetime.
+ *  1. IMDB ID → Fribb mapping → the anime entry (MAL/AniList ID) that covers
+ *     the requested season/episode (see bridge/targets.js)
+ *  2. MAL ID → AniLibria release via the catalog index (exact ID match;
+ *     the release year is cross-checked against AniList)
+ *  3. Fallback for releases without IDs: AniList titles → exact alias →
+ *     (AniLibria search API when the local index is unavailable) →
+ *     Fuse.js fuzzy match, every candidate validated so a release tagged as
+ *     a different anime is never accepted
+ *
+ * Per-entry results are memoized; the memo is cleared whenever the catalog
+ * index is rebuilt so newly added releases are picked up.
+ *
+ * Manual match decisions from the dashboard (overrides.js) are applied per
+ * anime entry: an approved release is used directly ("pinned"), a rejected
+ * one is never matched again. Title-based matches (search/fuse) are recorded
+ * for review (telemetry/matches.js).
  */
 
-const fs   = require('fs');
-const path = require('path');
-const Fuse = require('fuse.js');
-const NodeCache = require('node-cache');
-const axios = require('axios');
+const mapping   = require('../mapping/cache');
+const catalog   = require('../mapping/anilibria-catalog');
+const anilibria = require('../api/anilibria');
+const anilist   = require('../api/anilist');
+const cinemeta  = require('../api/cinemeta');
+const franchise = require('./franchise');
+const matching  = require('./matching');
+const overrides = require('../overrides');
+const matches   = require('../telemetry/matches');
+const { planTargets } = require('./targets');
+const { HttpError } = require('../api/http');
+const TTLCache  = require('../util/ttl-cache');
 
-const CACHE_FILE = path.resolve(__dirname, '../../data/resolver-cache.json');
+const HIT_TTL_MS      = 6 * 60 * 60 * 1000;
+const MISS_TTL_MS     = 30 * 60 * 1000;
+const DEGRADED_TTL_MS = 5 * 60 * 1000;
+const MAX_HTTP_ALIAS_PROBES = 6;
+const MAX_SEARCH_TITLES     = 4;
 
-// ─── Title normalization helpers ─────────────────────────────────────────────
+// entry key -> resolution result
+const memo = new TTLCache({
+  ttlMs: HIT_TTL_MS, max: 20_000,
+  name: 'Resolver', description: 'AniLibria release per anime entry (6 h found, 30 min not found); cleared when the index changes',
+});
+let lastClear = null; // { at, reason }
 
-const STOP_WORDS = new Set(['the', 'a', 'an', 'of', 'in', 'on', 'and', 'or', 'no', 'wo', 'ga', 'wa']);
-
-/** Strip special chars, lowercase, split into words */
-function normalizeWords(str) {
-  return str.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+function clearMemo(reason) {
+  memo.clear();
+  lastClear = { at: Date.now(), reason };
 }
 
-/** Return first N words that are ≥3 chars and not stop words */
-function significantWords(str, n = 2) {
-  return normalizeWords(str).filter(w => w.length >= 3 && !STOP_WORDS.has(w)).slice(0, n);
+catalog.onRebuild(() => clearMemo('AniLibria index updated'));
+overrides.onChange(event => {
+  if (event.type === 'match') memo.delete(event.key);
+  else if (event.type === 'import') clearMemo('overrides imported');
+});
+
+function entryKey(entry) {
+  return entry.mal ? `mal:${entry.mal}` : `al:${entry.anilist}`;
 }
 
-const mappingCache = require('../mapping/cache');
-const anilibria    = require('../api/anilibria');
-const anilist      = require('../api/anilist');
-
-// Cache: imdbId -> anilibria release id  (permanent for this session)
-const resolvedMap = new NodeCache({ stdTTL: 86400, checkperiod: 600 });
-
-// In-flight promise deduplication: prevents parallel _resolve() calls for the same imdbId
-const _inFlight = new Map();
-
-// ─── Cache hit/miss counters ────────────────────────────────────────────────
-const cacheStats = {
-  hits: 0,
-  misses: 0,
-  methods: { alias: 0, search: 0, fuse: 0 },
-  failures: 0,
-};
-
-// ─── Silent mode (suppresses per-item logs during batch prewarm) ─────────────
-let _silent = false;
-const log  = (...a) => { if (!_silent) console.log(...a); };
-const warn = (...a) => { if (!_silent) console.warn(...a); };
-function setSilentMode(val) { _silent = val; }
-
-// ─── Disk persistence for resolvedMap ────────────────────────────────────────
-
-function loadPersistedCache() {
-  try {
-    if (!fs.existsSync(CACHE_FILE)) return;
-    const data = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf8'));
-    const now = Date.now();
-    let loaded = 0;
-    for (const [key, entry] of Object.entries(data)) {
-      if (!entry) continue;
-      const { value, expiresAt } = entry;
-      if (expiresAt && expiresAt < now) continue; // expired — skip
-      const ttl = expiresAt ? Math.max(60, Math.round((expiresAt - now) / 1000)) : 86400;
-      resolvedMap.set(key, value !== undefined ? value : null, ttl);
-      loaded++;
-    }
-    if (loaded > 0) console.log(`[resolver] Loaded ${loaded} cached resolutions from disk.`);
-  } catch (err) {
-    console.warn('[resolver] Failed to load persisted cache:', err.message);
-  }
+/** Entry key of an AniList media object (same format as entryKey). */
+function mediaKey(media) {
+  return media.idMal ? `mal:${media.idMal}` : `al:${media.id}`;
 }
 
-function flushToDisk() {
-  try {
-    const keys = resolvedMap.keys();
-    const out = {};
-    for (const key of keys) {
-      const value     = resolvedMap.get(key);
-      const expiresAt = resolvedMap.getTtl(key); // ms epoch timestamp
-      out[key] = { value: value !== undefined ? value : null, expiresAt: expiresAt || 0 };
-    }
-    // Write to a temp file first then rename for an atomic update; prevents
-    // a corrupted cache file if the process is killed mid-write.
-    const tmp = CACHE_FILE + '.tmp';
-    fs.writeFileSync(tmp, JSON.stringify(out));
-    fs.renameSync(tmp, CACHE_FILE);
-  } catch (err) {
-    console.warn('[resolver] Failed to flush cache to disk:', err.message);
-  }
+/** Release IDs rejected for an anime entry (null when none). */
+function rejectedFor(key) {
+  const decision = overrides.getMatchDecision(key);
+  return decision?.decision === 'reject' ? new Set([decision.releaseId]) : null;
 }
 
-let _flushTimer = null;
-function scheduleFlush() {
-  if (_flushTimer) clearTimeout(_flushTimer);
-  _flushTimer = setTimeout(() => { flushToDisk(); _flushTimer = null; }, 5000);
+/** Release pinned for an anime entry, or null. */
+function pinnedFor(key) {
+  const decision = overrides.getMatchDecision(key);
+  return decision?.decision === 'approve' ? decision.releaseId : null;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-
-// Anilibria full title index, built lazily on first use
-let titleIndex = null;
-let indexBuilding = null;
-let indexSize = 0;
-let indexBuiltAt = 0;
-const INDEX_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+// ─── Release lookup for one anime ───────────────────────────────────────────
 
 /**
- * Build (or return cached) Fuse.js search index over Anilibria catalog.
- * If the index was built empty (due to an earlier API error), it will
- * be rebuilt on the next call.
+ * Find AniLibria releases for an anime.
+ * @param {{ mal: number|null, year: number|null }} target
+ * @param {string[]} titles - AniList title variants
+ * @param {import('../mapping/anilibria-catalog').CatalogIndex|null} index
+ * @param {{ offline?: boolean, exclude?: Set<number>|null, diag?: object|null }} [opts]
+ *   offline — match against the local index only (no API calls)
+ *   exclude — release IDs that must never be matched (rejected by the admin)
+ *   diag    — receives { release, score } of a title-based (search/fuse) match
+ * @returns {Promise<{ releaseIds: number[], method: string|null, uncertain: boolean, error?: Error }>}
+ *   uncertain — no match, but upstream failures mean the anime may still exist (error = first failure)
  */
-async function getTitleIndex() {
-  // Return cached index if still fresh; treat empty as not-yet-built
-  if (titleIndex && indexSize > 0 && (Date.now() - indexBuiltAt < INDEX_TTL_MS)) return titleIndex;
-  if (indexBuilding) return indexBuilding;
+async function findReleases(target, titles, index, { offline = false, exclude = null, diag = null } = {}) {
+  const allowed = r => !exclude || !exclude.has(r.id);
 
-  indexBuilding = (async () => {
-    console.log('[resolver] Building Anilibria title index …');
-    const docs = [];
+  // 1. Exact MAL/Shikimori ID match
+  if (index && target.mal) {
+    let accepted = index.findByMal(target.mal).filter(r => allowed(r) && matching.verdict(r, target).ok);
+    // Several releases carrying the same ID (split cours, mislabelled sequels):
+    // keep only those from the anime's own year when that disambiguates.
+    if (accepted.length > 1 && target.year) {
+      const sameYear = accepted.filter(r => r.year === target.year);
+      if (sameYear.length > 0) accepted = sameYear;
+    }
+    if (accepted.length > 0) return { releaseIds: accepted.map(r => r.id), method: 'mal', uncertain: false };
+  }
+  const indexMissing = index
+    ? undefined
+    : new HttpError('AniLibria catalog index is not available', { code: 'UNAVAILABLE', service: 'AniLibria' });
+  if (titles.length === 0 || (offline && !index)) {
+    return { releaseIds: [], method: null, uncertain: !index, error: indexMissing };
+  }
 
-    try {
-      for await (const page of anilibria.allReleases(50)) {
-        for (const release of page) {
-          const alias = release.alias || '';
-          docs.push({
-            id:         release.id,
-            alias,
-            aliasWords: alias.replace(/-/g, ' '),   // "one-piece" → "one piece" for Fuse
-            en:         release.name?.english    || '',
-            ru:         release.name?.main       || '',
-            alt:        release.name?.alternative || '',
-          });
+  // When the local index is complete and recent it is authoritative, and all
+  // title matching happens in memory. Otherwise fall back to the live API.
+  const trustIndex = Boolean(index?.isFresh) || offline;
+  let uncertain = false;
+  let firstError = null;
+
+  // 2. Exact alias
+  const aliases = matching.aliasCandidates(titles);
+  for (const alias of trustIndex ? aliases : aliases.slice(0, MAX_HTTP_ALIAS_PROBES)) {
+    let release = null;
+    if (trustIndex) {
+      release = index.findByAlias(alias);
+    } else {
+      try {
+        const raw = await anilibria.getRelease(alias);
+        release = raw ? matching.summarizeRelease(raw) : null;
+      } catch (err) {
+        if (!(err instanceof anilibria.GeoBlockedError)) {
+          uncertain = true;
+          firstError = firstError || err;
         }
-      }
-    } catch (err) {
-      const detail = err.response?.data ? JSON.stringify(err.response.data) : err.message;
-      console.warn('[resolver] Could not fully fetch Anilibria catalog:', detail);
-    }
-
-    indexSize = docs.length;
-    console.log(`[resolver] Indexed ${indexSize} Anilibria releases.`);
-
-    return new Fuse(docs, {
-      keys: [
-        { name: 'en',         weight: 2   },
-        { name: 'aliasWords', weight: 1.5 },  // spaced version: "one piece" matches "One Piece"
-        { name: 'alias',      weight: 1   },
-        { name: 'alt',        weight: 1   },
-        { name: 'ru',         weight: 0.5 },
-      ],
-      threshold: 0.25,
-      includeScore: true,
-    });
-  })();
-
-  try {
-    titleIndex = await indexBuilding;
-    indexBuiltAt = Date.now();
-  } finally {
-    indexBuilding = null;
-  }
-
-  return titleIndex;
-}
-
-/**
- * Convert a title string to a URL-friendly alias (slug).
- * e.g. "ONE PIECE" → "one-piece", "JoJo's" → "jojos-..."
- */
-function toAlias(title) {
-  return title
-    .toLowerCase()
-    .replace(/[''`]/g, '')           // strip apostrophes: "jojo's" → "jojos"
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
-/** Strip trailing year, season, part, or Roman-numeral suffixes from a title. */
-function stripSuffixes(title) {
-  return title
-    .replace(/\s*\(\d{4}\)\s*$/i, '')               // "(2011)"
-    .replace(/\s+(?:season|part|s)\s*\d+\s*$/i, '') // "Season 2", "Part 3", "S2"
-    .replace(/\s+(?:II{1,2}|IV|VI{1,3}|IX|XI{1,2}|X{2,3})\s*$/i, '') // trailing " II"–" XIII" etc. (not bare "I", "V", "X")
-    .trim();
-}
-
-/**
- * Try to find an Anilibria release directly by its URL alias.
- * This is fast and accurate — no fuzzy matching needed.
- * Returns the release object or null.
- */
-async function tryAliasList(titles) {
-  // Expand each title with a suffix-stripped variant to handle e.g. "Hunter x Hunter (2011)"
-  const expanded = [];
-  for (const t of titles) {
-    expanded.push(t);
-    const s = stripSuffixes(t);
-    if (s && s !== t) expanded.push(s);
-  }
-
-  // Build unique aliases, preserving title order (romaji first)
-  const aliases = [];
-  const seen = new Set();
-  for (const title of expanded) {
-    const alias = toAlias(title);
-    if (!alias || alias.length < 2 || seen.has(alias)) continue;
-    seen.add(alias);
-    aliases.push(alias);
-  }
-
-  if (aliases.length === 0) return null;
-
-  // Try aliases sequentially, stop on first hit (avoids firing many parallel 404s)
-  for (const alias of aliases) {
-    try {
-      const { data } = await axios.get(`https://anilibria.top/api/v1/anime/releases/${alias}`, {
-        timeout: 8_000,
-        headers: { 'User-Agent': 'stremio-anilibria-addon/1.0' },
-      });
-      if (data?.id) {
-        log(`[resolver] Alias lookup "${alias}" → release ${data.id} (${data.name?.english || data.name?.main})`);
-        anilibria.cacheRelease(data.id, data);
-        return data.id;
-      }
-    } catch {
-      // 404 or timeout — try next alias
-    }
-  }
-  return null;
-}
-
-/**
- * Try to find an Anilibria release using Anilibria's own search API.
- * Called after alias lookup fails but before the full Fuse.js index scan.
- *
- * Validates the top result by requiring its first significant word to match
- * the query's first significant word (prevents false positives).
- *
- * @param {string[]} titles
- * @returns {number|null}
- */
-async function tryAnilibriaSearch(titles) {
-  for (const title of titles) {
-    if (!title || title.length < 3) continue;
-    // Skip purely non-Latin titles (Japanese native, etc.) — Anilibria search works best with Latin
-    if (!/[a-zA-Z]/.test(title)) continue;
-
-    let results;
-    try {
-      results = await anilibria.searchReleases(title);
-    } catch {
-      continue;
-    }
-
-    if (!results || results.length === 0) continue;
-
-    const queryWords = significantWords(title, 2);
-    if (queryWords.length === 0) continue;
-
-    for (const candidate of results.slice(0, 3)) {
-      const candidateName = (candidate.name?.english || candidate.name?.main || '').toLowerCase();
-      const candidateWords = significantWords(candidateName, 2);
-
-      if (candidateWords.length === 0) continue;
-      if (candidateWords[0] !== queryWords[0]) {
-        log(`[resolver] API search "${title}" discarded: "${candidateName}" (first: "${queryWords[0]}" ≠ "${candidateWords[0]}")`);
         continue;
       }
+    }
+    if (release && allowed(release) && matching.verdict(release, target, { exactAlias: true }).ok) {
+      return { releaseIds: [release.id], method: 'alias', uncertain: false };
+    }
+  }
 
-      if (candidateWords.length >= 2 && queryWords.length >= 2) {
-        const w1 = candidateWords[1], w2 = queryWords[1];
-        if (!w1.startsWith(w2.slice(0, 4)) && !w2.startsWith(w1.slice(0, 4))) {
-          log(`[resolver] API search "${title}" discarded: "${candidateName}" (second: "${w2}" ≠ "${w1}")`);
-          continue;
+  // 3. AniLibria's search API (only when the local index cannot be trusted)
+  if (!trustIndex) {
+    const searchable = titles.filter(t => t.length >= 3 && /[a-z]/i.test(t)).slice(0, MAX_SEARCH_TITLES);
+    for (const title of searchable) {
+      let results;
+      try {
+        results = await anilibria.searchReleases(title);
+      } catch (err) {
+        uncertain = true;
+        firstError = firstError || err;
+        continue;
+      }
+      const queryWords = matching.significantWords(title);
+      for (const raw of results.slice(0, 3)) {
+        const candidate = matching.summarizeRelease(raw);
+        const candidateTitle = candidate.en || candidate.aliasWords;
+        if (!matching.wordsMatch(queryWords, matching.significantWords(candidateTitle))) continue;
+        if (!matching.sameSeason([title], candidateTitle)) continue;
+        if (allowed(candidate) && matching.verdict(candidate, target).ok) {
+          if (diag) Object.assign(diag, { release: candidate, score: null });
+          return { releaseIds: [candidate.id], method: 'search', uncertain: false };
         }
       }
-
-      log(`[resolver] API search "${title}" → release ${candidate.id} (${candidate.name?.english || candidate.name?.main})`);
-      return candidate.id;
     }
   }
-  return null;
+
+  // 4. Fuzzy match over the catalog index
+  if (index) {
+    const querySets = titles.map(t => matching.significantWords(t)).filter(w => w.length > 0);
+    const hits = titles
+      .flatMap(title => index.search(title, 3))
+      .sort((a, b) => a.score - b.score);
+    for (const { item, score } of hits) {
+      if (!allowed(item)) continue;
+      const itemTitle = item.en || item.aliasWords;
+      if (!querySets.some(qw => matching.wordsMatch(qw, matching.significantWords(itemTitle)))) continue;
+      if (!matching.sameSeason(titles, itemTitle)) continue;
+      if (!matching.verdict(item, target).ok) continue;
+      console.log(`[resolver] Fuse match "${item.en || item.ru}" (score ${score.toFixed(3)})`);
+      if (diag) Object.assign(diag, { release: item, score });
+      return { releaseIds: [item.id], method: 'fuse', uncertain: false };
+    }
+  }
+
+  if (!uncertain && index) return { releaseIds: [], method: null, uncertain: false };
+  return { releaseIds: [], method: null, uncertain: true, error: firstError || indexMissing };
 }
 
 /**
- * Search Anilibria title index for the best matching release ID.
- * Tries multiple title variants; also validates the result by checking
- * that the matched title is a genuine substring match (not just fuzzy noise).
+ * Resolve one mapping entry (one anime) to AniLibria releases.
  *
- * @param {string[]} titleVariants
- * @returns {number|null}
+ * @returns {Promise<{ releaseIds: number[], method: string|null, title: string|null,
+ *                     titles: string[], year: number|null, degraded: boolean, uncertain: boolean }>}
+ *   degraded  — AniList was unavailable (no titles / year check)
+ *   uncertain — AniLibria availability could not be determined (upstream errors)
  */
-async function findInIndex(titleVariants) {
-  const index = await getTitleIndex();
-  if (!index) return null;
+async function resolveEntry(entry) {
+  const key = entryKey(entry);
+  const cached = memo.get(key);
+  if (cached) return cached;
 
-  let best = null;
-  let bestScore = Infinity;
-
-  for (const title of titleVariants) {
-    if (!title) continue;
-    const results = index.search(title, { limit: 3 });
-    for (const r of results) {
-      if (r.score < bestScore) {
-        bestScore = r.score;
-        best = r.item;
-      }
-    }
-  }
-
-  if (best && bestScore < 0.25) {
-    // Sanity check: require matching on the first two significant words.
-    // This prevents false positives like "Mushoku Tensei" → "Mushoku no Eiyuu"
-    // or "Shingeki no Kyojin" → "Shingeki no Bahamut".
-    const matchedWords = significantWords(best.en || best.aliasWords || best.alias || '', 2);
-    const queryWordSets = titleVariants.map(t => significantWords(t, 2)).filter(w => w.length > 0);
-
-    const wordMatch = queryWordSets.some(qw => {
-      if (qw[0] !== matchedWords[0]) return false;
-      if (qw.length >= 2 && matchedWords.length >= 2) {
-        const w1 = qw[1], w2 = matchedWords[1];
-        return w1.startsWith(w2.slice(0, 4)) || w2.startsWith(w1.slice(0, 4));
-      }
-      return true;
-    });
-
-    if (wordMatch) {
-      log(`[resolver] Fuse match "${best.en || best.ru}" (score ${bestScore.toFixed(3)})`);
-      return best.id;
-    }
-    log(`[resolver] Fuse match discarded: ${JSON.stringify(queryWordSets)} ≠ ${JSON.stringify(matchedWords)} (title: "${best.en}")`);
-  }
-
-  return null;
-}
-
-/**
- * Resolve an IMDB ID to an Anilibria release ID.
- *
- * Resolution chain:
- *  1. IMDB ID → Fribb map → AniList ID
- *  2. AniList ID → canonical titles (English, romaji, synonyms)
- *  3. Try alias-based direct lookup on Anilibria API (fast, no false positives)
- *  4. Try Fuse.js index search (full catalog fuzzy match)
- *
- * @param {string} imdbId - e.g. "tt0388629"
- * @returns {number|null}
- */
-/**
- * Internal resolution logic returning full metadata.
- * @param {string} imdbId
- * @returns {{ id: number|null, title: string|null, method: string|null, titleVariants: string[] }}
- */
-async function _resolve(imdbId) {
-  let anilibriaId = null;
-  let method = null;
-  let titleVariants = [];
-  let isKnownAnime = false;
-
+  let media = null;
+  let degraded = false;
   try {
-    // Step 1: get associated IDs from Fribb mapping
-    const ids = await mappingCache.getByImdb(imdbId);
-
-    // MAL and AniList are anime-only databases; AniDB also indexes western cartoons.
-    // Only trust MAL/AniList as definitive anime proof.
-    if (ids?.mal_id || ids?.anilist_id) isKnownAnime = true;
-
-    if (ids?.anilist_id || ids?.mal_id) {
-      // Step 2: fetch canonical titles from AniList
-      if (ids.anilist_id) {
-        const media = await anilist.getById(ids.anilist_id);
-        if (media) titleVariants = anilist.collectTitles(media);
-      }
-      // Fallback: look up by MAL ID directly (AniList text search does not accept "mal:ID" syntax)
-      if (titleVariants.length === 0 && ids.mal_id) {
-        const media = await anilist.getByMalId(ids.mal_id).catch(() => null);
-        if (media) titleVariants = anilist.collectTitles(media);
-      }
-
-      // collectTitles() already returns [romaji, english, native, ...synonyms].
-      // No reorder needed here.
-    }
-
-    log(`[resolver] Trying titles for ${imdbId}:`, titleVariants.slice(0, 3));
-
-    if (titleVariants.length > 0) {
-      // Step 3: try alias-based direct lookup (most accurate)
-      anilibriaId = await tryAliasList(titleVariants);
-      if (anilibriaId) method = 'alias';
-
-      // Step 3.5: try Anilibria's own search API (catches alias mismatches)
-      if (!anilibriaId) {
-        anilibriaId = await tryAnilibriaSearch(titleVariants);
-        if (anilibriaId) method = 'search';
-      }
-
-      // Step 4: fall back to fuzzy index search
-      if (!anilibriaId) {
-        anilibriaId = await findInIndex(titleVariants);
-        if (anilibriaId) method = 'fuse';
-      }
-    }
-
-    if (!anilibriaId) {
-      warn(`[resolver] No Anilibria match for ${imdbId} (titles: ${titleVariants.slice(0, 2).join(', ')})`);
-    }
+    media = await anilist.getMedia(entry);
   } catch (err) {
-    console.error(`[resolver] Error resolving ${imdbId}:`, err.message);
-    throw err;  // let the stream handler show an error to the user
+    degraded = true;
+    console.warn(`[resolver] AniList lookup failed for ${key}: ${err.message}`);
   }
 
-  const title = titleVariants[0] || null;
-  return { id: anilibriaId, title, method, titleVariants, inFribb: isKnownAnime };
+  const target = { mal: entry.mal || media?.idMal || null, year: anilist.mediaYear(media) };
+  const titles = anilist.collectTitles(media);
+  const pinned = pinnedFor(key);
+  const diag = {};
+  const found = pinned
+    ? { releaseIds: [pinned], method: 'pinned', uncertain: false }
+    : await findReleases(target, titles, await catalog.getIndex(), { exclude: rejectedFor(key), diag });
+
+  const result = {
+    releaseIds: found.releaseIds,
+    method: found.method,
+    title: titles[0] || null,
+    titles,
+    year: target.year,
+    degraded,
+    uncertain: found.uncertain,
+    error: found.error || null,
+  };
+
+  if (found.releaseIds.length > 0) {
+    console.log(`[resolver] ${key} (${result.title || 'untitled'}) → release ${found.releaseIds.join(', ')} via ${found.method}`);
+  }
+  if (diag.release) {
+    matches.record({
+      key, mal: entry.mal || media?.idMal || null, anilist: entry.anilist || media?.id || null,
+      title: result.title, titles, year: target.year, method: found.method, score: diag.score, release: diag.release,
+    });
+  }
+
+  if (!found.uncertain) {
+    const ttl = degraded ? DEGRADED_TTL_MS : (found.releaseIds.length > 0 ? HIT_TTL_MS : MISS_TTL_MS);
+    memo.set(key, result, ttl);
+  }
+  return result;
 }
 
-/**
- * Deduplicated wrapper around _resolve: concurrent calls for the same imdbId
- * share one in-flight promise instead of firing parallel API chains.
- */
-async function _resolveOnce(imdbId) {
-  if (_inFlight.has(imdbId)) return _inFlight.get(imdbId);
-  const p = _resolve(imdbId).finally(() => _inFlight.delete(imdbId));
-  _inFlight.set(imdbId, p);
-  return p;
-}
+// ─── Per-request API ────────────────────────────────────────────────────────
 
 /**
- * Resolve an IMDB ID to an Anilibria release ID.
- * Backwards-compatible: returns number|null.
+ * Plan which anime entries/episodes to try for a Stremio request.
+ * Absolute episode numbers are computed here (needs Cinemeta for season > 1);
+ * when that is impossible the attempt keeps `episode: null`, so the show can
+ * still be resolved (and reported as "episode not found", not "missing").
+ *
+ * @param {{ imdbId: string, type: string, season: number|null, episode: number|null }} request
+ * @returns {Promise<import('./targets').Plan & { isAnime: true|null, uncertain: boolean }>}
+ * @throws {mapping.MappingUnavailableError}
  */
-async function resolveImdbToAnilibria(imdbId) {
-  const cached = resolvedMap.get(imdbId);
-  if (cached !== undefined) {
-    cacheStats.hits++;
-    return cached ? cached.id : null;
+async function plan({ imdbId, type, season, episode }) {
+  const entries = await mapping.getEntries(imdbId);
+  const result = planTargets(entries, { type, season, episode });
+  result.isAnime = entries.length > 0 ? true : null;
+  result.uncertain = false;
+
+  for (const attempt of result.attempts) {
+    if (attempt.numbering !== 'absolute' || attempt.episode !== null) continue;
+    let counts = null;
+    try {
+      counts = await cinemeta.getSeasonEpisodeCounts(imdbId);
+    } catch (err) {
+      result.uncertain = true;
+      result.error = err;
+      console.warn(`[resolver] Cinemeta episode counts failed for ${imdbId}: ${err.message}`);
+    }
+    attempt.episode = matching.absoluteEpisode(counts, attempt.absolute.season, attempt.absolute.episode);
   }
-  cacheStats.misses++;
-
-  const result = await _resolveOnce(imdbId);
-
-  if (result.id && result.method) {
-    cacheStats.methods[result.method] = (cacheStats.methods[result.method] || 0) + 1;
-  } else if (!result.id) {
-    cacheStats.failures++;
-  }
-
-  if (result.id) {
-    resolvedMap.set(imdbId, result);
-  } else {
-    resolvedMap.set(imdbId, null, 7200);
-  }
-  scheduleFlush();
-  return result.id;
-}
-
-/**
- * Resolve an IMDB ID with full metadata (title, method, titleVariants).
- * @param {string} imdbId
- * @returns {{ id: number|null, title: string|null, method: string|null, titleVariants: string[] }}
- */
-async function resolveImdbToAnilibriaDetailed(imdbId) {
-  const cached = resolvedMap.get(imdbId);
-  if (cached !== undefined) {
-    cacheStats.hits++;
-    // inFribb is stored on the cached result by _resolve(); no need to re-fetch Fribb here.
-    if (cached) return { ...cached, method: cached.method || 'cache' };
-    return { id: null, title: null, method: null, titleVariants: [], inFribb: false };
-  }
-  cacheStats.misses++;
-
-  const result = await _resolveOnce(imdbId);
-
-  if (result.id && result.method) {
-    cacheStats.methods[result.method] = (cacheStats.methods[result.method] || 0) + 1;
-  } else if (!result.id) {
-    cacheStats.failures++;
-  }
-
-  if (result.id) {
-    resolvedMap.set(imdbId, result);
-  } else {
-    resolvedMap.set(imdbId, null, 7200);
-  }
-  scheduleFlush();
   return result;
 }
 
 /**
- * Pre-warm the title index in the background (call on server start).
+ * Resolve one planned attempt into concrete release candidates.
+ * @returns {Promise<{ candidates: { releaseId: number, episode: number, numbering: string }[],
+ *                     showFound: boolean, method: string|null, title: string|null,
+ *                     degraded: boolean, uncertain: boolean }>}
+ *   showFound — the anime itself is on AniLibria (even if the requested season is not)
  */
-function warmup() {
-  getTitleIndex().catch(err =>
-    console.warn('[resolver] Warmup failed:', err.message)
-  );
-}
+async function resolveAttempt(attempt) {
+  const res = await resolveEntry(attempt.entry);
+  let releaseIds = res.releaseIds;
 
-/**
- * Remove a cached resolution result so the next call re-resolves from scratch.
- * Used by the debug endpoint to force a fresh lookup.
- */
-function clearCache(imdbId) {
-  resolvedMap.del(imdbId);
-  scheduleFlush();
-}
+  if (attempt.franchiseSeason && releaseIds.length > 0) {
+    const seasonRelease = await franchise.findSeasonRelease(releaseIds[0], attempt.franchiseSeason);
+    if (seasonRelease) {
+      releaseIds = [seasonRelease.releaseId];
+    } else if (attempt.franchiseSeason !== 1) {
+      releaseIds = [];
+    }
+  }
 
-/**
- * Resolve an Anilibria release ID directly from a list of title strings,
- * bypassing the IMDB→Fribb→AniList lookup chain.
- * Useful for scripts that already hold canonical titles.
- *
- * @param {string[]} titles - ordered list of title variants to try
- * @returns {number|null}
- */
-async function resolveByTitles(titles) {
-  if (!titles || titles.length === 0) return null;
-  let id = await tryAliasList(titles);
-  if (!id) id = await tryAnilibriaSearch(titles);
-  if (!id) id = await findInIndex(titles);
-  return id || null;
-}
-
-/** Whether the Fuse.js title index has been built with entries. */
-function isIndexReady() {
-  return indexSize > 0;
-}
-
-/** Check if an IMDB ID is already in the resolver cache. */
-function hasCached(imdbId) {
-  return resolvedMap.has(imdbId);
-}
-
-/**
- * Get resolver cache hit/miss statistics.
- */
-function getCacheStats() {
-  const total = cacheStats.hits + cacheStats.misses;
   return {
-    hits: cacheStats.hits,
-    misses: cacheStats.misses,
-    hitRate: total > 0 ? parseFloat(((cacheStats.hits / total) * 100).toFixed(1)) : 0,
-    methods: { ...cacheStats.methods },
-    failures: cacheStats.failures,
-    cacheSize: resolvedMap.keys().length,
+    candidates: releaseIds.map(releaseId => ({ releaseId, episode: attempt.episode, numbering: attempt.numbering })),
+    showFound: res.releaseIds.length > 0,
+    method: res.method,
+    title: res.title,
+    degraded: res.degraded,
+    uncertain: res.uncertain,
+    error: res.error,
   };
 }
 
-module.exports = { resolveImdbToAnilibria, resolveImdbToAnilibriaDetailed, resolveByTitles, clearCache, warmup, isIndexReady, hasCached, getCacheStats, loadPersistedCache, flushToDisk, setSilentMode };
+/**
+ * Resolve an AniList media object directly (bypassing the IMDB mapping and
+ * the AniList lookup); used by the trending catalog and by scripts that
+ * already hold AniList data.
+ * @param {object} media - AniList media with idMal, title, synonyms, seasonYear
+ * @param {{ offline?: boolean }} [opts] - offline: local catalog index only, no API calls
+ * @returns {Promise<{ releaseIds: number[], method: string|null, uncertain: boolean }>}
+ */
+async function resolveMedia(media, { offline = false } = {}) {
+  const key = mediaKey(media);
+  const pinned = pinnedFor(key);
+  if (pinned) return { releaseIds: [pinned], method: 'pinned', uncertain: false };
+  const target = { mal: media.idMal || null, year: anilist.mediaYear(media) };
+  const index = await catalog.getIndex();
+  return findReleases(target, anilist.collectTitles(media), index, { offline, exclude: rejectedFor(key) });
+}
+
+/**
+ * Forget memoized results for an IMDB ID so the next request re-resolves it.
+ * @returns {Promise<number>} how many anime entries were cleared
+ */
+async function clearCache(imdbId) {
+  let entries = [];
+  try {
+    entries = await mapping.getEntries(imdbId);
+  } catch { /* mapping not loaded: nothing memoized either */ }
+  let cleared = 0;
+  for (const entry of entries) if (memo.delete(entryKey(entry))) cleared++;
+  return cleared;
+}
+
+/** Forget every memoized result; returns how many entries were dropped. */
+function clearAll(reason = 'cleared from the dashboard') {
+  const size = memo.size;
+  clearMemo(reason);
+  return size;
+}
+
+/** Start building the AniLibria catalog index in the background. */
+function warmup() {
+  catalog.start();
+}
+
+/** Whether the AniLibria catalog index has been built. */
+function isIndexReady() {
+  return catalog.getInfo().size > 0;
+}
+
+/** When and why the resolver memo was last cleared ({ at, reason } or null). */
+function lastCleared() {
+  return lastClear;
+}
+
+module.exports = {
+  plan,
+  resolveAttempt,
+  resolveEntry,
+  resolveMedia,
+  clearCache,
+  clearAll,
+  lastCleared,
+  entryKey,
+  warmup,
+  isIndexReady,
+};

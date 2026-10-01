@@ -1,7 +1,9 @@
 const { version } = require('../package.json');
+const { addonUrl } = require('./config');
 
-const MANIFEST_URL = 'https://anilibria-stremio.online/manifest.json';
-const INSTALL_URL = 'stremio://anilibria-stremio.online/manifest.json';
+// Canonical public addon (override with ADDON_URL for self-hosted instances)
+const MANIFEST_URL = `${addonUrl}/manifest.json`;
+const INSTALL_URL = MANIFEST_URL.replace(/^https?:\/\//, 'stremio://');
 
 function renderInstallPage() {
   return `<!DOCTYPE html>
@@ -393,7 +395,7 @@ function renderInstallPage() {
       <div class="feature">
         <div class="feature-icon">\u{1F50D}</div>
         <div class="feature-title">Smart Matching</div>
-        <div class="feature-desc">4-step IMDB-to-AniLibria resolution: alias → search API → Fuse.js fuzzy → cache.</div>
+        <div class="feature-desc">Season-aware matching: IMDB → MyAnimeList ID → the exact AniLibria release, with title fallbacks.</div>
       </div>
       <div class="feature">
         <div class="feature-icon">\u{1F4FA}</div>

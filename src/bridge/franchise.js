@@ -1,86 +1,62 @@
 /**
- * Franchise Resolver
+ * Franchise Resolver (fallback season routing)
  *
- * When a user requests S2E1 and the resolved Anilibria release only has
- * season 1 episodes, this module uses the Anilibria franchise API to
- * find the correct season's release.
+ * Used only when the ID mapping has no entry for the requested season
+ * (e.g. a brand-new season). AniLibria's franchise API lists every release
+ * of a franchise with a sort order; the Nth TV/ONA release is taken as
+ * season N.
  *
  * Endpoint: GET /api/v1/anime/franchises/release/{releaseId}
- * Returns the franchise containing that release with all related releases,
- * each having sort_order and type (TV/MOVIE/ONA).
  */
 
-const NodeCache = require('node-cache');
 const anilibria = require('../api/anilibria');
+const TTLCache  = require('../util/ttl-cache');
 
-// Cache franchise data per release ID → 24h TTL
-const franchiseCache = new NodeCache({ stdTTL: 86400 });
+// release ID -> ordered season releases ([] when the release has no franchise)
+const franchiseCache = new TTLCache({ ttlMs: 24 * 60 * 60 * 1000, max: 5000, name: 'Franchises', description: 'Season order of AniLibria franchises (fallback season routing)' });
+
+// Definitive non-season content (movies, OVAs, specials, clips).
+const NON_SEASON_TYPES = new Set(['MOVIE', 'OVA', 'OVA_13', 'OAD', 'SPECIAL', 'CLIP']);
+
+async function getSeasonReleases(releaseId) {
+  const cached = franchiseCache.get(releaseId);
+  if (cached !== undefined) return cached;
+
+  // Transient errors propagate (and are not cached).
+  const franchise = await anilibria.getFranchiseByRelease(releaseId);
+  const members = Array.isArray(franchise?.franchise_releases) ? franchise.franchise_releases : [];
+
+  const seasons = members
+    .filter(fr => {
+      const raw = fr.release?.type?.value ?? fr.type?.value ?? fr.type ?? '';
+      return !NON_SEASON_TYPES.has(String(raw).toUpperCase());
+    })
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .map(fr => ({ releaseId: fr.release?.id || fr.release_id || fr.id, alias: fr.release?.alias || fr.alias || '' }))
+    .filter(s => typeof s.releaseId === 'number');
+
+  // Cache for every member so lookups from any season are instant.
+  franchiseCache.set(releaseId, seasons);
+  for (const fr of members) {
+    const id = fr.release?.id || fr.release_id || fr.id;
+    if (typeof id === 'number') franchiseCache.set(id, seasons);
+  }
+  if (seasons.length > 1) {
+    console.log(`[franchise] ${franchise.name_english || franchise.name}: ${seasons.length} season releases`);
+  }
+  return seasons;
+}
 
 /**
- * Given a release ID and a target season number, find the release
- * that corresponds to that season within the franchise.
+ * Find the release for a season within the franchise of `releaseId`.
  *
- * @param {number} releaseId     - The currently resolved Anilibria release ID
- * @param {number} targetSeason  - The season number requested (1-based)
- * @returns {Promise<{releaseId: number, alias: string}|null>}
+ * @param {number} releaseId    - any release of the franchise
+ * @param {number} targetSeason - requested season (1-based)
+ * @returns {Promise<{releaseId: number, alias: string}|null>} null when the franchise has no such season
  */
 async function findSeasonRelease(releaseId, targetSeason) {
-  // Check cache first
-  let tvReleases = franchiseCache.get(releaseId);
-
-  if (tvReleases === undefined) {
-    // Fetch franchise data from Anilibria
-    const franchise = await anilibria.getFranchiseByRelease(releaseId);
-
-    if (!franchise || !franchise.franchise_releases || franchise.franchise_releases.length <= 1) {
-      // Cache null for every member we know about so future calls skip the API
-      if (franchise?.franchise_releases) {
-        for (const fr of franchise.franchise_releases) {
-          const id = fr.release?.id || fr.id;
-          if (id) franchiseCache.set(id, null);
-        }
-      } else {
-        franchiseCache.set(releaseId, null);
-      }
-      return null;
-    }
-
-    // Exclude definitive non-season content (movies, OVAs, specials, clips).
-    // TV and ONA are both valid season types on streaming platforms.
-    tvReleases = franchise.franchise_releases
-      .filter(fr => {
-        const raw = fr.release?.type?.value ?? fr.type?.value ?? fr.type ?? '';
-        const type = String(raw).toUpperCase();
-        return !['MOVIE', 'OVA', 'OVA_13', 'SPECIAL', 'CLIP'].includes(type);
-      })
-      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-      .map(fr => ({
-        releaseId: fr.release?.id || fr.id,
-        alias: fr.release?.alias || fr.alias || '',
-        sortOrder: fr.sort_order,
-      }));
-
-    // Cache for ALL release IDs in the franchise (any future lookup is instant)
-    for (const fr of franchise.franchise_releases) {
-      const id = fr.release?.id || fr.id;
-      if (id) franchiseCache.set(id, tvReleases);
-    }
-
-    console.log(`[franchise] ${franchise.name_english || franchise.name}: ${tvReleases.length} TV releases in franchise`);
-  }
-
-  if (!tvReleases || tvReleases.length === 0) return null;
-
-  // Map targetSeason to index (season 1 = index 0)
-  const targetIndex = targetSeason - 1;
-  if (targetIndex < 0 || targetIndex >= tvReleases.length) return null;
-
-  const target = tvReleases[targetIndex];
-
-  // Don't redirect if it's the same release we already have
-  if (target.releaseId === releaseId) return null;
-
-  return { releaseId: target.releaseId, alias: target.alias };
+  const seasons = await getSeasonReleases(releaseId);
+  return seasons[targetSeason - 1] || null;
 }
 
 module.exports = { findSeasonRelease };

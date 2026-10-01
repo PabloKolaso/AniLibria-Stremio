@@ -169,13 +169,12 @@ async function findReleases(target, titles, index, { offline = false, exclude = 
     }
   }
 
-  // 4. Fuzzy match over the catalog index
+  // 4. Fuzzy match over the catalog index, among releases whose title starts
+  //    with the same significant word as one of the anime's titles (wordsMatch)
   if (index) {
     const querySets = titles.map(t => matching.significantWords(t)).filter(w => w.length > 0);
-    const hits = titles
-      .flatMap(title => index.search(title, 3))
-      .sort((a, b) => a.score - b.score);
-    for (const { item, score } of hits) {
+    const firstWords = [...new Set(querySets.map(words => words[0]))];
+    for (const { item, score } of index.search(titles, firstWords, 3)) {
       if (!allowed(item)) continue;
       const itemTitle = item.en || item.aliasWords;
       if (!querySets.some(qw => matching.wordsMatch(qw, matching.significantWords(itemTitle)))) continue;

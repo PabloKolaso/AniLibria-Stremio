@@ -5,6 +5,7 @@ process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'anilibria-resolver
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const Fuse = require('fuse.js');
 const catalog = require('../src/mapping/anilibria-catalog');
 const resolver = require('../src/bridge/resolver');
 
@@ -70,6 +71,32 @@ test('ID-less releases match by title, but never across seasons', async () => {
     synonyms: ['Maou Gakuin no Futekigousha'],
   });
   assert.deepEqual(fuzzy, { releaseIds: [8659], method: 'fuse', uncertain: false });
+});
+
+test('fuzzy search only scans releases that share a first title word', async t => {
+  // Scanning the whole catalog for every title variant blocked the event loop for seconds
+  const filler = Array.from({ length: 500 }, (_, i) => release(20000 + i, `filler-show-${i}`, 2020, null, null, `Filler Show ${i}`));
+  const index = new catalog.CatalogIndex([...CATALOG, ...filler], true);
+  t.mock.method(catalog, 'getIndex', async () => index);
+  const scanned = [];
+  const search = Fuse.prototype.search;
+  t.mock.method(Fuse.prototype, 'search', function (...args) {
+    scanned.push(this.getIndex().size());
+    return search.apply(this, args);
+  });
+
+  const fuzzy = await resolve({
+    ...media(40496, 2020, 'Maou Gakuin no Futekigousha: Shijou Saikyou no Maou no Shiso, Tensei shite Shison-tachi no Gakkou e Kayou'),
+    synonyms: ['Maou Gakuin no Futekigousha', 'ทรราชตกยุคไปอยู่ในโรงเรียนลูกหลาน'],
+  });
+  assert.deepEqual(fuzzy, { releaseIds: [8659], method: 'fuse', uncertain: false });
+  assert.ok(scanned.length > 0);
+  assert.ok(scanned.every(size => size === 1), `scanned ${scanned.join(', ')} releases`);
+
+  // No release starts with any of the anime's title words: nothing to scan
+  scanned.length = 0;
+  assert.deepEqual((await resolve(media(38000, 2019, 'Kimetsu no Yaiba', 'Demon Slayer'))).releaseIds, []);
+  assert.deepEqual(scanned, []);
 });
 
 test('without an index, failed live lookups are reported as uncertain', async t => {

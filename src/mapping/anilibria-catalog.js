@@ -1,9 +1,9 @@
 /**
  * In-memory index of the full AniLibria release catalog.
  *
- *  - byMal:   MAL/Shikimori ID -> releases   (exact matching, primary path)
- *  - byAlias: URL alias -> release           (exact title matching)
- *  - fuse:    fuzzy title search             (last-resort fallback)
+ *  - byMal:       MAL/Shikimori ID -> releases      (exact matching, primary path)
+ *  - byAlias:     URL alias -> release              (exact title matching)
+ *  - byFirstWord: first title word -> releases      (fuzzy title search, last-resort fallback)
  *
  * The catalog (~2k releases, 50 per page) is rebuilt in the background every
  * couple of hours; lookups always use the last good index, so requests never
@@ -13,7 +13,7 @@
 
 const Fuse      = require('fuse.js');
 const anilibria = require('../api/anilibria');
-const { summarizeRelease } = require('../bridge/matching');
+const { summarizeRelease, significantWords } = require('../bridge/matching');
 const { withTimeout } = require('../util/timeout');
 
 const PAGE_SIZE         = 50;
@@ -23,6 +23,18 @@ const RETRY_INTERVAL_MS   = 5 * 60 * 1000;
 /** An index older than this (e.g. refreshes keep failing) is no longer trusted to be complete. */
 const FRESH_MAX_AGE_MS    = 6 * 60 * 60 * 1000;
 const FUSE_THRESHOLD      = 0.25;
+/** Fuse.js scores each release on its own, whichever other releases are searched with it. */
+const FUSE_OPTIONS = {
+  keys: [
+    { name: 'en',         weight: 2   },
+    { name: 'aliasWords', weight: 1.5 },  // "one piece" matches "One Piece"
+    { name: 'alias',      weight: 1   },
+    { name: 'alt',        weight: 1   },
+    { name: 'ru',         weight: 0.5 },
+  ],
+  threshold: FUSE_THRESHOLD,
+  includeScore: true,
+};
 
 let current     = null;   // last good index
 let building    = null;   // in-flight build promise
@@ -45,6 +57,7 @@ class CatalogIndex {
     this.byId = new Map();
     this.byMal = new Map();
     this.byAlias = new Map();
+    this.byFirstWord = new Map(); // first significant title word -> releases
     this.withIds = 0; // releases carrying a MAL/Shikimori ID
 
     for (const raw of releases) {
@@ -62,21 +75,17 @@ class CatalogIndex {
         list.push(release);
         this.byMal.set(malId, list);
       }
+      // The resolver accepts a fuzzy match only when both titles start with
+      // the same significant word (matching.wordsMatch): group by that word.
+      const firstWord = significantWords(release.en || release.aliasWords, 1)[0];
+      if (firstWord) {
+        const list = this.byFirstWord.get(firstWord) || [];
+        list.push(release);
+        this.byFirstWord.set(firstWord, list);
+      }
     }
     // Duplicates (re-dubs, mislabelled seasons): prefer the original release first.
     for (const list of this.byMal.values()) list.sort((a, b) => a.id - b.id);
-
-    this.fuse = new Fuse([...this.byId.values()], {
-      keys: [
-        { name: 'en',         weight: 2   },
-        { name: 'aliasWords', weight: 1.5 },  // "one piece" matches "One Piece"
-        { name: 'alias',      weight: 1   },
-        { name: 'alt',        weight: 1   },
-        { name: 'ru',         weight: 0.5 },
-      ],
-      threshold: FUSE_THRESHOLD,
-      includeScore: true,
-    });
   }
 
   get size() {
@@ -96,9 +105,25 @@ class CatalogIndex {
     return this.byAlias.get(alias) || null;
   }
 
-  /** Fuzzy search; returns [{ item, score }] with score < threshold (lower is better). */
-  search(title, limit = 3) {
-    return this.fuse.search(title, { limit }).filter(r => r.score < FUSE_THRESHOLD);
+  /**
+   * Fuzzy title search among the releases whose title starts with one of
+   * `firstWords` — the only fuzzy hits the resolver can accept. Searching
+   * those few instead of the whole catalog keeps this cheap: one title
+   * searched against every release costs tens of milliseconds of CPU, and an
+   * AniList anime can have a dozen title variants.
+   * @param {string[]} titles
+   * @param {string[]} firstWords - first significant words (matching.significantWords)
+   * @param {number} [limit] - hits per title
+   * @returns {{ item: object, score: number }[]} hits under the threshold, best (lowest score) first
+   */
+  search(titles, firstWords, limit = 3) {
+    const candidates = new Set();
+    for (const word of firstWords) for (const release of this.byFirstWord.get(word) || []) candidates.add(release);
+    if (candidates.size === 0) return [];
+    const fuse = new Fuse([...candidates], FUSE_OPTIONS);
+    return titles
+      .flatMap(title => fuse.search(title, { limit }).filter(r => r.score < FUSE_THRESHOLD))
+      .sort((a, b) => a.score - b.score);
   }
 }
 

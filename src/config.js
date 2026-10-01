@@ -58,6 +58,8 @@ const config = Object.freeze({
   ntfyTopic: process.env.NTFY_TOPIC || '',
   /** Send admin alerts (provider outages, stale catalogs, error spikes, crashes) to NTFY_TOPIC. */
   ntfyAlerts: parseBool(process.env.NTFY_ALERTS),
+  /** Deployed git commit, when the platform exposes it (Koyeb GitHub deploys, Render) or GIT_COMMIT is set. */
+  commit: process.env.KOYEB_GIT_SHA || process.env.RENDER_GIT_COMMIT || process.env.GIT_COMMIT || null,
   nodeEnv: process.env.NODE_ENV || 'development',
 });
 

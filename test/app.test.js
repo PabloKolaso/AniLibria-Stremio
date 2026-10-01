@@ -9,6 +9,9 @@ const assert = require('node:assert/strict');
 const linter = require('stremio-addon-linter');
 const manifest = require('../src/manifest');
 const { createApp } = require('../src/app');
+const { MIN_SUPPORTED_MANIFEST_VERSION } = require('../src/install-version');
+const { CATALOGS_SINCE } = require('../src/telemetry/client-versions');
+const { version } = require('../package.json');
 
 let server;
 let base;
@@ -70,14 +73,77 @@ test('serves manifest, streams, health and install page with CORS', async () => 
   assert.deepEqual(await stream.json(), { streams: [], cacheMaxAge: 3600 });
   assert.equal(streamCalls.at(-1).id, 'tt9335498:1:1');
   assert.equal(streamCalls.at(-1).ip, '127.0.0.1', 'handlers receive the client IP');
+  assert.equal(streamCalls.at(-1).installVersion, version, 'this client fetched the current manifest');
 
   const health = await (await fetch(`${base}/health`)).json();
   assert.equal(health.status, 'ok');
   assert.equal(typeof health.mappingLoaded, 'boolean');
   assert.deepEqual(Object.keys(health.catalogs.releasing), ['count', 'updatedAt', 'stale', 'lastError']);
 
-  const home = await fetch(`${base}/`);
-  assert.match(await home.text(), /stremio:\/\/anilibria-stremio\.online\/manifest\.json/);
+  // Always the same install URL: Stremio updates an install in place only from the same URL
+  const html = await (await fetch(`${base}/`)).text();
+  assert.ok(html.includes('href="stremio://anilibria-stremio.online/manifest.json"'), 'Install button');
+  assert.ok(html.includes('value="https://anilibria-stremio.online/manifest.json"'), 'copy field');
+  assert.doesNotMatch(html, /\/v\//);
+});
+
+test('unprefixed requests use the manifest version the client is known to have', async () => {
+  const as = ip => ({ headers: { 'X-Forwarded-For': ip } });
+  await fetch(`${base}/stream/series/tt9335498:1:1.json`, as('203.0.113.7'));
+  assert.equal(streamCalls.at(-1).installVersion, 'legacy', 'never seen with a 3.x manifest');
+  // Installs from before 3.0.0 never request catalogs; 3.x installs load them on the Board
+  await fetch(`${base}/catalog/series/anilibria-releasing.json`, as('203.0.113.7'));
+  await fetch(`${base}/stream/series/tt9335498:1:1.json`, as('203.0.113.7'));
+  assert.equal(streamCalls.at(-1).installVersion, CATALOGS_SINCE);
+  // Installing or reinstalling fetches the manifest
+  await fetch(`${base}/manifest.json`, as('203.0.113.8'));
+  await fetch(`${base}/stream/series/tt9335498:1:1.json`, as('203.0.113.8'));
+  assert.equal(streamCalls.at(-1).installVersion, version);
+});
+
+test('version-tagged routes serve the same addon and tell handlers the installed version', async () => {
+  const plain = await (await fetch(`${base}/manifest.json`)).json();
+  const res = await fetch(`${base}/v/${version}/manifest.json`);
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get('access-control-allow-origin'), '*');
+  // Same id and same stremio-addons.net signature
+  assert.deepEqual(await res.json(), plain);
+  assert.equal(plain.id, 'community.anilibria.stremio');
+  assert.ok(plain.stremioAddonsConfig.signature);
+  assert.match(plain.description, new RegExp(` v${version.replace(/\./g, '\\.')}$`));
+
+  const stream = await fetch(`${base}/v/2.1.0/stream/series/tt9335498:1:1.json`);
+  assert.equal(stream.status, 200);
+  assert.equal(stream.headers.get('cache-control'), 'max-age=3600, public');
+  assert.deepEqual([streamCalls.at(-1).id, streamCalls.at(-1).installVersion], ['tt9335498:1:1', '2.1.0']);
+
+  const page = await fetch(`${base}/v/${version}/catalog/series/anilibria-releasing/skip=100.json`);
+  assert.equal(page.status, 200);
+  assert.deepEqual([catalogCalls.at(-1).id, { ...catalogCalls.at(-1).extra }, catalogCalls.at(-1).installVersion],
+    ['anilibria-releasing', { skip: '100' }, version]);
+  assert.equal((await fetch(`${base}/v/${version}/meta/series/anilibria%3A9660.json`)).status, 200);
+  assert.equal(metaCalls.at(-1).installVersion, version);
+
+  // Garbage versions: never installable, their requests are served like unprefixed ones
+  for (const bad of ['garbage', 'v3.0.0', '3.0', '3.0.0+build', '1.2.3-' + 'x'.repeat(40)]) {
+    const m = await fetch(`${base}/v/${encodeURIComponent(bad)}/manifest.json`);
+    assert.equal(m.status, 404, bad);
+  }
+  const garbage = await fetch(`${base}/v/garbage/stream/series/tt9335498:1:1.json`, { headers: { 'X-Forwarded-For': '203.0.113.99' } });
+  assert.equal(garbage.status, 200);
+  assert.equal(streamCalls.at(-1).installVersion, 'legacy');
+  assert.equal((await fetch(`${base}/v/${version}/nope/series/x.json`)).status, 404);
+  assert.equal((await fetch(`${base}/v/${version}/stream/series/x/y/z.json`)).status, 404);
+});
+
+test('/version reports the release, the minimum supported install and the start time', async () => {
+  const res = await fetch(`${base}/version`);
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.deepEqual(Object.keys(body), ['version', 'minSupported', 'commit', 'startedAt']);
+  assert.equal(body.version, version);
+  assert.equal(body.minSupported, MIN_SUPPORTED_MANIFEST_VERSION);
+  assert.ok(!Number.isNaN(Date.parse(body.startedAt)));
 });
 
 test('serves catalog pages and catalog item metadata', async () => {
@@ -173,6 +239,14 @@ test('the dashboard API reports the addon requests it saw', async () => {
   assert.ok(traffic.series.current.catalogs['anilibria-releasing'] >= 1);
   // Catalog and meta requests count as anime usage
   assert.ok(traffic.users.current >= 1);
+
+  // Requests by installed version, legacy installs flagged as outdated
+  const rows = Object.fromEntries(traffic.installs.rows.map(r => [r.version, r]));
+  assert.equal(traffic.installs.current, version);
+  assert.equal(traffic.installs.minSupported, MIN_SUPPORTED_MANIFEST_VERSION);
+  assert.ok(rows.legacy.requests >= 2 && rows.legacy.outdated === true, JSON.stringify(rows));
+  assert.ok(rows[version].requests >= 2 && rows[version].outdated === false, JSON.stringify(rows));
+  assert.equal(rows['2.1.0'].outdated, true);
 });
 
 test('state-changing API calls need the dashboard header (CSRF defence)', async () => {

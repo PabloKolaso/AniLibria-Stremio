@@ -112,6 +112,24 @@ test('series are aligned to UTC blocks and compare with the previous period', ()
   assert.equal(day.points.reduce((a, p) => a + p.outcomes.found, 0), day.current.found);
 });
 
+test('installed versions are counted per request, without manifest fetches and with a cap', () => {
+  traffic.recordResource({ resource: 'stream', ok: true, installVersion: 'legacy' });
+  traffic.recordResource({ resource: 'stream', ok: true, installVersion: 'legacy' });
+  traffic.recordResource({ resource: 'catalog', catalogId: 'anilibria-releasing', ok: true, installVersion: '3.0.0' });
+  traffic.recordResource({ resource: 'manifest', ok: true, installVersion: '3.0.0' });
+  traffic.recordResource({ resource: 'meta', ok: true }); // direct call, no version
+  let versions = traffic.series('24h').current.versions;
+  assert.deepEqual(versions, { legacy: 2, '3.0.0': 1 });
+
+  // Edited URLs cannot grow the hourly bucket without bound
+  for (let i = 0; i < 30; i++) traffic.recordResource({ resource: 'stream', ok: true, installVersion: `9.9.${i}` });
+  versions = traffic.series('24h').current.versions;
+  assert.equal(Object.keys(versions).length, 21, 'MAX_VERSIONS_PER_HOUR keys + "other"');
+  assert.equal(versions.other, 12);
+  traffic.recordResource({ resource: 'stream', ok: true, installVersion: 'legacy' });
+  assert.equal(traffic.series('24h').current.versions.legacy, 3, 'known versions keep counting');
+});
+
 // ─── Users ───────────────────────────────────────────────────────────────────
 
 test('users are counted by salted IP hash; v1 hashes are migrated', () => {

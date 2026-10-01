@@ -17,8 +17,9 @@
  *
  * Each bucket also holds the outcome reasons, resolver methods of found
  * requests, request sources (IMDB vs. addon catalog), a latency histogram
- * of anime stream requests, and the count of every addon resource request
- * (stream / catalog / meta / manifest).
+ * of anime stream requests, the count of every addon resource request
+ * (stream / catalog / meta / manifest), and the installed manifest version
+ * of stream / catalog / meta requests ("legacy" = not known, see install-version.js).
  */
 
 const path      = require('path');
@@ -34,6 +35,9 @@ const RECENT_MINUTES = 60;
 
 const CATEGORIES = ['found', 'not_on_anilibria', 'episode_missing', 'unsupported', 'blocked', 'error'];
 const RESOURCES = ['stream', 'catalog', 'meta', 'manifest'];
+
+/** Distinct installed versions kept per hour; more (edited URLs) count as "other". */
+const MAX_VERSIONS_PER_HOUR = 20;
 
 /** Chart ranges: `points` blocks of `step` hours, aligned to UTC. */
 const RANGES = {
@@ -85,7 +89,7 @@ function init() {
 function emptyBucket() {
   return {
     outcomes: {}, reasons: {}, methods: {}, sources: {},
-    passThrough: 0, latency: null, resources: {}, resourceErrors: {}, catalogs: {},
+    passThrough: 0, latency: null, resources: {}, resourceErrors: {}, catalogs: {}, versions: {},
   };
 }
 
@@ -166,14 +170,20 @@ function recordStream({ category, reason, method = null, source, ms }) {
 
 /**
  * Record one addon protocol request (any resource).
- * @param {{ resource: string, catalogId?: string|null, ok: boolean }} req
+ * @param {{ resource: string, catalogId?: string|null, ok: boolean, installVersion?: string|null }} req
+ *        installVersion — see install-version.js; manifest fetches are installs, not usage, and are not counted
  */
-function recordResource({ resource, catalogId = null, ok }) {
+function recordResource({ resource, catalogId = null, ok, installVersion = null }) {
   const bucket = currentBucket(Date.now());
   const name = RESOURCES.includes(resource) ? resource : 'other';
   inc(bucket.resources, name);
   if (!ok) inc(bucket.resourceErrors, name);
   if (catalogId) inc(bucket.catalogs, catalogId);
+  if (installVersion && resource !== 'manifest') {
+    bucket.versions ??= {}; // buckets saved before version tracking
+    const known = installVersion in bucket.versions || Object.keys(bucket.versions).length < MAX_VERSIONS_PER_HOUR;
+    inc(bucket.versions, known ? installVersion : 'other');
+  }
   store.schedule();
 }
 
@@ -182,12 +192,12 @@ function recordResource({ resource, catalogId = null, ok }) {
 function emptyAggregate() {
   return {
     outcomes: {}, reasons: {}, methods: {}, sources: {},
-    passThrough: 0, latency: hist.empty(), resources: {}, resourceErrors: {}, catalogs: {},
+    passThrough: 0, latency: hist.empty(), resources: {}, resourceErrors: {}, catalogs: {}, versions: {},
   };
 }
 
 function addInto(target, bucket) {
-  for (const field of ['outcomes', 'reasons', 'methods', 'sources', 'resources', 'resourceErrors', 'catalogs']) {
+  for (const field of ['outcomes', 'reasons', 'methods', 'sources', 'resources', 'resourceErrors', 'catalogs', 'versions']) {
     for (const [k, v] of Object.entries(bucket[field] || {})) inc(target[field], k, v);
   }
   target.passThrough += bucket.passThrough || 0;
@@ -290,10 +300,12 @@ function series(range, now = Date.now()) {
     from: firstHour * HOUR_MS,
     points: out,
     current: { ...summarize(currentAgg), methods: currentAgg.methods, reasons: currentAgg.reasons,
-      resources: currentAgg.resources, resourceErrors: currentAgg.resourceErrors, catalogs: currentAgg.catalogs },
+      resources: currentAgg.resources, resourceErrors: currentAgg.resourceErrors, catalogs: currentAgg.catalogs,
+      versions: currentAgg.versions },
     previous: hasPrevious
       ? { ...summarize(previousAgg), methods: previousAgg.methods, reasons: previousAgg.reasons,
-        resources: previousAgg.resources, resourceErrors: previousAgg.resourceErrors, catalogs: previousAgg.catalogs }
+        resources: previousAgg.resources, resourceErrors: previousAgg.resourceErrors, catalogs: previousAgg.catalogs,
+        versions: previousAgg.versions }
       : null,
   };
 }

@@ -1,6 +1,6 @@
 /**
  * Traffic — "How is the addon being used and performing?"
- * Outcomes, latency, users, resource mix and resolver methods per range,
+ * Outcomes, latency, users, resource mix, installed versions and resolver methods per range,
  * each compared with the previous period of the same length.
  */
 
@@ -117,6 +117,27 @@ function reasonsCard(series) {
   });
 }
 
+function installsCard(installs) {
+  const { rows, current, minSupported, legacy } = installs;
+  const total = rows.reduce((a, r) => a + r.requests, 0);
+  const outdated = rows.filter(r => r.outdated).reduce((a, r) => a + r.requests, 0);
+  const label = v => (v === legacy ? 'Legacy / unknown' : v === 'other' ? 'Other' : `v${v}${v === current ? ' (current)' : ''}`);
+  return card({
+    title: 'Requests by installed version',
+    sub: 'Stream, catalog and meta requests, by the manifest version the client is known to have',
+    body: body(
+      breakdown(rows.map(r => ({
+        label: label(r.version),
+        value: r.requests,
+        color: r.outdated ? '#f2b33d' : r.version === 'other' ? '#8a8aa3' : '#3ecf8e',
+        hint: r.outdated ? 'Sees the reinstall notice in Stremio' : undefined,
+      }))),
+      total > 0 && h('p', { class: 'help' },
+        h('span', { class: ['pill', outdated > 0 ? 'warn' : 'ok'] }, `${pct(outdated / total)} outdated`),
+        ` Clients below v${minSupported}, or not seen fetching the manifest or a catalog since they (re)installed, see the reinstall notice on anime titles.`)),
+  });
+}
+
 function catalogsNote(series) {
   const cats = series.current.catalogs || {};
   const errors = series.current.resourceErrors || {};
@@ -221,7 +242,7 @@ export default {
       mount(notesEl, catalogsNote(s));
 
       mount(methodsSlot, methodsCard(s));
-      mount(detailsEl, reasonsCard(s),
+      mount(detailsEl, installsCard(data.installs), reasonsCard(s),
         h('p', { class: 'help', title: utc(data.since.createdAt) },
           `Ranges are aligned to UTC (${s.stepHours === 1 ? 'hours' : s.stepHours === 6 ? '6-hour blocks' : 'days'}); the last point is the current, partial one. Data is kept for ${data.since.retentionDays} days.`,
           s.previous ? '' : ' No data exists for the previous period yet.'));

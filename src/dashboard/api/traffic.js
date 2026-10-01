@@ -1,10 +1,12 @@
 /**
  * Traffic: "how is the addon used and how does it perform?" — outcome,
- * latency, users, resources and resolver methods over a range.
+ * latency, users, resources, installed versions and resolver methods over a range.
  */
 
 const traffic = require('../../telemetry/traffic');
 const users   = require('../../telemetry/users');
+const installs = require('../../install-version');
+const { version } = require('../../../package.json');
 const { meta } = require('./meta');
 const { oneOf } = require('./params');
 
@@ -19,14 +21,25 @@ function usersFor(range) {
   }
 }
 
+/** Requests per installed manifest version; outdated installs see the reinstall notice. */
+function installsFor(series) {
+  const prev = series.previous?.versions || {};
+  const rows = Object.entries(series.current.versions || {})
+    .map(([v, requests]) => ({ version: v, requests, previous: prev[v] ?? null, outdated: installs.needsReinstall(v) }))
+    .sort((a, b) => b.requests - a.requests);
+  return { current: version, minSupported: installs.MIN_SUPPORTED_MANIFEST_VERSION, legacy: installs.LEGACY, rows };
+}
+
 function register(router) {
   router.get('/traffic', (req, res) => {
     const range = oneOf(req.query.range, Object.keys(traffic.RANGES), '24h');
+    const series = traffic.series(range);
     res.json({
       meta: meta(),
       range,
-      series: traffic.series(range),
+      series,
       users: usersFor(range),
+      installs: installsFor(series),
       since: traffic.since(),
     });
   });

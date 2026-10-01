@@ -1,6 +1,7 @@
 /**
- * Express application: Stremio protocol routes, install page, health check,
- * admin dashboard and debug routes.
+ * Express application: Stremio protocol routes (unprefixed and
+ * version-tagged), install page, health and version checks, admin dashboard
+ * and debug routes.
  */
 
 const path        = require('path');
@@ -11,10 +12,13 @@ const compression = require('compression');
 
 const config   = require('./config');
 const manifest = require('./manifest');
+const installs = require('./install-version');
+const lifecycle = require('./monitoring/lifecycle');
 const mapping  = require('./mapping/cache');
 const resolver = require('./bridge/resolver');
 const traffic  = require('./telemetry/traffic');
 const users    = require('./telemetry/users');
+const clientVersions = require('./telemetry/client-versions');
 const releasing = require('./catalogs/releasing');
 const trending  = require('./catalogs/trending');
 const { createAddonRouter } = require('./stremio');
@@ -39,10 +43,13 @@ function securityHeaders(req, res, next) {
  * Usage statistics for every addon protocol request. Catalog and meta
  * requests are anime usage by definition; stream requests count their
  * users themselves, once they know whether the title is an anime.
+ * Manifest, catalog and meta requests also tell which manifest the client has.
  */
-function recordAddonRequest({ resource, id, ok, ip }) {
-  traffic.recordResource({ resource, catalogId: resource === 'catalog' ? id : null, ok });
+function recordAddonRequest({ resource, id, ok, ip, installVersion }) {
+  traffic.recordResource({ resource, catalogId: resource === 'catalog' ? id : null, ok, installVersion });
   if ((resource === 'catalog' || resource === 'meta') && ip) users.recordUser(ip);
+  if (resource === 'manifest') clientVersions.recordManifest(ip, version);
+  else if (resource === 'catalog' || resource === 'meta') clientVersions.recordAtLeast(ip, clientVersions.CATALOGS_SINCE);
 }
 
 // Express recognizes error handlers by their four parameters, so `next` must stay.
@@ -91,6 +98,16 @@ function createApp({ handlers: overrides = {} } = {}) {
     });
   });
 
+  // Deployed version, and the oldest install that does not get the reinstall notice
+  app.get('/version', (req, res) => {
+    res.json({
+      version,
+      minSupported: installs.MIN_SUPPORTED_MANIFEST_VERSION,
+      commit: config.commit,
+      startedAt: new Date(lifecycle.startedAt).toISOString(),
+    });
+  });
+
   // Public install page at root (static for the process lifetime)
   const installPage = renderInstallPage();
   app.get('/', (req, res) => {
@@ -99,7 +116,11 @@ function createApp({ handlers: overrides = {} } = {}) {
   });
 
   app.use(dashboardRouter);
-  app.use(createAddonRouter(manifest, handlers, { onRequest: recordAddonRequest }));
+  const addonRouter = createAddonRouter(manifest, handlers, { onRequest: recordAddonRequest });
+  // Version-tagged routes (/v/3.0.0/manifest.json, /v/3.0.0/stream/...). Not handed out:
+  // Stremio would install a tagged URL as a second copy of the addon (see install-version.js)
+  app.use('/v/:version', installs.tagVersioned, addonRouter);
+  app.use(installs.tagUnversioned, addonRouter);
   app.use(debugRouter);
   app.use(errorHandler);
 

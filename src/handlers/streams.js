@@ -6,7 +6,10 @@
  *   - IMDB-based (Cinemeta and other catalogs): "tt0388629:1:5" | "tt5311514"
  *   - from this addon's catalogs: "anilibria:9660:8" | "anilibria:6826"
  *
- * Returns up to 3 stream objects per episode (1080p, 720p, 480p HLS).
+ * Returns up to 3 stream objects per episode (1080p, 720p, 480p HLS),
+ * followed by a "☕ Support" link (externalUrl) whenever any were found.
+ * Outdated installs get a "please reinstall" link (externalUrl) first in
+ * every anime answer, see install-version.js.
  *
  * Every request is logged with its outcome category and reason, and feeds
  * the dashboard's telemetry: traffic buckets, users, top titles, missing
@@ -28,9 +31,13 @@ const titles     = require('../telemetry/titles');
 const missing    = require('../telemetry/missing');
 const matches    = require('../telemetry/matches');
 const problems   = require('../monitoring/problems');
+const { withUpdateNotice } = require('../install-version');
 
 const IMDB_RE = /^tt\d{7,10}$/;
 const SUPPORTED_TYPES = new Set(['series', 'movie']);
+
+/** Donation page, listed after the video streams of every successful answer. */
+const SUPPORT_URL = 'https://buymeacoffee.com/anilibriastremio';
 
 /** Overall budget for one stream request; slower lookups keep running and warm the caches. */
 const REQUEST_DEADLINE_MS = 20_000;
@@ -338,6 +345,20 @@ function errorStream(description) {
   };
 }
 
+/**
+ * Append the support link after the video streams. Never added to an empty
+ * list (it would hide "no streams"), and has no bingeGroup so auto-play of the
+ * next episode never picks it.
+ */
+function withSupportLink(streams) {
+  if (streams.length === 0) return streams;
+  return [...streams, {
+    name: '☕ Support',
+    description: 'Support AniLibria for Stremio on Buy Me a Coffee',
+    externalUrl: SUPPORT_URL,
+  }];
+}
+
 /** Feed the dashboard's telemetry with one finished request. */
 function recordTelemetry({ id, type, ip, imdbId, direct, parsed, res, category, ms, errorText }) {
   const source = direct ? 'catalog' : 'imdb';
@@ -385,12 +406,39 @@ function recordTelemetry({ id, type, ip, imdbId, direct, parsed, res, category, 
   }
 }
 
+/** Stremio response for a finished lookup. */
+function respond(res) {
+  if (res.outcome === 'success') return { streams: withSupportLink(res.streams) };
+
+  if (res.outcome === 'error') {
+    if (res.reason === 'blocked') {
+      return {
+        streams: [{
+          name: 'AniLibria\nBlocked',
+          description: 'This content is restricted or geo-blocked on AniLibria in your region.',
+          externalUrl: 'https://anilibria.top',
+        }],
+      };
+    }
+    const detail = res.reason === 'timeout'
+      ? 'lookup is taking longer than usual'
+      : res.error ? describeError(res.error) : 'service temporarily unavailable';
+    return {
+      streams: [errorStream(`Temporary error looking up this anime (${detail}).\nTry again in a moment.`)],
+    };
+  }
+
+  return { streams: [], cacheMaxAge: res.cacheMaxAge };
+}
+
 /**
  * Main stream handler.
- * @param {{ type: string, id: string, ip?: string|null }} args
+ * @param {{ type: string, id: string, ip?: string|null, installVersion?: string|null }} args
+ *        installVersion: the installed manifest version, see install-version.js
+ *        (null for calls that are not addon requests: never shows the update notice)
  * @returns {Promise<{ streams: object[], cacheMaxAge?: number }>}
  */
-async function streamHandler({ type, id, ip = null }) {
+async function streamHandler({ type, id, ip = null, installVersion = null }) {
   const startTime = Date.now();
   if (!SUPPORTED_TYPES.has(type)) return { streams: [] };
   const direct = parseCatalogId(id);
@@ -439,27 +487,10 @@ async function streamHandler({ type, id, ip = null }) {
   else if (res.outcome === 'error') console.warn(logLine);
   else console.log(logLine);
 
-  if (res.outcome === 'success') return { streams: res.streams };
-
-  if (res.outcome === 'error') {
-    if (res.reason === 'blocked') {
-      return {
-        streams: [{
-          name: 'AniLibria\nBlocked',
-          description: 'This content is restricted or geo-blocked on AniLibria in your region.',
-          externalUrl: 'https://anilibria.top',
-        }],
-      };
-    }
-    const detail = res.reason === 'timeout'
-      ? 'lookup is taking longer than usual'
-      : res.error ? describeError(res.error) : 'service temporarily unavailable';
-    return {
-      streams: [errorStream(`Temporary error looking up this anime (${detail}).\nTry again in a moment.`)],
-    };
-  }
-
-  return { streams: [], cacheMaxAge: res.cacheMaxAge };
+  // Non-anime titles never get the update notice: Stremio asks this addon
+  // about every movie and series, so it would follow users everywhere
+  const response = respond(res);
+  return category === 'pass_through' ? response : withUpdateNotice(response, installVersion);
 }
 
 module.exports = { streamHandler, findStreams, findCatalogStreams, parseId, buildStreams };

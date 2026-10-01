@@ -1,7 +1,9 @@
 const { version } = require('../package.json');
 const { addonUrl } = require('./config');
 
-// Canonical public addon (override with ADDON_URL for self-hosted instances)
+// Canonical public addon (override with ADDON_URL for self-hosted instances).
+// Never version-tagged: Stremio updates an install in place only when it is
+// reinstalled from the same URL.
 const MANIFEST_URL = `${addonUrl}/manifest.json`;
 const INSTALL_URL = MANIFEST_URL.replace(/^https?:\/\//, 'stremio://');
 

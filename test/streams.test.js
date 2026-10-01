@@ -17,6 +17,7 @@ const traffic = require('../src/telemetry/traffic');
 const titles = require('../src/telemetry/titles');
 const overrides = require('../src/overrides');
 const { streamHandler, parseId } = require('../src/handlers/streams');
+const { MIN_SUPPORTED_MANIFEST_VERSION } = require('../src/install-version');
 
 const ENTRY = { type: 'TV', mal: 100, anilist: 100, tvdbSeason: 1, tvdbOffset: 0 };
 const RELEASE = {
@@ -71,11 +72,18 @@ test('returns one stream per available quality with per-quality binge groups', a
   stubPipeline(t, {});
   const res = await streamHandler({ type: 'series', id: 'tt0000001:1:1' });
   assert.equal(res.cacheMaxAge, undefined);
-  assert.deepEqual(res.streams.map(s => s.name), ['AniLibria\n1080p', 'AniLibria\n720p', 'AniLibria\n480p']);
+  assert.deepEqual(res.streams.map(s => s.name), ['AniLibria\n1080p', 'AniLibria\n720p', 'AniLibria\n480p', '☕ Support']);
   assert.equal(res.streams[0].url, 'https://cdn/1/1080.m3u8');
   assert.equal(res.streams[0].description, 'Test Show • Pilot\nRussian Dub • HLS');
   assert.deepEqual(res.streams[0].behaviorHints, { notWebReady: true, bingeGroup: 'anilibria-tt0000001-1080p' });
+  // Support link: last, opened in the browser, no bingeGroup (auto-play skips it)
+  assert.deepEqual(res.streams.at(-1), {
+    name: '☕ Support',
+    description: 'Support AniLibria for Stremio on Buy Me a Coffee',
+    externalUrl: 'https://buymeacoffee.com/anilibriastremio',
+  });
   const log = lastLog();
+  assert.equal(log.streams, 3, 'telemetry counts video streams only');
   assert.equal(log.outcome, 'success');
   assert.equal(log.category, 'found');
   assert.equal(log.reason, 'found');
@@ -101,8 +109,55 @@ test('a found request feeds traffic and top titles (merged per release)', async 
 test('skips empty quality URLs and titles untitled episodes', async t => {
   stubPipeline(t, { plan: { attempts: [{ entry: ENTRY, episode: 2, numbering: 'local' }] } });
   const res = await streamHandler({ type: 'series', id: 'tt0000001:1:2' });
-  assert.deepEqual(res.streams.map(s => s.name), ['AniLibria\n480p']);
+  assert.deepEqual(res.streams.map(s => s.name), ['AniLibria\n480p', '☕ Support']);
   assert.match(res.streams[0].description, /Episode 2/);
+});
+
+test('the support link is never added to empty, blocked or error answers', async t => {
+  stubPipeline(t, { plan: { attempts: [{ entry: ENTRY, episode: 9, numbering: 'local' }] } });
+  assert.deepEqual((await streamHandler({ type: 'series', id: 'tt0000013:1:9' })).streams, []);
+
+  t.mock.restoreAll();
+  stubPipeline(t, { release: async () => { throw new anilibria.GeoBlockedError(555); } });
+  assert.deepEqual((await streamHandler({ type: 'series', id: 'tt0000014:1:1' })).streams.map(s => s.name), ['AniLibria\nBlocked']);
+
+  t.mock.restoreAll();
+  stubPipeline(t, { release: async () => { throw new HttpError('HTTP 503', { code: 'HTTP', status: 503 }); } });
+  assert.deepEqual((await streamHandler({ type: 'series', id: 'tt0000015:1:1' })).streams.map(s => s.name), ['AniLibria\n⚠ Error']);
+});
+
+test('outdated installs get the update notice first; real streams still follow', async t => {
+  stubPipeline(t, {});
+  for (const installVersion of ['legacy', '2.0.2']) {
+    const res = await streamHandler({ type: 'series', id: 'tt0000001:1:1', installVersion });
+    assert.deepEqual(res.streams.map(s => s.name), ['⚠️ AniLibria', 'AniLibria\n1080p', 'AniLibria\n720p', 'AniLibria\n480p', '☕ Support'], installVersion);
+    assert.equal(res.streams[0].url, undefined, 'not playable');
+    assert.equal(res.streams[0].behaviorHints, undefined, 'no bingeGroup: auto-play keeps the picked quality');
+    assert.equal(res.streams[1].behaviorHints.bingeGroup, 'anilibria-tt0000001-1080p');
+  }
+  assert.equal(lastLog().streams, 3, 'telemetry counts video streams only');
+
+  for (const installVersion of [MIN_SUPPORTED_MANIFEST_VERSION, '99.0.0', null]) {
+    const res = await streamHandler({ type: 'series', id: 'tt0000001:1:1', installVersion });
+    assert.equal(res.streams[0].name, 'AniLibria\n1080p', String(installVersion));
+  }
+});
+
+test('the update notice is shown on empty anime answers, never for non-anime titles', async t => {
+  stubPipeline(t, { attempt: { candidates: [], showFound: false } });
+  const notDubbed = await streamHandler({ type: 'series', id: 'tt0000016:1:1', installVersion: 'legacy' });
+  assert.deepEqual(notDubbed.streams.map(s => s.name), ['⚠️ AniLibria']);
+  assert.equal(notDubbed.cacheMaxAge, 1800, 'keeps the cache lifetime of the answer');
+
+  t.mock.restoreAll();
+  stubPipeline(t, { release: async () => { throw new HttpError('HTTP 503', { code: 'HTTP', status: 503 }); } });
+  const error = await streamHandler({ type: 'series', id: 'tt0000017:1:1', installVersion: 'legacy' });
+  assert.deepEqual(error.streams.map(s => s.name), ['⚠️ AniLibria', 'AniLibria\n⚠ Error']);
+
+  t.mock.restoreAll();
+  stubPipeline(t, { plan: { mode: 'none', isAnime: null, attempts: [] } });
+  assert.deepEqual(await streamHandler({ type: 'movie', id: 'tt0000018', installVersion: 'legacy' }), { streams: [], cacheMaxAge: 3600 });
+  assert.deepEqual(await streamHandler({ type: 'series', id: 'kitsu:1:1', installVersion: 'legacy' }), { streams: [] });
 });
 
 test('a release reached from several cours uses season-relative numbering', async t => {

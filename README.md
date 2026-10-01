@@ -42,6 +42,7 @@ Watch Russian-dubbed anime in Stremio without leaving the app or managing a sepa
 | Long runners | One Piece, Naruto Shippuden, Bleach… use absolute episode numbers |
 | Binge-watch support | Auto-plays the next episode in the quality you picked (`bingeGroup`) |
 | Geo-block detection | Shows a readable message instead of a dead spinner |
+| Reinstall notice | Outdated installs get a tap-to-reinstall entry on anime titles (see [Updating](#updating)) |
 | Fast cold starts | ID mapping and AniList data cached on disk; AniLibria catalog indexed at boot |
 | Admin dashboard | `/dashboard` (password protected) — health monitoring, traffic, catalogs, missing titles, logs, admin tools |
 
@@ -100,6 +101,30 @@ Or click **+ Add addon** in Stremio → Addons and paste the URL.
 3. In the stream picker, select **AniLibria 1080p / 720p / 480p**
 4. Enjoy the Russian dub
 
+The last entry in the list, **☕ Support**, opens the project's Buy Me a Coffee page. It only
+appears when streams were found and is never picked by auto-play.
+
+---
+
+<a name="updating"></a>
+
+## Updating
+
+Fixes to matching, new episodes and catalog changes reach every install immediately — they run on
+the server. The manifest is different: Stremio stores it at install time and never refreshes it,
+so new catalogs or resources only reach you after a reinstall.
+
+If your install is too old for the current release (today: anything before **v3.0.0**, which added
+the catalogs), anime titles show **⚠️ AniLibria — Update available — tap to reinstall** at the top
+of the stream list. Reinstall from the same URL, `https://anilibria-stremio.online/manifest.json`:
+Stremio then updates the existing install in place instead of adding a second copy. Non-anime titles
+never show the notice.
+
+Stremio does not tell an addon which manifest a client has, so the addon infers it: the version of
+the manifest the client last fetched, or at least 3.0.0 once it opens a catalog (only 3.0.0+
+manifests declare catalogs). Clients are identified by the same salted IP hash as the usage
+statistics and forgotten after 90 days without requests.
+
 ---
 
 ## Catalogs
@@ -133,7 +158,9 @@ npm install
 npm start
 # Addon available at http://localhost:7000/manifest.json
 
-npm test   # unit + integration tests (offline)
+npm run dev           # restart on file changes
+npm test              # unit + integration tests (offline)
+npm run check-anime   # resolve AniList's 2000 most popular anime, report what is (not) found
 ```
 
 ### Environment Variables
@@ -149,6 +176,7 @@ npm test   # unit + integration tests (offline)
 | `TRUST_PROXY` | `true` | Express `trust proxy` setting (`true`, `false`, hop count, or subnet list). Use the number of proxies in front of the app when known |
 | `DATA_DIR` | `./data` | Where stats, logs and caches are persisted |
 | `ANILIBRIA_API_URL` | `https://anilibria.top/api/v1` | AniLibria API base URL (in case the domain changes) |
+| `GIT_COMMIT` | — | Commit reported by `/version`. Read automatically from `KOYEB_GIT_SHA` or `RENDER_GIT_COMMIT` when the platform sets them |
 
 ### Deploy to Koyeb (free tier)
 
@@ -156,6 +184,31 @@ npm test   # unit + integration tests (offline)
 2. Create a new **Web Service** on [koyeb.com](https://koyeb.com) pointing to your fork
 3. Koyeb auto-detects Node.js — build: `npm install`, run: `npm start`
 4. Add env vars: `PUBLIC_URL` = `https://your-app-name.koyeb.app`, `ADDON_URL` = the same URL, and `DASHBOARD_PASSWORD`
+
+A `render.yaml` blueprint is also included for [Render](https://render.com). Render's free tier
+sleeps after 15 minutes without traffic; with `PUBLIC_URL` set, the addon pings itself every
+12 minutes to stay awake.
+
+### Endpoints
+
+| Path | Purpose |
+|---|---|
+| `/` | Install page |
+| `/manifest.json` | Addon manifest — the URL to install |
+| `/health` | Liveness: version, uptime, mapping and index readiness, catalog status |
+| `/version` | Deployed `version`, `minSupported` install version, `commit`, `startedAt` |
+| `/dashboard` | Admin panel (password protected) |
+| `/debug/resolve/{imdbId}` | Re-resolve one ID (dashboard login required, see below) |
+
+The addon routes are also served under `/v/{version}/` (e.g. `/v/3.0.0/manifest.json`). These are
+not handed out: Stremio would install a tagged URL as a second copy of the addon.
+
+### Releasing a New Version
+
+1. Bump `version` in `package.json` — it is shown in the manifest, the install page, `/health` and `/version`
+2. Bump `MIN_SUPPORTED_MANIFEST_VERSION` in `src/install-version.js` **only** if the manifest changed in a
+   way existing installs cannot pick up (new resources, catalogs, types or ID prefixes). Every install
+   below it gets the reinstall notice, so leave it alone for server-side changes
 
 ---
 
@@ -168,7 +221,7 @@ changes. Failed logins are rate-limited. Works on phones.
 | Page | Answers |
 |---|---|
 | **Overview** | Is everything working? Health banner, status of every provider (AniLibria, AniList, Cinemeta, Fribb, Stremio API) and data source, 24 h KPIs (anime requests, users, error rate, coverage, p95 latency), grouped recent problems, top anime |
-| **Traffic** | How is the addon used and performing? 24 h / 7 d / 30 d / 90 d: requests by outcome, latency, unique users, resource mix, resolver match methods, outcome reasons — each compared with the previous period |
+| **Traffic** | How is the addon used and performing? 24 h / 7 d / 30 d / 90 d: requests by outcome, latency, unique users, resource mix, resolver match methods, outcome reasons, requests by installed version (share of outdated installs) — each compared with the previous period |
 | **Content** | What data is available and updating? Releasing and Trending catalogs with the reason every title is (not) listed, recent AniLibria updates, index and mapping status, low-confidence matches to approve/reject, coverage report |
 | **Missing titles** | What cannot be resolved, and why? Not on AniLibria · missing from the ID mapping · episode not found (with a likely cause) · not dubbed yet · now available · ignored |
 | **Logs** | What happened for one request? Filterable request log with details drawer and "re-resolve now", CSV export; live server console |
@@ -196,6 +249,7 @@ src/
   app.js                — Express app: protocol routes, install page, health, dashboard
   stremio.js            — Stremio addon protocol (manifest + resource routes)
   manifest.js           — Addon manifest
+  install-version.js    — Installed manifest versions, reinstall notice
   config.js             — Environment variables
   handlers/
     streams.js          — Stream handler (IMDB and catalog IDs)
@@ -204,6 +258,7 @@ src/
   catalogs/
     releasing.js        — "Releasing" catalog + AniLibria update poller
     trending.js         — "Trending" catalog (AniList → AniLibria)
+    updates.js          — Recent AniLibria updates feed (new episodes/releases)
     meta.js             — Stremio metadata built from AniLibria releases
   bridge/
     resolver.js         — IMDB → anime entry → AniLibria release
@@ -215,15 +270,18 @@ src/
     cache.js            — Fribb IMDB ↔ MAL/AniList mapping (disk-cached)
     anilibria-catalog.js — AniLibria catalog index (MAL ID, alias, fuzzy)
     availability.js     — Which AniLibria releases are playable (bulk-checked)
+    coverage.js         — How much of AniLibria's catalog the addon can reach
   api/
     http.js             — fetch wrapper: timeouts, retries, typed errors
     anilibria.js        — AniLibria REST API v1 client
     anilist.js          — AniList GraphQL client (disk-cached)
     cinemeta.js         — Cinemeta client (titles, season sizes)
-  telemetry/              — request log, hourly traffic, users, top titles, missing titles, match review
+  telemetry/              — request log, hourly traffic, users, client versions, top titles, missing titles, match review
   monitoring/             — provider health, process metrics, lifecycle, problems, jobs, alerts
   dashboard/              — dashboard routes and JSON API; public/ holds the browser app (ES modules)
+  util/                   — JSON stores, append-only logs, TTL cache, timeouts
   overrides.js, auth.js, debug.js, install-page.js
+scripts/check-anime.js  — bulk check of popular anime against the resolver
 test/                   — node:test suites (npm test)
 ```
 
@@ -235,6 +293,7 @@ test/                   — node:test suites (npm test)
 |---|---|
 | `express` 5 + `cors` + `compression` | HTTP server and Stremio addon protocol |
 | [`fuse.js`](https://fusejs.io) | Fuzzy title matching (fallback) |
+| [`semver`](https://github.com/npm/node-semver) | Installed manifest version checks |
 | Node.js `fetch` | HTTP client |
 | [Fribb `anime-list-mini.json`](https://github.com/Fribb/anime-lists) | IMDB → MAL/AniList mapping with TVDB seasons |
 | [AniList GraphQL](https://anilist.gitbook.io/anilist-apiv2-docs) | Canonical titles and release years |
@@ -294,8 +353,9 @@ This project is licensed under the [MIT License](LICENSE). You are free to use, 
 | Длинные сериалы | One Piece, Naruto Shippuden, Bleach… — сквозная нумерация серий |
 | Авто-следующая серия | `bingeGroup` сохраняет выбранное качество при переходе к следующей серии |
 | Определение геоблока | Понятное сообщение вместо зависшей загрузки |
+| Напоминание о переустановке | Устаревшие установки видят на аниме пункт «нажмите, чтобы переустановить» (см. [Обновление](#обновление)) |
 | Быстрый холодный старт | Маппинг ID и данные AniList кэшируются на диске; каталог AniLibria индексируется при запуске |
-| Панель управления | `/dashboard` (защищена паролем) — Обзор, Аналитика, Логи, Ошибки поиска, Терминал |
+| Панель управления | `/dashboard` (защищена паролем) — мониторинг, трафик, каталоги, ненайденные тайтлы, логи, инструменты администратора |
 
 ---
 
@@ -349,6 +409,30 @@ https://anilibria-stremio.online/manifest.json
 3. В списке источников выберите **AniLibria 1080p / 720p / 480p**
 4. Смотрите с русской озвучкой
 
+Последний пункт списка, **☕ Support**, открывает страницу проекта на Buy Me a Coffee. Он
+появляется только когда стримы найдены, и автовоспроизведение его никогда не выбирает.
+
+---
+
+<a name="обновление"></a>
+
+## Обновление
+
+Исправления сопоставления, новые серии и изменения каталогов доходят до всех установок сразу — они
+работают на сервере. С манифестом иначе: Stremio сохраняет его при установке и больше не обновляет,
+поэтому новые каталоги и ресурсы появятся только после переустановки.
+
+Если установка слишком старая для текущей версии (сейчас — всё до **v3.0.0**, где появились каталоги),
+на аниме в начале списка стримов появляется **⚠️ AniLibria — Доступно обновление — нажмите, чтобы
+переустановить**. Переустановите аддон по тому же адресу, `https://anilibria-stremio.online/manifest.json`:
+тогда Stremio обновит существующую установку, а не добавит вторую копию. На не-аниме это напоминание
+не показывается.
+
+Stremio не сообщает аддону, какой манифест у клиента, поэтому аддон определяет это сам: по версии
+манифеста, который клиент загрузил последним, или как минимум 3.0.0, если клиент открывает каталог
+(каталоги объявлены только в манифестах 3.0.0+). Клиенты различаются по тому же солёному хэшу IP, что
+и в статистике, и забываются через 90 дней без запросов.
+
 ---
 
 ## Каталоги
@@ -381,7 +465,9 @@ npm install
 npm start
 # Аддон доступен по адресу http://localhost:7000/manifest.json
 
-npm test   # модульные и интеграционные тесты (без сети)
+npm run dev           # перезапуск при изменении файлов
+npm test              # модульные и интеграционные тесты (без сети)
+npm run check-anime   # проверить 2000 самых популярных аниме AniList: что найдено, а что нет
 ```
 
 ### Переменные окружения
@@ -397,6 +483,7 @@ npm test   # модульные и интеграционные тесты (бе
 | `TRUST_PROXY` | `true` | Настройка Express `trust proxy` (`true`, `false`, число прокси или список подсетей) |
 | `DATA_DIR` | `./data` | Каталог для статистики, логов и кэшей |
 | `ANILIBRIA_API_URL` | `https://anilibria.top/api/v1` | Базовый URL API AniLibria (на случай смены домена) |
+| `GIT_COMMIT` | — | Коммит, который показывает `/version`. Берётся автоматически из `KOYEB_GIT_SHA` или `RENDER_GIT_COMMIT`, если платформа их задаёт |
 
 ### Деплой на Koyeb (бесплатный тариф)
 
@@ -404,6 +491,30 @@ npm test   # модульные и интеграционные тесты (бе
 2. Создать новый **Web Service** на [koyeb.com](https://koyeb.com), указав форк
 3. Koyeb автоматически определяет Node.js — сборка: `npm install`, запуск: `npm start`
 4. Добавить переменные окружения: `PUBLIC_URL` = `https://your-app-name.koyeb.app`, `ADDON_URL` = тот же URL и `DASHBOARD_PASSWORD`
+
+Для [Render](https://render.com) в репозитории есть `render.yaml`. Бесплатный тариф Render засыпает
+через 15 минут без запросов; если задан `PUBLIC_URL`, аддон пингует себя каждые 12 минут.
+
+### Адреса
+
+| Путь | Назначение |
+|---|---|
+| `/` | Страница установки |
+| `/manifest.json` | Манифест аддона — адрес для установки |
+| `/health` | Проверка работы: версия, аптайм, готовность маппинга и индекса, состояние каталогов |
+| `/version` | Развёрнутая `version`, минимальная поддерживаемая версия установки `minSupported`, `commit`, `startedAt` |
+| `/dashboard` | Панель управления (по паролю) |
+| `/debug/resolve/{imdbId}` | Повторное определение одного ID (нужен вход в панель, см. ниже) |
+
+Маршруты аддона доступны и с префиксом `/v/{version}/` (напр. `/v/3.0.0/manifest.json`). Эти адреса
+не раздаются: Stremio установил бы такой URL как вторую копию аддона.
+
+### Выпуск новой версии
+
+1. Поднять `version` в `package.json` — она видна в манифесте, на странице установки, в `/health` и `/version`
+2. Поднимать `MIN_SUPPORTED_MANIFEST_VERSION` в `src/install-version.js` **только** если манифест изменился так,
+   что существующие установки этого не получат (новые ресурсы, каталоги, типы или префиксы ID). Все установки
+   ниже этой версии увидят напоминание о переустановке, поэтому для серверных изменений её не трогайте
 
 ---
 
@@ -414,7 +525,7 @@ npm test   # модульные и интеграционные тесты (бе
 все сессии. Число неудачных попыток входа ограничено. Панель работает и на телефоне.
 
 - **Overview** — всё ли работает: статус провайдеров и данных, показатели за 24 ч, сгруппированные проблемы, топ аниме
-- **Traffic** — исходы запросов, задержка, пользователи, ресурсы и методы сопоставления с сравнением с прошлым периодом
+- **Traffic** — исходы запросов, задержка, пользователи, ресурсы, методы сопоставления и запросы по установленной версии (доля устаревших установок) со сравнением с прошлым периодом
 - **Content** — каталоги Releasing и Trending с причинами исключения, обновления AniLibria, индекс и маппинг, неточные совпадения, покрытие
 - **Missing titles** — нет на AniLibria, нет в маппинге, серия не найдена, ещё не озвучено, уже доступно, скрыто
 - **Logs** — журнал запросов с фильтрами и подробностями, экспорт CSV; консоль сервера
@@ -425,7 +536,8 @@ npm test   # модульные и интеграционные тесты (бе
 `/debug/resolve/{imdbId}?season=1&episode=1` (нужен вход в панель) заново определяет ID в обход кэшей
 и возвращает результат, релиз AniLibria и строки лога — помогает разбирать отсутствующие тайтлы
 или неверные совпадения. Для фильмов добавьте `type=movie`. То же самое, с подробностями каждого шага,
-показывает **Admin → Resolve tester** в панели.
+показывает **Admin → Resolve tester** в панели; он также принимает ID каталогов (`anilibria:9660:8`)
+и вставленные ссылки Stremio/IMDB.
 
 ---
 
@@ -437,6 +549,7 @@ src/
   app.js                — Express: маршруты протокола, страница установки, health, панель
   stremio.js            — Протокол аддонов Stremio (манифест и ресурсы)
   manifest.js           — Манифест аддона
+  install-version.js    — Установленные версии манифеста, напоминание о переустановке
   config.js             — Переменные окружения
   handlers/
     streams.js          — Обработчик стримов (IMDB и ID каталогов)
@@ -445,6 +558,7 @@ src/
   catalogs/
     releasing.js        — Каталог «Releasing» + опрос обновлений AniLibria
     trending.js         — Каталог «Trending» (AniList → AniLibria)
+    updates.js          — Лента последних обновлений AniLibria (новые серии и релизы)
     meta.js             — Метаданные Stremio из релизов AniLibria
   bridge/
     resolver.js         — IMDB → запись аниме → релиз AniLibria
@@ -456,15 +570,18 @@ src/
     cache.js            — Маппинг Fribb IMDB ↔ MAL/AniList (кэш на диске)
     anilibria-catalog.js — Индекс каталога AniLibria (MAL ID, алиас, нечёткий поиск)
     availability.js     — Какие релизы AniLibria можно посмотреть (пакетная проверка)
+    coverage.js         — Какую часть каталога AniLibria аддон может найти
   api/
     http.js             — Обёртка над fetch: таймауты, повторы, типизированные ошибки
     anilibria.js        — Клиент AniLibria REST API v1
     anilist.js          — Клиент AniList GraphQL (кэш на диске)
     cinemeta.js         — Клиент Cinemeta (названия, размеры сезонов)
-  telemetry/              — журнал запросов, почасовая статистика, пользователи, топ, отсутствующие тайтлы
+  telemetry/              — журнал запросов, почасовая статистика, пользователи, версии клиентов, топ, отсутствующие тайтлы
   monitoring/             — здоровье провайдеров, метрики процесса, перезапуски, проблемы, задачи, оповещения
   dashboard/              — маршруты и JSON API панели; public/ — браузерное приложение (ES-модули)
+  util/                   — JSON-хранилища, журналы, TTL-кэш, таймауты
   overrides.js, auth.js, debug.js, install-page.js
+scripts/check-anime.js  — массовая проверка популярных аниме через резолвер
 test/                   — тесты node:test (npm test)
 ```
 

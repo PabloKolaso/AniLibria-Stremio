@@ -129,6 +129,9 @@ const { catalogHandler } = require('../src/handlers/catalog');
 const { metaHandler } = require('../src/handlers/meta');
 const { streamHandler } = require('../src/handlers/streams');
 
+/** Playable streams of a stream response (the trailing support link has no url). */
+const videoStreams = res => res.streams.filter(s => s.url);
+
 async function catalogIds(id) {
   const res = await catalogHandler({ type: 'series', id, extra: {} });
   return res.metas.map(m => m.id);
@@ -178,11 +181,12 @@ test('a new episode is served without restart: episode 5 → 6', async () => {
   assert.deepEqual(after.meta.videos.map(v => [v.id, v.season, v.episode]).at(-1), ['anilibria:100:6', 1, 6]);
 
   const streams = await streamHandler({ type: 'series', id: 'anilibria:100:6' });
-  assert.deepEqual(streams.streams.map(s => s.url), [
+  assert.deepEqual(videoStreams(streams).map(s => s.url), [
     'https://cdn.example/100/6/1080.m3u8',
     'https://cdn.example/100/6/720.m3u8',
   ]);
   assert.equal(streams.streams[0].behaviorHints.bingeGroup, 'anilibria-r100-1080p');
+  assert.equal(streams.streams.at(-1).name, '☕ Support');
 });
 
 test('a stream request for a just-published episode rechecks AniLibria before the next poll', async t => {
@@ -195,7 +199,7 @@ test('a stream request for a just-published episode rechecks AniLibria before th
 
   t.mock.timers.tick(31_000);
   const found = await streamHandler({ type: 'series', id: 'anilibria:100:7' });
-  assert.equal(found.streams.length, 2);
+  assert.equal(videoStreams(found).length, 2);
 });
 
 test('a newly dubbed anime appears in the catalog and becomes resolvable for IMDB lookups', async () => {
@@ -226,12 +230,12 @@ test('a finished release that gets a new episode is refreshed as soon as it ente
   addRelease(800, { alias: 'anime-h', mal: 8008, episodes: 2, name: 'Anime H' });
   upstream.releases.get(800).fresh_at = stamp(600); // old: not in the one-item feed
   await releasing.refresh();
-  assert.equal((await streamHandler({ type: 'series', id: 'anilibria:800:2' })).streams.length, 2); // cached now
+  assert.equal(videoStreams(await streamHandler({ type: 'series', id: 'anilibria:800:2' })).length, 2); // cached now
 
   setEpisodes(800, 3); // now the most recently updated release
   await releasing.refresh();
   const res = await streamHandler({ type: 'series', id: 'anilibria:800:3' });
-  assert.equal(res.streams.length, 2);
+  assert.equal(videoStreams(res).length, 2);
   upstream.latestLimit = Infinity;
 });
 
@@ -309,7 +313,7 @@ test('an AniLibria outage never lets unverified anime through', async () => {
     const meta = await metaHandler({ type: 'series', id: 'anilibria:400' });
     assert.equal(meta.meta.videos.length, 12);
     const streams = await streamHandler({ type: 'series', id: 'anilibria:400:12' });
-    assert.equal(streams.streams.length, 2);
+    assert.equal(videoStreams(streams).length, 2);
   } finally {
     upstream.failAniLibria = false;
   }

@@ -24,6 +24,8 @@ const jobs       = require('./monitoring/jobs');
 const JsonStore  = require('./util/json-store');
 const { isFirstRun: authIsFirstRun } = require('./auth');
 const { createApp } = require('./app');
+const { MIN_SUPPORTED_MANIFEST_VERSION } = require('./install-version');
+const { version } = require('../package.json');
 
 const KEEPALIVE_INTERVAL_MS = 12 * 60 * 1000; // Render free tier spins down after 15 min idle
 const SHUTDOWN_TIMEOUT_MS   = 5000;
@@ -121,7 +123,7 @@ function defineJobs() {
 }
 
 async function start() {
-  console.log('=== Stremio AniLibria Addon ===');
+  console.log(`AniLibria addon v${version} (min supported v${MIN_SUPPORTED_MANIFEST_VERSION})`);
   const host = config.publicUrl || `http://localhost:${config.port}`;
 
   lifecycle.start();

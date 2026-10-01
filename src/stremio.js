@@ -9,7 +9,9 @@
  * Handler results are sent as JSON; cacheMaxAge / staleRevalidate /
  * staleError (seconds) become a Cache-Control header, as in the SDK.
  * Handlers also receive the client IP (for privacy-preserving usage
- * statistics), and an optional onRequest hook sees every request's outcome.
+ * statistics) and the installed manifest version when the app tagged the
+ * request with one (req.installVersion, see install-version.js), and an
+ * optional onRequest hook sees every request's outcome.
  * https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/protocol.md
  */
 
@@ -47,10 +49,11 @@ function decodeSegment(segment) {
 
 /**
  * @param {object} manifest
- * @param {Record<string, (args: { type: string, id: string, extra: object, ip: string|null }) => Promise<object>>} handlers
+ * @param {Record<string, (args: { type: string, id: string, extra: object, ip: string|null,
+ *        installVersion: string|null }) => Promise<object>>} handlers
  *        resource name -> handler
  * @param {{ onRequest?: (info: { resource: string, type?: string, id?: string, ok: boolean,
- *           ms: number, ip: string|null }) => void }} [opts]
+ *           ms: number, ip: string|null, installVersion: string|null }) => void }} [opts]
  * @returns {express.Router}
  */
 function createAddonRouter(manifest, handlers, { onRequest = null } = {}) {
@@ -70,7 +73,7 @@ function createAddonRouter(manifest, handlers, { onRequest = null } = {}) {
 
   router.get('/manifest.json', (req, res) => {
     sendJson(res, 200, manifestJson);
-    report({ resource: 'manifest', ok: true, ms: 0, ip: req.ip || null });
+    report({ resource: 'manifest', ok: true, ms: 0, ip: req.ip || null, installVersion: req.installVersion ?? null });
   });
 
   router.get(RESOURCE_PATH_RE, async (req, res, next) => {
@@ -90,20 +93,21 @@ function createAddonRouter(manifest, handlers, { onRequest = null } = {}) {
 
     const started = Date.now();
     const ip = req.ip || null;
+    const installVersion = req.installVersion ?? null;
     let resp;
     try {
-      resp = await handlers[resource]({ type, id, extra, config: {}, ip });
+      resp = await handlers[resource]({ type, id, extra, config: {}, ip, installVersion });
     } catch (err) {
       console.error(`[addon] ${resource} handler failed for ${type}/${id}:`, err);
-      report({ resource, type, id, ok: false, ms: Date.now() - started, ip });
+      report({ resource, type, id, ok: false, ms: Date.now() - started, ip, installVersion });
       return sendJson(res, 500, { err: 'handler error' });
     }
     if (!resp || typeof resp !== 'object') {
       console.error(`[addon] ${resource} handler returned no object for ${type}/${id}`);
-      report({ resource, type, id, ok: false, ms: Date.now() - started, ip });
+      report({ resource, type, id, ok: false, ms: Date.now() - started, ip, installVersion });
       return sendJson(res, 500, { err: 'handler error' });
     }
-    report({ resource, type, id, ok: true, ms: Date.now() - started, ip });
+    report({ resource, type, id, ok: true, ms: Date.now() - started, ip, installVersion });
 
     const cache = cacheControl(resp);
     if (cache) res.setHeader('Cache-Control', cache);
